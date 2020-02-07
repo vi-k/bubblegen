@@ -75,9 +75,9 @@ class MyPainter extends CustomPainter {
     @required this.topLine,
     @required this.bottomLine,
     this.boxRadius,
-    this.size,
-    this.radius,
-    this.offset,
+    this.nipWidth,
+    this.nipRadius,
+    this.nipYOffset,
     this.startTopAngle,
     this.finishTopPos,
     this.finishTopAngle,
@@ -92,9 +92,9 @@ class MyPainter extends CustomPainter {
   final NipLine topLine;
   final NipLine bottomLine;
   final double boxRadius;
-  final double size;
-  final double radius;
-  final double offset;
+  final double nipWidth;
+  final double nipRadius;
+  final double nipYOffset;
   final double startTopAngle;
   final double finishTopPos;
   final double finishTopAngle;
@@ -105,11 +105,14 @@ class MyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final boxRadius = this.boxRadius > size.height / 2 ? size.height / 2 : this.boxRadius;
-    final circleR = this.zoom * boxRadius;
-    final circleX = this.zoom * this.size + circleR;
-    final circleY = circleR;
-    final offsetY = this.offset < 0 ? this.offset : 0.0;
+    final offsetY = nipYOffset < 0 ? nipYOffset : 0.0;
+
+    final boxCircle1R = boxRadius > size.height / 2 ? size.height / 2 : boxRadius;
+    final boxCircle2R = boxCircle1R;
+    final boxCircle1X = nipWidth + boxCircle1R;
+    final boxCircle1Y = boxCircle1R;
+    final boxCircle2X = nipWidth + boxCircle2R;
+    final boxCircle2Y = offsetY + size.height - boxCircle2R;
 
     var paint = Paint();
     var path = Path();
@@ -119,28 +122,29 @@ class MyPainter extends CustomPainter {
 
     paint.color = Colors.lightGreen;
     canvas.drawRRect(
-        RRect.fromLTRBR(this.zoom * this.size, 0, this.zoom * size.width, this.zoom * size.height + offsetY,
-            Radius.circular(this.zoom * boxRadius)),
+        RRect.fromLTRBR(this.zoom * this.nipWidth, 0, this.zoom * size.width, this.zoom * size.height + offsetY,
+            Radius.circular(this.zoom * boxCircle1R)),
         paint);
 
-    canvas.drawCircle(Offset(this.zoom * this.radius, this.zoom * (this.offset + this.radius)), zoom * radius, paint);
+    canvas.drawCircle(
+        Offset(this.zoom * this.nipRadius, this.zoom * (this.nipYOffset + this.nipRadius)), zoom * nipRadius, paint);
 
-//    final startTopAngle = this.startTopAngle * pi / 180;
-    final startTopAngle = this.topLine.pos * pi / 180;
-    final startTopX = this.zoom * this.radius * (1 - sin(startTopAngle));
-    final startTopY = this.zoom * (this.offset + this.radius * (1 - cos(startTopAngle)));
+    final startTopAngle = this.startTopAngle * pi / 180;
+    final startTopX = this.zoom * this.nipRadius * (1 - sin(startTopAngle));
+    final startTopY = this.zoom * (this.nipYOffset + this.nipRadius * (1 - cos(startTopAngle)));
 
     double finishTopX;
     double finishTopY;
     if (this.finishTopPos < 0) {
       final finishTopPos = -this.finishTopPos * pi / 180;
-      finishTopX = circleX - this.zoom * boxRadius * sin(finishTopPos);
-      finishTopY = circleY - this.zoom * boxRadius * cos(finishTopPos);
+      finishTopX = boxCircle1X - this.zoom * boxCircle1R * sin(finishTopPos);
+      finishTopY = boxCircle1Y - this.zoom * boxCircle1R * cos(finishTopPos);
     } else {
-      var pos = this.finishTopPos + this.offset;
+      var pos = this.finishTopPos + this.nipYOffset;
       if (pos < 0) pos = 0;
-      finishTopX =
-          pos < boxRadius ? circleX - this.zoom * boxRadius * sin(acos(1 - pos / boxRadius)) : this.zoom * this.size;
+      finishTopX = pos < boxCircle1R
+          ? boxCircle1X - this.zoom * boxCircle1R * sin(acos(1 - pos / boxCircle1R))
+          : this.zoom * this.nipWidth;
       finishTopY = this.zoom * pos;
     }
     final finishTopAngle = this.finishTopAngle * pi / 180;
@@ -152,20 +156,21 @@ class MyPainter extends CustomPainter {
     final finishTopDirectY = finishTopY - topDirectSize * sin(finishTopAngle);
 
     final startBottomAngle = this.startBottomAngle * pi / 180;
-    final startBottomX = this.zoom * this.radius * (1 + sin(startBottomAngle));
-    final startBottomY = this.zoom * (this.offset + this.radius * (1 + cos(startBottomAngle)));
+    final startBottomX = this.zoom * this.nipRadius * (1 + sin(startBottomAngle));
+    final startBottomY = this.zoom * (this.nipYOffset + this.nipRadius * (1 + cos(startBottomAngle)));
 
     double finishBottomX;
     double finishBottomY;
     if (this.finishBottomPos < 0) {
       final finishBottomPos = -this.finishBottomPos * pi / 180;
-      finishBottomX = circleX - this.zoom * boxRadius * sin(finishBottomPos);
-      finishBottomY = circleY - this.zoom * boxRadius * cos(finishBottomPos);
+      finishBottomX = boxCircle1X - this.zoom * boxCircle1R * sin(finishBottomPos);
+      finishBottomY = boxCircle1Y - this.zoom * boxCircle1R * cos(finishBottomPos);
     } else {
-      var pos = this.finishBottomPos + this.offset;
+      var pos = this.finishBottomPos + this.nipYOffset;
       if (pos < 0) pos = 0;
-      finishBottomX =
-          pos < boxRadius ? circleX - this.zoom * boxRadius * sin(acos(1 - pos / boxRadius)) : this.zoom * this.size;
+      finishBottomX = pos < boxCircle1R
+          ? boxCircle1X - this.zoom * boxCircle1R * sin(acos(1 - pos / boxCircle1R))
+          : this.zoom * this.nipWidth;
       finishBottomY = this.zoom * pos;
     }
     final finishBottomAngle = this.finishBottomAngle * pi / 180;
@@ -210,9 +215,11 @@ class MyPainter extends CustomPainter {
       paint.style = PaintingStyle.stroke;
 //      canvas.drawPath(path, paint);
 
-      canvas.drawCircle(Offset(circleX, circleY), circleR, paint);
-      canvas.drawLine(Offset(circleX, circleY - circleR), Offset(circleX, circleY + circleR), paint);
-      canvas.drawLine(Offset(circleX - circleR, circleY), Offset(circleX + circleR, circleY), paint);
+      canvas.drawCircle(Offset(boxCircle1X, boxCircle1Y), boxCircle1R, paint);
+      canvas.drawLine(
+          Offset(boxCircle1X, boxCircle1Y - boxCircle1R), Offset(boxCircle1X, boxCircle1Y + boxCircle1R), paint);
+      canvas.drawLine(
+          Offset(boxCircle1X - boxCircle1R, boxCircle1Y), Offset(boxCircle1X + boxCircle1R, boxCircle1Y), paint);
 
       paint.style = PaintingStyle.fill;
       canvas.drawCircle(Offset(startTopX, startTopY), 1, paint);
@@ -261,6 +268,93 @@ class MyPainter extends CustomPainter {
 //    paint.color = Colors.red;
 //    paint.style = PaintingStyle.fill;
 //    canvas.drawPath(path, paint);
+
+    final nipCircleX = nipRadius;
+    final nipCircleY = nipYOffset + nipRadius;
+
+    double topX1;
+    double topY1;
+    double topX2;
+    double topY2;
+
+    if (topLine.posType == NipPosType.angle) {
+      var a = topLine.pos * pi / 180;
+      topX1 = nipCircleX + nipRadius * sin(a);
+      topY1 = nipCircleY - nipRadius * cos(a);
+      topX2 = nipWidth;
+      topY2 = topY1 + sin(a) * (nipWidth - topX1) / cos(a);
+//      if (topY2 < boxCircle1Y) {
+//        topY2 = boxCircle1Y;
+//      }
+//      if (topY2 > boxCircle2Y) {
+//        topY2 = boxCircle2Y;
+//      }
+    } else if (topLine.posType == NipPosType.side) {
+      topX2 = nipWidth;
+      topY2 = nipYOffset + topLine.pos;
+
+      if (topY2 < boxCircle1Y - boxCircle1R) {
+        topY2 = boxCircle1Y - boxCircle1R;
+        topX2 = boxCircle1X;
+      } else if (topY2 < boxCircle1Y) {
+        topX2 = boxCircle1X - boxCircle1R * cos(asin((boxCircle1Y - topY2) / boxCircle1R));
+      }
+
+      if (topY2 > boxCircle2Y + boxCircle2R) {
+        topY2 = boxCircle2Y + boxCircle2R;
+        topX2 = boxCircle2X;
+      } else if (topY2 > boxCircle2Y) {
+        topX2 = boxCircle2X - boxCircle2R * cos(asin((topY2 - boxCircle2Y) / boxCircle2R));
+      }
+
+      var l = sqrt(pow(topX2 - nipCircleX, 2) + pow(topY2 - nipCircleY, 2));
+      var a1 = asin((topY2 - nipCircleY) / l);
+      var a2 = -atan2(l, nipRadius);
+
+      topX1 = nipCircleX + nipRadius * cos(a1 + a2);
+      topY1 = nipCircleY + nipRadius * sin(a1 + a2);
+
+    } else if (topLine.posType == NipPosType.corner) {
+      var a = topLine.pos * pi / 180;
+      if (topLine.pos <= 0) {
+        topX2 = boxCircle1X + boxCircle1R * cos(a);
+        topY2 = boxCircle1Y + boxCircle1R * sin(a);
+      } else {
+        topX2 = boxCircle2X + boxCircle2R * cos(a);
+        topY2 = boxCircle2Y + boxCircle2R * sin(a);
+      }
+
+      var l = sqrt(pow(topX2 - nipCircleX, 2) + pow(topY2 - nipCircleY, 2));
+      var a1 = asin((topY2 - nipCircleY) / l);
+      var a2 = -atan2(l, nipRadius);
+
+      topX1 = nipCircleX + nipRadius * cos(a1 + a2);
+      topY1 = nipCircleY + nipRadius * sin(a1 + a2);
+    }
+
+    paint.color = Colors.black;
+    paint.style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(topX1, topY1), 2, paint);
+    canvas.drawCircle(Offset(topX2, topY2), 2, paint);
+
+    paint.strokeWidth = 1;
+    paint.style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(topX1, topY1), Offset(topX2, topY2), paint);
+
+    paint.color = Colors.black45;
+    canvas.drawCircle(Offset(nipCircleX, nipCircleY), nipRadius, paint);
+    canvas.drawArc(
+        Rect.fromCenter(center: Offset(boxCircle1X, boxCircle1Y), width: 2 * boxCircle1R, height: 2 * boxCircle1R),
+        -pi / 2,
+        -pi / 2,
+        true,
+        paint);
+    canvas.drawArc(
+        Rect.fromCenter(center: Offset(boxCircle2X, boxCircle2Y), width: 2 * boxCircle2R, height: 2 * boxCircle2R),
+        pi / 2,
+        pi / 2,
+        true,
+        paint);
   }
 
   @override

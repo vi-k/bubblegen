@@ -138,7 +138,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
   NipPosType _posType = NipPosType.angle;
   var _lineAngle = 0.0;
   var _sidePos = 0.0;
-  var _cornerPos = 90.0;
+  var _cornerPos = -90.0;
   var _h = 0.0; // arc's height (or finish line's radius?)
   var _curve1Enabled = true;
   var _a1 = 0.0; // curve's α₁
@@ -306,13 +306,13 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 doChange();
               },
             ),
-            Text('side\'s position'),
+            Text('y offset on the side'),
             Expanded(
               child: Slider(
                 value: _sidePos,
-                min: -40,
-                max: 40,
-                divisions: 80,
+                min: -50,
+                max: 50,
+                divisions: 100,
                 onChanged: _posType != NipPosType.side
                     ? null
                     : (value) {
@@ -334,17 +334,18 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 doChange();
               },
             ),
-            Text('corner\'s position'),
+            Text('angle of corners'),
             Expanded(
               child: Slider(
-                value: _cornerPos,
-                min: 90,
-                max: 270,
+                value: _cornerPos <= -90 ? -(_cornerPos + 180) : _cornerPos >= 90 ? (180 - _cornerPos) : 0,
+                min: -90,
+                max: 90,
                 divisions: 180,
                 onChanged: _posType != NipPosType.corner
                     ? null
                     : (value) {
-                        _cornerPos = value;
+                        _cornerPos = value <= 0 ? -(value + 180) : (180 - value);
+                        doChange();
                       },
               ),
             ),
@@ -518,10 +519,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   // Whatsapp
-  var _boxRadius = 8.0;
-  var _size = 10.0;
-  var _radius = 1.0;
-  var _offset = 0.0;
+  var _boxRadius = 20.0;
+  var _nipWidth = 40.0;
+  var _nipRadius = 10.0;
+  var _nipYOffset = 20.0;
   var _startTopAngle = 0.0;
   var _finishTopPos = 0.0;
   var _finishTopAngle = 180.0;
@@ -529,11 +530,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _finishBottomPos = 14.0;
   var _finishBottomAngle = 127.0;
 
+  // Whatsapp
+//  var _boxRadius = 8.0;
+//  var _nipWidth = 10.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
+//  var _startTopAngle = 0.0;
+//  var _finishTopPos = 0.0;
+//  var _finishTopAngle = 180.0;
+//  var _startBottomAngle = -53.0;
+//  var _finishBottomPos = 14.0;
+//  var _finishBottomAngle = 127.0;
+
   // Telegram
 //  var _boxRadius = 12.0;
-//  var _size = 10.0;
-//  var _radius = 1.0;
-//  var _offset = 0.0;
+//  var _nipWidth = 10.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
 //  var _startTopAngle = 0.0;
 //  var _finishTopPos = 0.0;
 //  var _finishTopAngle = 180.0;
@@ -543,9 +556,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   // Viber
 //  var _boxRadius = 20.0;
-//  var _size = 0.0;
-//  var _radius = 1.0;
-//  var _offset = 0.0;
+//  var _nipWidth = 0.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
 //  var _startTopAngle = 0.0;
 //  var _finishTopPos = 0.0;
 //  var _finishTopAngle = 180.0;
@@ -555,9 +568,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   // Sid chat
 //  var _boxRadius = 40.0;
-//  var _size = 6.0;
-//  var _radius = 1.0;
-//  var _offset = 0.0;
+//  var _nipWidth = 6.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
 //  var _startTopAngle = -65.0;
 //  var _finishTopPos = -40.0;
 //  var _finishTopAngle = 192.0;
@@ -574,9 +587,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       topLine: _topLine,
       bottomLine: _bottomLine,
       boxRadius: _boxRadius,
-      size: _size,
-      radius: _radius,
-      offset: _offset,
+      nipWidth: _nipWidth,
+      nipRadius: _nipRadius,
+      nipYOffset: _nipYOffset,
       startTopAngle: _startTopAngle,
       finishTopPos: _finishTopPos,
       finishTopAngle: _finishTopAngle,
@@ -586,7 +599,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       drawDraft: _drawDraft,
     );
 
-    final padding = EdgeInsets.only(left: _size + 10, top: 10.0 + (_offset < 0 ? -_offset : 0), right: 10, bottom: 10);
+    final padding = EdgeInsets.only(left: _nipWidth + 10, top: 10.0 + (_nipYOffset < 0 ? -_nipYOffset : 0), right: 10, bottom: 10);
 
     return Scaffold(
       appBar: AppBar(
@@ -681,53 +694,53 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         Row(
                           children: <Widget>[
-                            Text('radius', textAlign: TextAlign.right),
+                            Text('nipRadius', textAlign: TextAlign.right),
                             Slider(
-                              value: _radius,
+                              value: _nipRadius,
                               min: 0.0,
                               max: 10.0,
                               divisions: 40,
                               onChanged: (double value) {
                                 setState(() {
-                                  _radius = value;
+                                  _nipRadius = value;
                                 });
                               },
                             ),
-                            Text('${_radius.toStringAsFixed(2)}'),
+                            Text('${_nipRadius.toStringAsFixed(2)}'),
                           ],
                         ),
                         Row(
                           children: <Widget>[
-                            Text('size', textAlign: TextAlign.right),
+                            Text('nipWidth', textAlign: TextAlign.right),
                             Slider(
-                              value: _size,
+                              value: _nipWidth,
                               min: 0.0,
                               max: 40.0,
                               divisions: 40,
                               onChanged: (double value) {
                                 setState(() {
-                                  _size = value;
+                                  _nipWidth = value;
                                 });
                               },
                             ),
-                            Text('${_size.toStringAsFixed(1)}'),
+                            Text('${_nipWidth.toStringAsFixed(1)}'),
                           ],
                         ),
                         Row(
                           children: <Widget>[
-                            Text('offset', textAlign: TextAlign.right),
+                            Text('nipYOffset', textAlign: TextAlign.right),
                             Slider(
-                              value: _offset,
+                              value: _nipYOffset,
                               min: -40.0,
                               max: 40.0,
                               divisions: 80,
                               onChanged: (double value) {
                                 setState(() {
-                                  _offset = value;
+                                  _nipYOffset = value;
                                 });
                               },
                             ),
-                            Text('${_offset.toStringAsFixed(1)}'),
+                            Text('${_nipYOffset.toStringAsFixed(1)}'),
                           ],
                         ),
                         Divider(),
