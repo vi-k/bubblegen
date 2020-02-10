@@ -472,6 +472,11 @@ class MyPainter extends CustomPainter {
       var a2 = -atan2(l, nipRadius);
 
       top.start = smallCircle.point(a1 + a2);
+
+      if (draft) {
+        paintDraftSecond.style = PaintingStyle.stroke;
+        canvas.drawLine(top.end, Offset(topCircle.center.dx, top.end.dy), paintDraftSecond);
+      }
     }
     //
     // Прямая линия к углам бокса
@@ -497,6 +502,9 @@ class MyPainter extends CustomPainter {
               -pi / 2,
               true,
               paintDraftSecond);
+
+          paintDraftSecond.style = PaintingStyle.stroke;
+          canvas.drawLine(topCircle.center, top.end, paintDraftSecond);
         }
         // Четверть нижнего круга
         else {
@@ -507,6 +515,9 @@ class MyPainter extends CustomPainter {
               pi / 2,
               true,
               paintDraftSecond);
+
+          paintDraftSecond.style = PaintingStyle.stroke;
+          canvas.drawLine(bottomCircle.center, top.end, paintDraftSecond);
         }
       }
     }
