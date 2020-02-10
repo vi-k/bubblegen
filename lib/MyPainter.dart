@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 enum NipPosType { angle, side, corner }
@@ -116,6 +117,21 @@ class MyPainter extends CustomPainter {
 
     var paint = Paint();
     var path = Path();
+
+    var paintDraftMain = Paint();
+    paintDraftMain.strokeWidth = 1;
+    paintDraftMain.style = PaintingStyle.stroke;
+    paintDraftMain.color = Colors.black;
+
+    var paintDraftSecond = Paint();
+    paintDraftSecond.strokeWidth = 1;
+    paintDraftSecond.style = PaintingStyle.stroke;
+    paintDraftSecond.color = Colors.black26;
+
+    var paintDraftError = Paint();
+    paintDraftError.strokeWidth = 1;
+    paintDraftError.style = PaintingStyle.stroke;
+    paintDraftError.color = Colors.red;
 
 //    canvas.clipRect(Rect.fromLTRB(0, 0, size.width, size.height));
     canvas.translate(0, -offsetY);
@@ -277,18 +293,153 @@ class MyPainter extends CustomPainter {
     double topX2;
     double topY2;
 
+    var topLineHasError = false;
+
+    // Малый круг
+    paintDraftSecond.style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(nipCircleX, nipCircleY), nipRadius, paintDraftSecond);
+
+    // Прямая линия под углом
     if (topLine.posType == NipPosType.angle) {
-      var a = topLine.pos * pi / 180;
-      topX1 = nipCircleX + nipRadius * sin(a);
-      topY1 = nipCircleY - nipRadius * cos(a);
-      topX2 = nipWidth;
-      topY2 = topY1 + sin(a) * (nipWidth - topX1) / cos(a);
-//      if (topY2 < boxCircle1Y) {
-//        topY2 = boxCircle1Y;
-//      }
-//      if (topY2 > boxCircle2Y) {
-//        topY2 = boxCircle2Y;
-//      }
+      var alpha = topLine.pos * pi / 180; // Угол наклона линии
+      var beta = alpha - pi / 2; // Точка касательной (угол) на малом круге
+      topX1 = nipCircleX + nipRadius * cos(beta);
+      topY1 = nipCircleY + nipRadius * sin(beta);
+      topY2 = topY1 + tan(alpha) * (nipWidth - topX1);
+
+      if (topY2 >= boxCircle1Y && topY2 <= boxCircle2Y) {
+        //
+        // Линия пересекается с ровной стороной бокса
+        //
+        topX2 = nipWidth;
+
+        path.reset();
+        path.moveTo(nipWidth, boxCircle1Y);
+        path.lineTo(boxCircle1X, boxCircle1Y);
+        path.lineTo(boxCircle2X, boxCircle2Y);
+        path.lineTo(nipWidth, boxCircle2Y);
+        path.close();
+
+        paintDraftSecond.style = PaintingStyle.fill;
+        canvas.drawPath(path, paintDraftSecond);
+      } else if (topY2 < boxCircle1Y) {
+        //
+        // Линия уходит к верхнему кругу и выше
+        //
+        paintDraftSecond.style = PaintingStyle.fill;
+        canvas.drawArc(
+            Rect.fromCenter(center: Offset(boxCircle1X, boxCircle1Y), width: 2 * boxCircle1R, height: 2 * boxCircle1R),
+            -pi / 2,
+            -pi / 2,
+            true,
+            paintDraftSecond);
+
+        // Рассчитываем нормаль к линии от центра верхнего круга
+        var normal = Line(Offset(topX1, topY1), alpha).normal(Offset(boxCircle1X, boxCircle1Y));
+
+        if (normal.length <= boxCircle1R) {
+          //
+          // Линия пересекается с дугой угла
+          //
+          var chord = sqrt(boxCircle1R * boxCircle1R - normal.length * normal.length); // Половина хорды
+          topX2 = normal.end.dx - cos(alpha) * chord;
+          topY2 = normal.end.dy - sin(alpha) * chord;
+
+          paintDraftSecond.style = PaintingStyle.stroke;
+          canvas.drawLine(Offset(boxCircle1X, boxCircle1Y), normal.end, paintDraftSecond);
+          canvas.drawLine(Offset(topX2, topY2), normal.end, paintDraftSecond);
+          paintDraftSecond.style = PaintingStyle.fill;
+          canvas.drawCircle(normal.end, 2, paintDraftSecond);
+        } else {
+          //
+          // Линия выходит за верхний круг
+          // В этом случае за линию берём касательную, общую для малого и верхнего кругов
+          //
+          topLineHasError = true;
+
+          // Расстояние между центрами кругов
+          var d = sqrt(pow(boxCircle1X - nipCircleX, 2) + pow(boxCircle1Y - nipCircleY, 2));
+
+          // Точка касательной (угол) на малом и верхнем кругах
+          beta = atan2(boxCircle1Y - nipCircleY, boxCircle1X - nipCircleX) + atan2(nipRadius - boxCircle1R, d) - pi / 2;
+
+          topX1 = nipCircleX + cos(beta) * nipRadius;
+          topY1 = nipCircleY + sin(beta) * nipRadius;
+          topX2 = boxCircle1X + cos(beta) * boxCircle1R;
+          topY2 = boxCircle1Y + sin(beta) * boxCircle1R;
+
+          paintDraftSecond.style = PaintingStyle.stroke;
+          canvas.drawLine(Offset(nipCircleX, nipCircleY), Offset(topX1, topY1), paintDraftSecond);
+          canvas.drawLine(Offset(boxCircle1X, boxCircle1Y), Offset(topX2, topY2), paintDraftSecond);
+
+          if (beta > -pi / 2) {
+            //
+            // Линия уходит вправо
+            //
+            paintDraftSecond.style = PaintingStyle.fill;
+            canvas.drawArc(
+                Rect.fromCenter(
+                    center: Offset(boxCircle1X, boxCircle1Y), width: 2 * boxCircle1R, height: 2 * boxCircle1R),
+                0,
+                -pi / 2,
+                true,
+                paintDraftSecond);
+          }
+        }
+      } else if (topY2 > boxCircle2Y) {
+        //
+        // Линия уходит к нижнему углу и ниже
+        //
+        paintDraftSecond.style = PaintingStyle.fill;
+        canvas.drawArc(
+            Rect.fromCenter(center: Offset(boxCircle2X, boxCircle2Y), width: 2 * boxCircle2R, height: 2 * boxCircle2R),
+            pi / 2,
+            pi / 2,
+            true,
+            paintDraftSecond);
+
+        var kX = topX1 + (boxCircle2Y - topY1) / tan(alpha);
+        var kY = boxCircle2Y;
+        var kR = boxCircle2X - kX;
+        var kH = sin(alpha) * kR;
+        var kW = cos(alpha) * kR;
+        if (kH > boxCircle2R) {
+          //
+          // Выходит за угол
+          //
+          topLineHasError = true;
+
+          var b = atan2(boxCircle2Y - nipCircleY, boxCircle2X - nipCircleX);
+          var dist = sqrt(pow(boxCircle2X - nipCircleX, 2) + pow(boxCircle2Y - nipCircleY, 2));
+          var g = b - atan2(boxCircle2R - nipRadius, dist) - pi / 2;
+
+          topX1 = nipCircleX + cos(g) * nipRadius;
+          topY1 = nipCircleY + sin(g) * nipRadius;
+          topX2 = boxCircle2X + cos(g) * boxCircle2R;
+          topY2 = boxCircle2Y + sin(g) * boxCircle2R;
+        } else {
+          //
+          // Пересекается с дугой угла
+          //
+          var l = kW - sqrt(boxCircle2R * boxCircle2R - kH * kH);
+          topX2 = kX + cos(alpha) * l;
+          topY2 = kY + sin(alpha) * l;
+
+          var b = pi / 2 - alpha;
+          var mX = boxCircle2X - cos(b) * kH;
+          var mY = boxCircle2Y + sin(b) * kH;
+
+          paint.strokeWidth = 1;
+          paint.style = PaintingStyle.stroke;
+          paint.color = Colors.black45;
+          canvas.drawLine(Offset(boxCircle2X, boxCircle2Y), Offset(mX, mY), paint);
+          canvas.drawLine(Offset(topX2, topY2), Offset(mX, mY), paint);
+
+          paint.color = Colors.black;
+          paint.style = PaintingStyle.fill;
+          canvas.drawCircle(Offset(mX, mY), 2, paint);
+        }
+      }
     } else if (topLine.posType == NipPosType.side) {
       topX2 = nipWidth;
       topY2 = nipYOffset + topLine.pos;
@@ -313,7 +464,6 @@ class MyPainter extends CustomPainter {
 
       topX1 = nipCircleX + nipRadius * cos(a1 + a2);
       topY1 = nipCircleY + nipRadius * sin(a1 + a2);
-
     } else if (topLine.posType == NipPosType.corner) {
       var a = topLine.pos * pi / 180;
       if (topLine.pos <= 0) {
@@ -332,33 +482,88 @@ class MyPainter extends CustomPainter {
       topY1 = nipCircleY + nipRadius * sin(a1 + a2);
     }
 
-    paint.color = Colors.black;
-    paint.style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(topX1, topY1), 2, paint);
-    canvas.drawCircle(Offset(topX2, topY2), 2, paint);
+    var p = topLineHasError ? paintDraftError : paintDraftMain;
+    p.style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(topX1, topY1), 2, p);
+    canvas.drawCircle(Offset(topX2, topY2), 2, p);
+    p.style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(topX1, topY1), Offset(topX2, topY2), p);
 
-    paint.strokeWidth = 1;
-    paint.style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(topX1, topY1), Offset(topX2, topY2), paint);
-
-    paint.color = Colors.black45;
-    canvas.drawCircle(Offset(nipCircleX, nipCircleY), nipRadius, paint);
-    canvas.drawArc(
-        Rect.fromCenter(center: Offset(boxCircle1X, boxCircle1Y), width: 2 * boxCircle1R, height: 2 * boxCircle1R),
-        -pi / 2,
-        -pi / 2,
-        true,
-        paint);
-    canvas.drawArc(
-        Rect.fromCenter(center: Offset(boxCircle2X, boxCircle2Y), width: 2 * boxCircle2R, height: 2 * boxCircle2R),
-        pi / 2,
-        pi / 2,
-        true,
-        paint);
+//    var ls = LineSegment(Offset(0,0), Offset(0, -100));
+//    var ls = LineSegment.direct(Offset(0,0), 90 * pi / 180, 100);
+    var ls = Line(Offset(0, 0), 90 * pi / 180).normal(Offset(100, 0));
+    print('start: ${ls.start}, end: ${ls.end}, direct: ${ls.direct * 180 / pi}, length: ${ls.length}');
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+/// Отрезок
+///
+/// Неконстантный класс. Необходимые значения вычисляются по необходимости и сохраняются
+class LineSegment {
+  LineSegment(this._start, this._end);
+  LineSegment.direct(this._start, this._direct, this._length);
+
+  final Offset _start;
+  Offset _end;
+  double _length;
+  double _direct;
+
+  Offset get start => _start;
+
+  Offset get end {
+    if (_end == null) {
+      _end = Offset(_start.dx + _length * cos(_direct), _start.dy + _length * sin(_direct));
+    }
+    return _end;
+  }
+
+  double get length {
+    if (_length == null) {
+      _length = sqrt(pow(_end.dx - _start.dx, 2) + pow(_end.dy - _start.dy, 2));
+    }
+    return _length;
+  }
+
+  double get direct {
+    if (_direct == null) {
+      _direct = atan2(_end.dy - _start.dy, _end.dx - _start.dy);
+    }
+    return _direct;
+  }
+}
+
+class Line {
+  const Line(this.start, this.direct);
+  Line.toPoint(this.start, Offset end) : direct = atan2(1,2);
+
+  final Offset start;
+  final double direct;
+
+  LineSegment normal(Offset point) {
+    double distance;
+    double angle;
+
+    var tn = tan(direct);
+    if (tn == 0.0) {
+      distance = start.dy - point.dy;
+      angle = pi / 2;
+    } else {
+      // Вспомогательный треугольник, гипотенуза которого находится на одной горизонтали с точкой
+      var x = start.dx + (point.dy - start.dy) / tn;
+      distance = sin(direct) * (point.dx - x); // Дальний катет треуголника - искомое расстояние
+      angle = direct + pi / 2;
+    }
+
+    if (distance < 0) {
+      distance = -distance;
+      angle -= pi;
+    }
+
+    return LineSegment.direct(point, angle, distance);
   }
 }
