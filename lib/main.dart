@@ -732,8 +732,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             Slider(
                               value: _nipYOffset,
                               min: -40.0,
-                              max: 40.0,
-                              divisions: 80,
+                              max: 120.0,
+                              divisions: 160,
                               onChanged: (double value) {
                                 setState(() {
                                   _nipYOffset = value;
