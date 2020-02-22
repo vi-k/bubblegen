@@ -27,19 +27,19 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class ScaledCustomPaint extends StatefulWidget {
+class ZoomCustomPaint extends StatefulWidget {
   final CustomPainter painter;
-  final double scale;
+  final double zoom;
   final Widget child;
   final EdgeInsets padding;
 
-  const ScaledCustomPaint({Key key, this.painter, this.scale = 1.0, this.child, this.padding}) : super(key: key);
+  const ZoomCustomPaint({Key key, this.painter, this.zoom = 1.0, this.child, this.padding}) : super(key: key);
 
   @override
-  _ScaledCustomPaintState createState() => _ScaledCustomPaintState();
+  _ZoomCustomPaintState createState() => _ZoomCustomPaintState();
 }
 
-class _ScaledCustomPaintState extends State<ScaledCustomPaint> {
+class _ZoomCustomPaintState extends State<ZoomCustomPaint> {
   ui.Image _image;
   bool _update = true;
 
@@ -54,12 +54,12 @@ class _ScaledCustomPaintState extends State<ScaledCustomPaint> {
       child: CustomPaint(
         child: Container(padding: widget.padding, child: widget.child),
 //      painter: widget.painter,
-        painter: ScaledCustomPaintPainter(
+        painter: ZoomCustomPaintPainter(
             painter: widget.painter,
             image: this._image,
             update: update,
             ratio: ratio,
-            scale: this.widget.scale,
+            zoom: this.widget.zoom,
             onUpdate: (image) {
               setState(() {
                 this._image = image;
@@ -72,12 +72,12 @@ class _ScaledCustomPaintState extends State<ScaledCustomPaint> {
   }
 }
 
-class ScaledCustomPaintPainter extends CustomPainter {
-  ScaledCustomPaintPainter({
+class ZoomCustomPaintPainter extends CustomPainter {
+  ZoomCustomPaintPainter({
     this.image,
     this.update,
     this.ratio,
-    this.scale,
+    this.zoom,
     this.painter,
     this.onUpdate,
   }) : super();
@@ -85,7 +85,7 @@ class ScaledCustomPaintPainter extends CustomPainter {
   final ui.Image image;
   final bool update;
   final double ratio;
-  final double scale;
+  final double zoom;
   final CustomPainter painter;
   final void Function(ui.Image) onUpdate;
 
@@ -95,7 +95,7 @@ class ScaledCustomPaintPainter extends CustomPainter {
     if (this.image != null) {
       var paint = Paint();
       paint.isAntiAlias = true;
-      canvas.scale(this.scale / this.ratio, this.scale / this.ratio);
+      canvas.scale(this.zoom / this.ratio, this.zoom / this.ratio);
       canvas.drawImage(this.image, Offset.zero, paint);
     }
 
@@ -502,39 +502,17 @@ class _NipLineSelectState extends State<NipLineSelect> {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  var _scaleLevel = 0.0;
+  var _height = 50.0;
+  var _zoomLevel = 0.0;
   var _drawDraft = false;
-  static String _text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,' +
-      ' sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-  TextEditingController _controller;
-
-  void initState() {
-    super.initState();
-    this._controller = TextEditingController(text: _text);
-  }
-
-  void dispose() {
-    this._controller.dispose();
-    super.dispose();
-  }
 
   // Whatsapp
-  var _boxRadius = 20.0;
-  var _nipWidth = 40.0;
-  var _nipRadius = 10.0;
-  var _nipYOffset = 20.0;
-  var _startTopAngle = 0.0;
-  var _finishTopPos = 0.0;
-  var _finishTopAngle = 180.0;
-  var _startBottomAngle = -53.0;
-  var _finishBottomPos = 14.0;
-  var _finishBottomAngle = 127.0;
-
-  // Whatsapp
-//  var _boxRadius = 8.0;
-//  var _nipWidth = 10.0;
-//  var _nipRadius = 1.0;
-//  var _nipYOffset = 0.0;
+  var _boxRadius = 8.0;
+  var _nipWidth = 10.0;
+  var _nipRadius = 1.0;
+  var _nipYOffset = 0.0;
+  var _topLine = NipLine.line(0);
+  var _bottomLine = NipLine.line(53);
 //  var _startTopAngle = 0.0;
 //  var _finishTopPos = 0.0;
 //  var _finishTopAngle = 180.0;
@@ -578,9 +556,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //  var _finishBottomPos = -65.0;
 //  var _finishBottomAngle = 140.0;
 
-  var _topLine = NipLine.line(-29);
-  var _bottomLine = NipLine.line(-45);
-
   @override
   Widget build(BuildContext context) {
     final painter = MyPainter(
@@ -590,12 +565,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       nipWidth: _nipWidth,
       nipRadius: _nipRadius,
       nipYOffset: _nipYOffset,
-      startTopAngle: _startTopAngle,
-      finishTopPos: _finishTopPos,
-      finishTopAngle: _finishTopAngle,
-      startBottomAngle: _startBottomAngle,
-      finishBottomPos: _finishBottomPos,
-      finishBottomAngle: _finishBottomAngle,
       drawDraft: _drawDraft,
     );
 
@@ -616,14 +585,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               padding: EdgeInsets.all(10),
               child: Builder(
                 builder: (BuildContext context) {
-                  return _scaleLevel == 0
+                  return _zoomLevel == 0
                       ? CustomPaint(
-                          painter: painter, child: Container(padding: padding, child: Text(this._controller.text)))
-                      : ScaledCustomPaint(
+                          painter: painter, child: Container(padding: padding, child: Container(height: _height)))
+                      : ZoomCustomPaint(
                           painter: painter,
                           padding: padding,
-                          child: Opacity(opacity: 0.0, child: Text(this._controller.text)),
-                          scale: pow(2, _scaleLevel));
+                          child: Container(height: _height),
+                          zoom: pow(2, _zoomLevel));
                 },
               ),
             ),
@@ -634,40 +603,42 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: Column(
                 children: <Widget>[
                   Container(
-                    padding: EdgeInsets.all(10),
-                    child: TextField(
-                      minLines: 1,
-                      maxLines: 3,
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Text',
-                      ),
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                    ),
-                  ),
-                  Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     child: Column(
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            Text('scale', textAlign: TextAlign.right),
+                            Text('height', textAlign: TextAlign.right),
                             Slider(
-                              value: _scaleLevel,
-                              //label: '${_scale.round()}',
+                              value: _height,
+                              min: 10.0,
+                              max: 200.0,
+                              divisions: 19,
+                              onChanged: (double value) {
+                                setState(() {
+                                  _height = value;
+                                });
+                              },
+                            ),
+                            Text('${_height.toStringAsFixed(0)}'),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text('zoom', textAlign: TextAlign.right),
+                            Slider(
+                              value: _zoomLevel,
+                              //label: '${_zoom.round()}',
                               min: 0.0,
                               max: 5.0,
                               divisions: 5,
                               onChanged: (double value) {
                                 setState(() {
-                                  _scaleLevel = value;
+                                  _zoomLevel = value;
                                 });
                               },
                             ),
-                            Text('${pow(2, _scaleLevel).toStringAsFixed(0)}x'),
+                            Text('${pow(2, _zoomLevel).toStringAsFixed(0)}x'),
                           ],
                         ),
                         Row(
@@ -751,113 +722,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             _topLine = nipLine;
                           }),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Text('startTopAngle', textAlign: TextAlign.right),
-                            Slider(
-                              value: _startTopAngle,
-                              min: -90.0,
-                              max: 90.0,
-                              divisions: 180,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _startTopAngle = value;
-                                });
-                              },
-                            ),
-                            Text('${_startTopAngle.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('finishTopPos', textAlign: TextAlign.right),
-                            Slider(
-                              value: _finishTopPos,
-                              min: -90.0,
-                              max: 40.0,
-                              divisions: 130,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _finishTopPos = value;
-                                });
-                              },
-                            ),
-                            Text('${_finishTopPos.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('finishTopAngle', textAlign: TextAlign.right),
-                            Slider(
-                              value: _finishTopAngle,
-                              min: 90.0,
-                              max: 270.0,
-                              divisions: 180,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _finishTopAngle = value;
-                                });
-                              },
-                            ),
-                            Text('${_finishTopAngle.toStringAsFixed(1)}'),
-                          ],
+                        Divider(),
+                        NipLineSelect(
+                          caption: 'Bottom line',
+                          nipLine: _bottomLine,
+                          onChange: (nipLine) => setState(() {
+                            _bottomLine = nipLine;
+                          }),
                         ),
                         Divider(),
-                        Text(
-                          'Bottom line',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('startBottomAngle', textAlign: TextAlign.right),
-                            Slider(
-                              value: _startBottomAngle,
-                              min: -90.0,
-                              max: 90.0,
-                              divisions: 180,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _startBottomAngle = value;
-                                });
-                              },
-                            ),
-                            Text('${_startBottomAngle.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('finishBottomPos', textAlign: TextAlign.right),
-                            Slider(
-                              value: _finishBottomPos,
-                              min: -90.0,
-                              max: 40,
-                              divisions: 130,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _finishBottomPos = value;
-                                });
-                              },
-                            ),
-                            Text('${_finishBottomPos.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('finishBottomAngle', textAlign: TextAlign.right),
-                            Slider(
-                              value: _finishBottomAngle,
-                              min: 90.0,
-                              max: 270.0,
-                              divisions: 180,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _finishBottomAngle = value;
-                                });
-                              },
-                            ),
-                            Text('${_finishBottomAngle.toStringAsFixed(1)}'),
-                          ],
-                        ),
                         Row(
                           children: <Widget>[
                             Text('Draft'),
@@ -868,17 +741,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                   _drawDraft = value;
                                 });
                               },
-                            ),
-                            Radio<int>(
-                              groupValue: 1,
-                              value: 1,
-                              onChanged: (int value) {},
-                            ),
-                            Text('1'),
-                            Radio<int>(
-                              groupValue: 1,
-                              value: 1,
-                              onChanged: (int value) {},
                             ),
                           ],
                         ),
