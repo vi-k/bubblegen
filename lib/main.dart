@@ -506,13 +506,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _zoomLevel = 0.0;
   var _drawDraft = false;
 
-  // Whatsapp
-  var _boxRadius = 8.0;
-  var _nipWidth = 10.0;
-  var _nipRadius = 1.0;
-  var _nipYOffset = 0.0;
+  var _boxRadius = 20.0;
+  var _nipWidth = 40.0;
+  var _nipRadius = 10.0;
+  var _nipYOffset = 10.0;
   var _topLine = NipLine.line(0);
-  var _bottomLine = NipLine.line(53);
+  var _bottomLine = NipLine.line(30);
+
+  // Whatsapp
+//  var _boxRadius = 8.0;
+//  var _nipWidth = 10.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
+//  var _topLine = NipLine.line(0);
+//  var _bottomLine = NipLine.line(53);
 //  var _startTopAngle = 0.0;
 //  var _finishTopPos = 0.0;
 //  var _finishTopAngle = 180.0;
@@ -730,28 +737,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             _bottomLine = nipLine;
                           }),
                         ),
-                        Divider(),
-                        Row(
-                          children: <Widget>[
-                            Text('Draft'),
-                            Switch(
-                              value: _drawDraft,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  _drawDraft = value;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
-                  Text(''),
-                  Text(''),
                 ],
               ),
             ),
+          ),
+          Divider(),
+          Row(
+            children: <Widget>[
+              Text('Draft'),
+              Switch(
+                value: _drawDraft,
+                onChanged: (bool value) {
+                  setState(() {
+                    _drawDraft = value;
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
