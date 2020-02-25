@@ -348,9 +348,9 @@ class _NipLineSelectState extends State<NipLineSelect> {
             Expanded(
               child: Slider(
                 value: _lineAngle,
-                min: -80,
-                max: 80,
-                divisions: 160,
+                min: -89,
+                max: 89,
+                divisions: 178,
                 onChanged: getPosType(_type) != PosType.angle
                     ? null
                     : (value) {
@@ -376,9 +376,9 @@ class _NipLineSelectState extends State<NipLineSelect> {
             Expanded(
               child: Slider(
                 value: _pos,
-                min: -50,
-                max: 50,
-                divisions: 100,
+                min: -100,
+                max: 100,
+                divisions: 200,
                 onChanged: getPosType(_type) != PosType.pos
                     ? null
                     : (value) {
@@ -404,9 +404,9 @@ class _NipLineSelectState extends State<NipLineSelect> {
             Expanded(
               child: Slider(
                 value: _offset,
-                min: -50,
-                max: 50,
-                divisions: 100,
+                min: -100,
+                max: 100,
+                divisions: 200,
                 onChanged: getPosType(_type) != PosType.offset
                     ? null
                     : (value) {
@@ -670,7 +670,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
 
     final padding =
-        EdgeInsets.only(left: _nipWidth + 10, top: 10.0 + (_nipYOffset < 0 ? -_nipYOffset : 0), right: 10, bottom: 10);
+        EdgeInsets.only(left: _nipWidth + 10, top: 10.0 + (_nipYOffset < 0 ? -_nipYOffset : 0), right: 10, bottom: 10.0);
 
     return Scaffold(
       appBar: AppBar(
