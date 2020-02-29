@@ -198,30 +198,76 @@ class DraftInfo {
 
   void addPoint(Point point, [DraftType type = DraftType.Draft]) => points.add(DraftPoint(point, type));
 
-  void paint(Canvas canvas, BubblePaintInfo pi) {
-    var path = Path();
+  void paintBackground(Canvas canvas, BubblePaintInfo pi) {
+    final dp = 1.0 / pi.scale;
+    final limitSize = 10.0 * dp;
 
     var paint = Paint();
-    paint.strokeWidth = 1;
+    paint.strokeWidth = 1 * dp;
     paint.color = draftColor;
-
-    // Границы области
     paint.style = PaintingStyle.stroke;
-    canvas.drawLine(pi.rect.topLeft, pi.rect.topLeft.translate(-10, 0), paint);
-    canvas.drawLine(pi.rect.topLeft, pi.rect.topLeft.translate(0, -10), paint);
-    canvas.drawLine(pi.rect.topRight, pi.rect.topRight.translate(10, 0), paint);
-    canvas.drawLine(pi.rect.topRight, pi.rect.topRight.translate(0, -10), paint);
-    canvas.drawLine(pi.rect.bottomLeft, pi.rect.bottomLeft.translate(-10, 0), paint);
-    canvas.drawLine(pi.rect.bottomLeft, pi.rect.bottomLeft.translate(0, 10), paint);
-    canvas.drawLine(pi.rect.bottomRight, pi.rect.bottomRight.translate(10, 0), paint);
-    canvas.drawLine(pi.rect.bottomRight, pi.rect.bottomRight.translate(0, 10), paint);
+
+    var path = Path();
+
+    //
+    // Границы области
+    //
+
+    // Левая граница
+    path.moveTo(pi.rect.left, pi.rect.top - limitSize);
+    path.lineTo(pi.rect.left, pi.rect.bottom + limitSize);
+
+    // Правая граница
+    path.moveTo(pi.rect.right, pi.rect.top - limitSize);
+    path.lineTo(pi.rect.right, pi.rect.bottom + limitSize);
+
+    // Верхняя граница
+    path.moveTo(pi.rect.left - limitSize, pi.rect.top);
+    path.lineTo(pi.rect.right + limitSize, pi.rect.top);
+
+    // Нижняя граница
+    path.moveTo(pi.rect.left - limitSize, pi.rect.bottom);
+    path.lineTo(pi.rect.right + limitSize, pi.rect.bottom);
+
+//    path.moveTo(pi.rect.topLeft.dx - limitSize, pi.rect.topLeft.dy);
+//    path.lineTo(pi.rect.topLeft.dx, pi.rect.topLeft.dy);
+//    path.lineTo(pi.rect.topLeft.dx, pi.rect.topLeft.dy - limitSize);
+
+//    path.moveTo(pi.rect.topRight.dx + limitSize, pi.rect.topRight.dy);
+//    path.lineTo(pi.rect.topRight.dx, pi.rect.topRight.dy);
+//    path.lineTo(pi.rect.topRight.dx, pi.rect.topRight.dy - limitSize);
+
+//    path.moveTo(pi.rect.bottomLeft.dx - limitSize, pi.rect.bottomLeft.dy);
+//    path.lineTo(pi.rect.bottomLeft.dx, pi.rect.bottomLeft.dy);
+//    path.lineTo(pi.rect.bottomLeft.dx, pi.rect.bottomLeft.dy + limitSize);
+
+//    path.moveTo(pi.rect.bottomRight.dx + limitSize, pi.rect.bottomRight.dy);
+//    path.lineTo(pi.rect.bottomRight.dx, pi.rect.bottomRight.dy);
+//    path.lineTo(pi.rect.bottomRight.dx, pi.rect.bottomRight.dy + limitSize);
 
     // Границы бокса
-    canvas.drawLine(pi.box.topLeft, pi.box.topLeft.translate(-10, 0), paint);
-    canvas.drawLine(pi.box.topLeft, pi.box.topLeft.translate(0, -10), paint);
-    canvas.drawLine(pi.box.bottomLeft, pi.box.bottomLeft.translate(-10, 0), paint);
-    canvas.drawLine(pi.box.bottomLeft, pi.box.bottomLeft.translate(0, 10), paint);
+    path.moveTo(pi.box.left, pi.box.top - limitSize);
+    path.lineTo(pi.box.left, pi.box.bottom + limitSize);
+//    path.moveTo(pi.box.topLeft.dx - limitSize, pi.box.topLeft.dy);
+//    path.lineTo(pi.box.topLeft.dx, pi.box.topLeft.dy);
+//    path.lineTo(pi.box.topLeft.dx, pi.box.topLeft.dy - limitSize);
+//
+//    path.moveTo(pi.box.bottomLeft.dx - limitSize, pi.box.bottomLeft.dy);
+//    path.lineTo(pi.box.bottomLeft.dx, pi.box.bottomLeft.dy);
+//    path.lineTo(pi.box.bottomLeft.dx, pi.box.bottomLeft.dy + limitSize);
 
+    canvas.drawPath(path, paint);
+  }
+
+  void paint(Canvas canvas, BubblePaintInfo pi) {
+    final dp = 1.0 / pi.scale;
+    final sideSize = 4.0 * dp;
+    final pointSize = 2.0 * dp;
+
+    var path = Path();
+    var paint = Paint();
+    paint.strokeWidth = 1 * dp;
+    paint.color = draftColor;
     paint.style = PaintingStyle.fill;
 
     // Малый круг
@@ -234,8 +280,8 @@ class DraftInfo {
       path.reset();
       path.moveTo(pi.ltCircle.center.x, pi.box.top);
       path.lineTo(pi.rtCircle.center.x, pi.box.top);
-      path.lineTo(pi.rtCircle.center.x, pi.box.top + 4);
-      path.lineTo(pi.ltCircle.center.x, pi.box.top + 4);
+      path.lineTo(pi.rtCircle.center.x, pi.box.top + sideSize);
+      path.lineTo(pi.ltCircle.center.x, pi.box.top + sideSize);
       path.close();
 
       canvas.drawPath(path, paint);
@@ -245,8 +291,8 @@ class DraftInfo {
     if (showLeftSide) {
       path.reset();
       path.moveTo(pi.box.left, pi.ltCircle.center.y);
-      path.lineTo(pi.box.left + 4, pi.ltCircle.center.y);
-      path.lineTo(pi.box.left + 4, pi.lbCircle.center.y);
+      path.lineTo(pi.box.left + sideSize, pi.ltCircle.center.y);
+      path.lineTo(pi.box.left + sideSize, pi.lbCircle.center.y);
       path.lineTo(pi.box.left, pi.lbCircle.center.y);
       path.close();
 
@@ -258,8 +304,8 @@ class DraftInfo {
       path.reset();
       path.moveTo(pi.lbCircle.center.x, pi.box.bottom);
       path.lineTo(pi.rbCircle.center.x, pi.box.bottom);
-      path.lineTo(pi.rbCircle.center.x, pi.box.bottom - 4);
-      path.lineTo(pi.lbCircle.center.x, pi.box.bottom - 4);
+      path.lineTo(pi.rbCircle.center.x, pi.box.bottom - sideSize);
+      path.lineTo(pi.lbCircle.center.x, pi.box.bottom - sideSize);
       path.close();
 
       canvas.drawPath(path, paint);
@@ -309,7 +355,7 @@ class DraftInfo {
       // Точки
       points.forEach((item) {
         if (item.type == type) {
-          canvas.drawCircle(item.point, 2, paint);
+          canvas.drawCircle(item.point, pointSize, paint);
         }
       });
     });
@@ -317,6 +363,7 @@ class DraftInfo {
 }
 
 class BubblePaintInfo {
+  double scale;
   Rect rect;
   Circle nipCircle;
   Rect box;
@@ -392,7 +439,7 @@ class RenderBubble extends RenderProxyBox {
 
   set bubble(CustomBubble bubble) {
     assert(bubble != null);
-    if (_bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
+    if (_bubble.scale != bubble.scale || _bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
       markNeedsLayout();
     }
     markNeedsPaint();
@@ -409,7 +456,7 @@ class RenderBubble extends RenderProxyBox {
       Offset changes;
       if (bubble.nipSide == NipSide.left || bubble.nipSide == NipSide.right) {
         changes = Offset(bubble.nipSize, 0);
-        final maxWidth = constraints.maxWidth - bubble.nipSize;
+        final maxWidth = constraints.maxWidth - bubble.nipSize * bubble.scale;
         final minWidth = math.min(constraints.minWidth, maxWidth);
         childConstraints = constraints.copyWith(
           maxWidth: maxWidth,
@@ -417,7 +464,7 @@ class RenderBubble extends RenderProxyBox {
         );
       } else if (bubble.nipSide == NipSide.top || bubble.nipSide == NipSide.bottom) {
         changes = Offset(0, bubble.nipSize);
-        final maxHeight = constraints.maxHeight - bubble.nipSize;
+        final maxHeight = constraints.maxHeight - bubble.nipSize * bubble.scale;
         final minHeight = math.min(constraints.minHeight, maxHeight);
         childConstraints = constraints.copyWith(
           maxHeight: maxHeight,
@@ -425,8 +472,14 @@ class RenderBubble extends RenderProxyBox {
         );
       }
 
+      childConstraints = childConstraints / bubble.scale;
+      print('constraints: $constraints');
+      print('childConstraints: $childConstraints');
+
       child.layout(childConstraints, parentUsesSize: true);
-      size = Size(child.size.width + changes.dx, child.size.height + changes.dy);
+      size = Size(child.size.width + changes.dx, child.size.height + changes.dy) * bubble.scale;
+      print('child.size: ${child.size}');
+      print('size: $size');
     } else {
       performResize();
     }
@@ -437,19 +490,23 @@ class RenderBubble extends RenderProxyBox {
     if (child == null) return;
 
     var pi = BubblePaintInfo();
-
-    pi.rect = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    pi.scale = bubble.scale;
+    Offset childOffset = offset;
 
     if (bubble.nipSide == NipSide.left || bubble.nipSide == NipSide.right) {
-      pi.box = Rect.fromLTWH(offset.dx + bubble.nipSize, offset.dy, child.size.width, child.size.height);
-      if (bubble.nipSide == NipSide.left) offset = offset.translate(bubble.nipSize, 0);
-    } else if (bubble.nipSide == NipSide.top || bubble.nipSide == NipSide.bottom) {
-      pi.rect = Rect.fromLTRB(pi.rect.top, pi.rect.left, pi.rect.bottom, pi.rect.right);
-      pi.box = Rect.fromLTWH(offset.dy + bubble.nipSize, offset.dx, child.size.height, child.size.width);
-      if (bubble.nipSide == NipSide.top) offset = offset.translate(0, bubble.nipSize);
+      pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
+      pi.box = Rect.fromLTWH(bubble.nipSize, 0, size.width / bubble.scale - bubble.nipSize, size.height / bubble.scale);
+      if (bubble.nipSide == NipSide.left) childOffset = offset.translate(bubble.nipSize * bubble.scale, 0);
+    } else {
+      pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
+      pi.box = Rect.fromLTWH(
+          bubble.nipSize, 0, child.size.height / bubble.scale - bubble.nipSize, child.size.width / bubble.scale);
+      if (bubble.nipSide == NipSide.top) childOffset = offset.translate(0, bubble.nipSize * bubble.scale);
     }
 
-//    pi.box = Rect.fromLTWH(boxOffset.dx, boxOffset.dy, child.size.width, child.size.height);
+    print('offset: $offset');
+    print('pi.rect: ${pi.rect}');
+    print('pi.box: ${pi.box}');
 
     //
     // Если радиусы больше сторон бокса, рассчитываем коэффициент, чтобы равномерно уменьшить все радиусы
@@ -511,14 +568,15 @@ class RenderBubble extends RenderProxyBox {
         bottomRight: Radius.circular(pi.rbCircle.radius)));
 
     context.canvas.save();
+    context.canvas.translate(offset.dx, offset.dy);
     if (bubble.nipSide == NipSide.right) {
-      context.canvas.translate(2 * offset.dx + size.width, 0);
+      context.canvas.translate(size.width, 0);
       context.canvas.scale(-1, 1);
     } else if (bubble.nipSide == NipSide.top) {
       context.canvas.scale(-1, 1);
       context.canvas.rotate(math.pi * 90 / 180);
     } else if (bubble.nipSide == NipSide.bottom) {
-      context.canvas.translate(0, 2 * offset.dy + size.height);
+      context.canvas.translate(0, size.height);
       context.canvas.scale(-1, -1);
       context.canvas.rotate(math.pi * 90 / 180);
     }
@@ -528,12 +586,18 @@ class RenderBubble extends RenderProxyBox {
     var paint = Paint();
     paint.color = bubble.color;
     paint.style = PaintingStyle.fill;
-    context.canvas.drawShadow(path, bubble.shadowColor, bubble.elevation, false);
+    if (pi.draft != null) pi.draft.paintBackground(context.canvas, pi);
+    context.canvas.drawShadow(path, bubble.shadowColor, bubble.elevation * bubble.scale, false);
     context.canvas.drawPath(path, paint);
     if (pi.draft != null) pi.draft.paint(context.canvas, pi);
+
     context.canvas.restore();
 
-    context.paintChild(child, Offset(offset.dx, offset.dy));
+    context.canvas.save();
+    context.canvas.translate(childOffset.dx, childOffset.dy);
+    context.canvas.scale(bubble.scale);
+    context.paintChild(child, Offset.zero);
+    context.canvas.restore();
   }
 }
 

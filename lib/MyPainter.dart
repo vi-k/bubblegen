@@ -460,6 +460,7 @@ class MyPainter extends CustomPainter {
     if (bottomOffset < 0) bottomOffset = 0;
 
     var pi = BubblePaintInfo();
+    pi.scale = 1.0;
     pi.rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
     pi.box = Rect.fromLTRB(nipWidth, topOffset, size.width / 3, size.height - bottomOffset);

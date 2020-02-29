@@ -5,8 +5,6 @@ import 'package:bubble_demo/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'MyPainter.dart';
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -603,25 +601,26 @@ class _NipLineSelectState extends State<NipLineSelect> {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
-  var _scale = 1.0;
+  var _scale = 3.0;
   var _zoomLevel = 0.0;
-  var _drawDraft = false;
+  var _drawDraft = true;
 
-  var _radius = 20.0;
-  var _nipSize = 40.0;
-  var _nipOffset = NipOffset(absolute: 10.0);
-  var _nipRadius = 10.0;
-  var _nipSide = NipSide.left;
-  var _topLine = NipLine.line(0);
-  var _bottomLine = NipLine.line(30);
+//  var _radius = 20.0;
+//  var _nipSide = NipSide.left;
+//  var _nipRadius = 10.0;
+//  var _nipSize = 40.0;
+//  var _nipOffset = NipOffset(absolute: 10.0);
+//  var _topLine = NipLine.line(0);
+//  var _bottomLine = NipLine.line(30);
 
   // Whatsapp
-//  var _boxRadius = 8.0;
-//  var _nipWidth = 10.0;
-//  var _nipRadius = 1.0;
-//  var _nipYOffset = 0.0;
-//  var _topLine = NipLine.line(0);
-//  var _bottomLine = NipLine.line(53);
+  var _radius = 8.0;
+  var _nipSide = NipSide.left;
+  var _nipRadius = 1.0;
+  var _nipSize = 10.0;
+  var _nipOffset = NipOffset(absolute: 0.0);
+  var _topLine = NipLine.line(0);
+  var _bottomLine = NipLine.line(53);
 //  var _startTopAngle = 0.0;
 //  var _finishTopPos = 0.0;
 //  var _finishTopAngle = 180.0;
@@ -667,22 +666,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final painter = MyPainter(
-      topLine: _topLine,
-      bottomLine: _bottomLine,
-      boxRadius: _radius,
-      nipWidth: _nipSize,
-      nipRadius: _nipRadius,
-      nipYOffset: _nipOffset.absolute,
-      height: _height,
-      drawDraft: _drawDraft,
-    );
+//    final painter = MyPainter(
+//      topLine: _topLine,
+//      bottomLine: _bottomLine,
+//      boxRadius: _radius,
+//      nipWidth: _nipSize,
+//      nipRadius: _nipRadius,
+//      nipYOffset: _nipOffset.absolute,
+//      height: _height,
+//      drawDraft: _drawDraft,
+//    );
 
-    final padding = EdgeInsets.only(
-        left: _nipSize + 10,
-        top: 10.0 + (_nipOffset.absolute < 0 ? -_nipOffset.absolute : 0),
-        right: 10,
-        bottom: 10.0 + (_nipOffset.absolute + 2 * _nipRadius > _height ? _nipOffset.absolute + 2 * _nipRadius - _height : 0));
+//    final padding = EdgeInsets.only(
+//        left: _nipSize + 10,
+//        top: 10.0 + (_nipOffset.absolute < 0 ? -_nipOffset.absolute : 0),
+//        right: 10,
+//        bottom: 10.0 + (_nipOffset.absolute + 2 * _nipRadius > _height ? _nipOffset.absolute + 2 * _nipRadius - _height : 0));
 
     return Scaffold(
       appBar: AppBar(
@@ -690,57 +689,61 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       body: Column(
         children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(20),
-            child: Bubble(
-                scale: _scale.toDouble(),
-                radius: BubbleRadius(
-                    topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                nipSide: _nipSide,
-                nipRadius: _nipRadius,
-                nipSize: _nipSize,
-                nipOffset: _nipOffset,
-                topLine: _topLine,
-                bottomLine: _bottomLine,
-                color: Colors.lightBlue,
-                elevation: 2.0,
-                drawDraft: _drawDraft,
-                child: Container(
-                    height: _height,
-//                    padding: EdgeInsets.all(10),
-//                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
-                    )),
-          ),
-          LimitedBox(
-            maxHeight: 200,
+          PhysicalModel(
+            color: Colors.yellow.shade100,
+            elevation: 2.0,
             child: Container(
-//                width: double.infinity,
-//                height: 400.0,
-              color: Colors.yellow.withAlpha(64),
               padding: EdgeInsets.all(20),
-              child: Builder(
-                builder: (BuildContext context) {
-                  return _zoomLevel == 0
-                      ? CustomPaint(
-                          painter: painter,
-                          child: Container(
-                              height: _height +
-                                  (_nipOffset.absolute < 0
-                                      ? -_nipOffset.absolute
-                                      : 0 +
-                                          (_nipOffset.absolute + 2 * _nipRadius > _height
-                                              ? _nipOffset.absolute + 2 * _nipRadius - _height
-                                              : 0))))
-                      : ZoomCustomPaint(
-                          painter: painter,
-                          padding: padding,
-                          child: Container(height: _height),
-                          zoom: pow(2, _zoomLevel));
-                },
-              ),
+              child: Bubble(
+                  scale: _scale,
+                  radius: BubbleRadius(
+                      topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                  nipSide: _nipSide,
+                  nipRadius: _nipRadius,
+                  nipSize: _nipSize,
+                  nipOffset: _nipOffset,
+                  topLine: _topLine,
+                  bottomLine: _bottomLine,
+                  color: Colors.lightBlue,
+                  elevation: 1.0,
+                  drawDraft: _drawDraft,
+                  child: Container(
+                      height: _height,
+//                    padding: EdgeInsets.all(10),
+//                    child: Text('a a a a a'),
+//                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
+                      )),
             ),
           ),
-//            Text('$_size'),
+//          LimitedBox(
+//            maxHeight: 200,
+//            child: Container(
+////                width: double.infinity,
+////                height: 400.0,
+//              color: Colors.yellow.withAlpha(64),
+//              padding: EdgeInsets.all(20),
+//              child: Builder(
+//                builder: (BuildContext context) {
+//                  return _zoomLevel == 0
+//                      ? CustomPaint(
+//                          painter: painter,
+//                          child: Container(
+//                              height: _height +
+//                                  (_nipOffset.absolute < 0
+//                                      ? -_nipOffset.absolute
+//                                      : 0 +
+//                                          (_nipOffset.absolute + 2 * _nipRadius > _height
+//                                              ? _nipOffset.absolute + 2 * _nipRadius - _height
+//                                              : 0))))
+//                      : ZoomCustomPaint(
+//                          painter: painter,
+//                          padding: padding,
+//                          child: Container(height: _height),
+//                          zoom: pow(2, _zoomLevel));
+//                },
+//              ),
+//            ),
+//          ),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -753,13 +756,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           children: <Widget>[
                             Text('scale', textAlign: TextAlign.right),
                             Slider(
-                              value: _scale,// scaleLevel(_scale),
+                              value: _scale,
                               min: 1.0,
-                              max: 4.0,
-                              divisions: 30,
+                              max: 8.0,
+                              divisions: 7,
                               onChanged: (double value) {
                                 setState(() {
-                                  _scale = value;//scaleFromLevel(value);
+                                  _scale = value;
                                 });
                               },
                             ),
@@ -936,36 +939,28 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          Divider(),
-          Row(
-            children: <Widget>[
-              Text('Draft'),
-              Switch(
-                value: _drawDraft,
-                onChanged: (bool value) {
-                  setState(() {
-                    _drawDraft = value;
-                  });
-                },
+          PhysicalModel(
+            color: Colors.grey.shade300,
+            elevation: 2.0,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                children: <Widget>[
+                  Text('Draft'),
+                  Switch(
+                    value: _drawDraft,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _drawDraft = value;
+                      });
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
-}
-
-double scaleLevel(int scale) {
-  int s = scale;
-  int l = -1;
-  while (s != 0) {
-    l++;
-    s >>= 1;
-  }
-  return l.toDouble();
-}
-
-int scaleFromLevel(double level) {
-  return (1 << level.round());
 }
