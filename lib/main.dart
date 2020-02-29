@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:bubble_demo/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'MyPainter.dart';
 
@@ -231,11 +233,15 @@ class _NipLineSelectState extends State<NipLineSelect> {
         break;
 
       case PosType.offset:
-        type = lineTypeIndex == 0 ? NipLineType.relativeLineTo : lineTypeIndex == 1 ? NipLineType.relativeArcTo : NipLineType.relativeCurveTo;
+        type = lineTypeIndex == 0
+            ? NipLineType.relativeLineTo
+            : lineTypeIndex == 1 ? NipLineType.relativeArcTo : NipLineType.relativeCurveTo;
         break;
 
       case PosType.corner:
-        type = lineTypeIndex == 0 ? NipLineType.lineToCorner : lineTypeIndex == 1 ? NipLineType.arcToCorner : NipLineType.curveToCorner;
+        type = lineTypeIndex == 0
+            ? NipLineType.lineToCorner
+            : lineTypeIndex == 1 ? NipLineType.arcToCorner : NipLineType.curveToCorner;
         break;
     }
 
@@ -348,9 +354,9 @@ class _NipLineSelectState extends State<NipLineSelect> {
             Expanded(
               child: Slider(
                 value: _lineAngle,
-                min: -89,
-                max: 89,
-                divisions: 178,
+                min: -90,
+                max: 90,
+                divisions: 180,
                 onChanged: getPosType(_type) != PosType.angle
                     ? null
                     : (value) {
@@ -410,9 +416,9 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 onChanged: getPosType(_type) != PosType.offset
                     ? null
                     : (value) {
-                  _offset = value;
-                  doChange();
-                },
+                        _offset = value;
+                        doChange();
+                      },
               ),
             ),
             Text('${_offset.toStringAsFixed(1)}'),
@@ -431,14 +437,14 @@ class _NipLineSelectState extends State<NipLineSelect> {
             Text('corner\'s angle'),
             Expanded(
               child: Slider(
-                value: _cornerAngle <= -90 ? -(_cornerAngle + 180) : _cornerAngle >= 90 ? (180 - _cornerAngle) : 0,
-                min: -90,
-                max: 90,
-                divisions: 180,
+                value: _cornerAngle,
+                min: -270,
+                max: 270,
+                divisions: 560,
                 onChanged: getPosType(_type) != PosType.corner
                     ? null
                     : (value) {
-                        _cornerAngle = value <= 0 ? -(value + 180) : (180 - value);
+                        _cornerAngle = value;
                         doChange();
                       },
               ),
@@ -597,13 +603,15 @@ class _NipLineSelectState extends State<NipLineSelect> {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
+  var _scale = 1.0;
   var _zoomLevel = 0.0;
   var _drawDraft = false;
 
-  var _boxRadius = 20.0;
-  var _nipWidth = 40.0;
+  var _radius = 20.0;
+  var _nipSize = 40.0;
+  var _nipOffset = NipOffset(absolute: 10.0);
   var _nipRadius = 10.0;
-  var _nipYOffset = 10.0;
+  var _nipSide = NipSide.left;
   var _topLine = NipLine.line(0);
   var _bottomLine = NipLine.line(30);
 
@@ -662,15 +670,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     final painter = MyPainter(
       topLine: _topLine,
       bottomLine: _bottomLine,
-      boxRadius: _boxRadius,
-      nipWidth: _nipWidth,
+      boxRadius: _radius,
+      nipWidth: _nipSize,
       nipRadius: _nipRadius,
-      nipYOffset: _nipYOffset,
+      nipYOffset: _nipOffset.absolute,
+      height: _height,
       drawDraft: _drawDraft,
     );
 
-    final padding =
-        EdgeInsets.only(left: _nipWidth + 10, top: 10.0 + (_nipYOffset < 0 ? -_nipYOffset : 0), right: 10, bottom: 10.0);
+    final padding = EdgeInsets.only(
+        left: _nipSize + 10,
+        top: 10.0 + (_nipOffset.absolute < 0 ? -_nipOffset.absolute : 0),
+        right: 10,
+        bottom: 10.0 + (_nipOffset.absolute + 2 * _nipRadius > _height ? _nipOffset.absolute + 2 * _nipRadius - _height : 0));
 
     return Scaffold(
       appBar: AppBar(
@@ -678,18 +690,47 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       body: Column(
         children: <Widget>[
+          Container(
+            padding: EdgeInsets.all(20),
+            child: Bubble(
+                scale: _scale.toDouble(),
+                radius: BubbleRadius(
+                    topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                nipSide: _nipSide,
+                nipRadius: _nipRadius,
+                nipSize: _nipSize,
+                nipOffset: _nipOffset,
+                topLine: _topLine,
+                bottomLine: _bottomLine,
+                color: Colors.lightBlue,
+                elevation: 2.0,
+                drawDraft: _drawDraft,
+                child: Container(
+                    height: _height,
+//                    padding: EdgeInsets.all(10),
+//                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
+                    )),
+          ),
           LimitedBox(
             maxHeight: 200,
             child: Container(
 //                width: double.infinity,
-//                height: 120.0,
+//                height: 400.0,
               color: Colors.yellow.withAlpha(64),
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(20),
               child: Builder(
                 builder: (BuildContext context) {
                   return _zoomLevel == 0
                       ? CustomPaint(
-                          painter: painter, child: Container(padding: padding, child: Container(height: _height)))
+                          painter: painter,
+                          child: Container(
+                              height: _height +
+                                  (_nipOffset.absolute < 0
+                                      ? -_nipOffset.absolute
+                                      : 0 +
+                                          (_nipOffset.absolute + 2 * _nipRadius > _height
+                                              ? _nipOffset.absolute + 2 * _nipRadius - _height
+                                              : 0))))
                       : ZoomCustomPaint(
                           painter: painter,
                           padding: padding,
@@ -710,19 +751,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            Text('height', textAlign: TextAlign.right),
+                            Text('scale', textAlign: TextAlign.right),
                             Slider(
-                              value: _height,
-                              min: 10.0,
-                              max: 200.0,
-                              divisions: 19,
+                              value: _scale,// scaleLevel(_scale),
+                              min: 1.0,
+                              max: 4.0,
+                              divisions: 30,
                               onChanged: (double value) {
                                 setState(() {
-                                  _height = value;
+                                  _scale = value;//scaleFromLevel(value);
                                 });
                               },
                             ),
-                            Text('${_height.toStringAsFixed(0)}'),
+                            Text('${_scale.toStringAsFixed(1)}x'),
                           ],
                         ),
                         Row(
@@ -743,21 +784,43 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             Text('${pow(2, _zoomLevel).toStringAsFixed(0)}x'),
                           ],
                         ),
+                        Divider(),
+                        Text(
+                          'Box',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         Row(
                           children: <Widget>[
-                            Text('boxRadius', textAlign: TextAlign.right),
+                            Text('height', textAlign: TextAlign.right),
                             Slider(
-                              value: _boxRadius,
+                              value: _height,
+                              min: 10.0,
+                              max: 200.0,
+                              divisions: 190,
+                              onChanged: (double value) {
+                                setState(() {
+                                  _height = value;
+                                });
+                              },
+                            ),
+                            Text('${_height.toStringAsFixed(0)}'),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text('corner\'s radius', textAlign: TextAlign.right),
+                            Slider(
+                              value: _radius,
                               min: 0.0,
                               max: 40.0,
                               divisions: 40,
                               onChanged: (double value) {
                                 setState(() {
-                                  _boxRadius = value;
+                                  _radius = value;
                                 });
                               },
                             ),
-                            Text('${_boxRadius.toStringAsFixed(1)}'),
+                            Text('${_radius.toStringAsFixed(1)}'),
                           ],
                         ),
                         Divider(),
@@ -767,7 +830,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         Row(
                           children: <Widget>[
-                            Text('nipRadius', textAlign: TextAlign.right),
+                            Text('side', textAlign: TextAlign.right),
+                            Slider(
+                              value: _nipSide.index.toDouble(),
+                              min: NipSide.left.index.toDouble(),
+                              max: NipSide.bottom.index.toDouble(),
+                              divisions: 3,
+                              onChanged: (double value) {
+                                setState(() {
+                                  _nipSide = NipSide.values[value.floor()];
+                                });
+                              },
+                            ),
+                            Text(_nipSide.toString().replaceFirst(RegExp(r'NipSide\.'), '')),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text('radius', textAlign: TextAlign.right),
                             Slider(
                               value: _nipRadius,
                               min: 0.0,
@@ -784,36 +864,53 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         Row(
                           children: <Widget>[
-                            Text('nipWidth', textAlign: TextAlign.right),
+                            Text('size', textAlign: TextAlign.right),
                             Slider(
-                              value: _nipWidth,
+                              value: _nipSize,
                               min: 0.0,
                               max: 40.0,
                               divisions: 40,
                               onChanged: (double value) {
                                 setState(() {
-                                  _nipWidth = value;
+                                  _nipSize = value;
                                 });
                               },
                             ),
-                            Text('${_nipWidth.toStringAsFixed(1)}'),
+                            Text('${_nipSize.toStringAsFixed(1)}'),
                           ],
                         ),
                         Row(
                           children: <Widget>[
-                            Text('nipYOffset', textAlign: TextAlign.right),
+                            Text('offset.rel', textAlign: TextAlign.right),
                             Slider(
-                              value: _nipYOffset,
+                              value: _nipOffset.relative,
+                              min: 0.0,
+                              max: 1.0,
+                              divisions: 10,
+                              onChanged: (double value) {
+                                setState(() {
+                                  _nipOffset = NipOffset(relative: value, absolute: _nipOffset.absolute);
+                                });
+                              },
+                            ),
+                            Text('${_nipOffset.relative.toStringAsFixed(1)}'),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text('offset.abs', textAlign: TextAlign.right),
+                            Slider(
+                              value: _nipOffset.absolute,
                               min: -40.0,
                               max: 120.0,
                               divisions: 160,
                               onChanged: (double value) {
                                 setState(() {
-                                  _nipYOffset = value;
+                                  _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
                                 });
                               },
                             ),
-                            Text('${_nipYOffset.toStringAsFixed(1)}'),
+                            Text('${_nipOffset.absolute.toStringAsFixed(1)}'),
                           ],
                         ),
                         Divider(),
@@ -857,4 +954,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+double scaleLevel(int scale) {
+  int s = scale;
+  int l = -1;
+  while (s != 0) {
+    l++;
+    s >>= 1;
+  }
+  return l.toDouble();
+}
+
+int scaleFromLevel(double level) {
+  return (1 << level.round());
 }

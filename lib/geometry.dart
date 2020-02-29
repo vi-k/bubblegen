@@ -25,11 +25,11 @@ class Point extends Offset {
 
 /// Линия
 class Line {
-  final Point start;
-  final double direct;
-
   const Line(this.start, this.direct);
   //Line.toPoint(this.start, Offset end) : direct = atan2(1,2);
+
+  final Point start;
+  final double direct;
 
   String toString() {
     return "Line($start, ${direct * 180 / math.pi})";
@@ -176,9 +176,6 @@ class LineSegment {
     return _direct;
   }
 
-//  bool get isNull => _start == null;
-//  bool get isNotNull => _start != null;
-
   String toString() {
     return "LineSegment($_start, $_end)";
   }
@@ -186,10 +183,10 @@ class LineSegment {
 
 /// Окружность
 class Circle {
+  const Circle(this.center, this.radius);
+
   final Point center;
   final double radius;
-
-  const Circle(this.center, this.radius);
 
   double get diameter => 2 * radius;
 

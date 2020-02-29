@@ -2,242 +2,8 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import 'bubble.dart';
 import 'geometry.dart';
-
-enum NipLineType {
-  line,
-  lineTo,
-  relativeLineTo,
-  lineToCorner,
-  arc,
-  arcTo,
-  relativeArcTo,
-  arcToCorner,
-  curve,
-  curveTo,
-  relativeCurveTo,
-  curveToCorner
-}
-
-class NipLine {
-  final NipLineType type;
-  final double pos;
-  final double h; // arc's radius
-  final double a1; // curve's α₁
-  final double a2; // curve's α₂
-  final double sz1; // curve's sz₁
-  final double sz2; // curve's sz₂
-
-  const NipLine._internal(
-    this.type,
-    this.pos, {
-    this.h = 0.0,
-    this.a1,
-    this.a2,
-    this.sz1,
-    this.sz2,
-  }) : assert(pos != null);
-
-  const NipLine.line(double lineAngle) : this._internal(NipLineType.line, lineAngle);
-  const NipLine.lineTo(double pos) : this._internal(NipLineType.lineTo, pos);
-  const NipLine.relativeLineTo(double offset) : this._internal(NipLineType.relativeLineTo, offset);
-  const NipLine.lineToCorner(double cornerAngle) : this._internal(NipLineType.lineToCorner, cornerAngle);
-
-  const NipLine.arc(double lineAngle, double arcAngle) : this._internal(NipLineType.arc, lineAngle, a1: arcAngle);
-  const NipLine.arcTo(double pos, double arcAngle) : this._internal(NipLineType.arcTo, pos, a1: arcAngle);
-  const NipLine.relativeArcTo(double offset, double arcAngle)
-      : this._internal(NipLineType.relativeArcTo, offset, a1: arcAngle);
-  const NipLine.arcToCorner(double cornerAngle, double arcAngle)
-      : this._internal(NipLineType.arcToCorner, cornerAngle, a1: arcAngle);
-
-  const NipLine.curve(double lineAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.curve,
-          lineAngle,
-          a1: angle1,
-          a2: angle2,
-          sz1: size1,
-          sz2: size2,
-        );
-
-  const NipLine.curveTo(double pos, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.curveTo,
-          pos,
-          a1: angle1,
-          a2: angle2,
-          sz1: size1,
-          sz2: size2,
-        );
-
-  const NipLine.relativeCurveTo(double pos, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.relativeCurveTo,
-          pos,
-          a1: angle1,
-          a2: angle2,
-          sz1: size1,
-          sz2: size2,
-        );
-
-  const NipLine.curveToCorner(double cornerAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.curveToCorner,
-          cornerAngle,
-          a1: angle1,
-          a2: angle2,
-          sz1: size1,
-          sz2: size2,
-        );
-}
-
-enum DraftType { Draft, Main, Error }
-
-class DraftLine {
-  DraftLine(this.line, this.type);
-  final DraftType type;
-  final Line line;
-}
-
-class DraftLineSegment {
-  DraftLineSegment(this.lineSegment, this.type);
-  final DraftType type;
-  final LineSegment lineSegment;
-}
-
-class DraftPoint {
-  DraftPoint(this.point, this.type);
-  final DraftType type;
-  final Point point;
-}
-
-class DraftInfo {
-  DraftInfo();
-
-  bool showNip = true;
-  bool showTopSide = false;
-  bool showLeftSide = false;
-  bool showBottomSide = false;
-  bool showTopCorner = false;
-  bool showBottomCorner = false;
-
-  static final Color draftColor = Colors.black26;
-  static final Color mainColor = Colors.black;
-  static final Color errorColor = Colors.red;
-
-  List<DraftLine> _lines = [];
-  List<DraftLineSegment> _lineSegments = [];
-  List<DraftPoint> _points = [];
-
-  get lines => _lines;
-  get lineSegments => _lineSegments;
-  get points => _points;
-
-  void addLine(Point start, double direct, [DraftType type = DraftType.Draft]) =>
-      lines.add(DraftLine(Line(start, direct), type));
-  void addLineCopy(Line line, [DraftType type = DraftType.Draft]) =>
-      lines.add(DraftLine(Line(line.start, line.direct), type));
-
-  void addLineSegment(Point start, Point end, [DraftType type = DraftType.Draft]) =>
-      lineSegments.add(DraftLineSegment(LineSegment(start, end), type));
-  void addLineSegmentCopy(LineSegment lineSegment, [DraftType type = DraftType.Draft]) =>
-      lineSegments.add(DraftLineSegment(LineSegment(lineSegment.start, lineSegment.end), type));
-
-  void addPoint(Point point, [DraftType type = DraftType.Draft]) => points.add(DraftPoint(point, type));
-
-  void paint(Canvas draftCanvas, Circle nipCircle, Rect box, Circle ltCircle, Circle lbCircle, Circle rtCircle,
-      Circle rbCircle) {
-    var draftPath = Path();
-
-    var paint = Paint();
-    paint.strokeWidth = 1;
-
-    paint.style = PaintingStyle.fill;
-    paint.color = draftColor;
-
-    // Малый круг
-    if (showNip) {
-      draftCanvas.drawCircle(nipCircle.center, nipCircle.radius, paint);
-    }
-
-    // Верхняя сторона
-    if (showTopSide) {
-      draftPath.reset();
-      draftPath.moveTo(ltCircle.center.x, box.top);
-      draftPath.lineTo(rtCircle.center.x, box.top);
-      draftPath.lineTo(rtCircle.center.x, box.top + 4);
-      draftPath.lineTo(ltCircle.center.x, box.top + 4);
-      draftPath.close();
-
-      draftCanvas.drawPath(draftPath, paint);
-    }
-
-    // Левая сторона
-    if (showLeftSide) {
-      draftPath.reset();
-      draftPath.moveTo(box.left, ltCircle.center.y);
-      draftPath.lineTo(box.left + 4, ltCircle.center.y);
-      draftPath.lineTo(box.left + 4, lbCircle.center.y);
-      draftPath.lineTo(box.left, lbCircle.center.y);
-      draftPath.close();
-
-      draftCanvas.drawPath(draftPath, paint);
-    }
-
-    // Нижняя сторона
-    if (showBottomSide) {
-      draftPath.reset();
-      draftPath.moveTo(lbCircle.center.x, box.bottom);
-      draftPath.lineTo(rbCircle.center.x, box.bottom);
-      draftPath.lineTo(rbCircle.center.x, box.bottom - 4);
-      draftPath.lineTo(lbCircle.center.x, box.bottom - 4);
-      draftPath.close();
-
-      draftCanvas.drawPath(draftPath, paint);
-    }
-
-    // Верхний угол
-    if (showTopCorner) {
-      draftCanvas.drawArc(Rect.fromCenter(center: ltCircle.center, width: ltCircle.diameter, height: ltCircle.diameter),
-          -math.pi / 2, -math.pi / 2, true, paint);
-    }
-
-    // Нижний угол
-    if (showBottomCorner) {
-      draftCanvas.drawArc(Rect.fromCenter(center: lbCircle.center, width: lbCircle.diameter, height: lbCircle.diameter),
-          math.pi / 2, math.pi / 2, true, paint);
-    }
-
-    DraftType.values.forEach((type) {
-      paint.color = type == DraftType.Error ? errorColor : type == DraftType.Main ? mainColor : draftColor;
-
-      paint.style = PaintingStyle.stroke;
-
-      // Линии
-      lines.forEach((item) {
-        if (item.type == type) {
-          draftCanvas.drawLine(item.line.start, item.line.point(1000.0), paint);
-        }
-      });
-
-      // Отрезки
-      lineSegments.forEach((item) {
-        if (item.type == type) {
-          draftCanvas.drawLine(item.lineSegment.start, item.lineSegment.end, paint);
-        }
-      });
-
-      paint.style = PaintingStyle.fill;
-
-      // Точки
-      points.forEach((item) {
-        if (item.type == type) {
-          draftCanvas.drawCircle(item.point, 2, paint);
-        }
-      });
-    });
-  }
-}
 
 class MyPainter extends CustomPainter {
   MyPainter({
@@ -248,6 +14,7 @@ class MyPainter extends CustomPainter {
     this.nipWidth,
     this.nipRadius,
     this.nipYOffset,
+    this.height,
     this.drawDraft,
   }) : super();
 
@@ -258,6 +25,7 @@ class MyPainter extends CustomPainter {
   final double nipWidth;
   final double nipRadius;
   final double nipYOffset;
+  final double height;
   final bool drawDraft;
 
   /// Прямая линия под углом
@@ -325,12 +93,7 @@ class MyPainter extends CustomPainter {
         if (chord != null) {
           out.end = chord.start;
 
-          if (draft != null) {
-            var normal = line.normal(ltCircle.center);
-            draft.addLineSegment(ltCircle.center, normal.end);
-            draft.addLineSegment(chord.start, normal.end);
-            draft.addPoint(normal.end);
-          }
+          draft?.addPoint(chord.end);
         }
         //
         // Линия выходит за верхний круг
@@ -384,12 +147,7 @@ class MyPainter extends CustomPainter {
         if (chord != null) {
           out.end = chord.start;
 
-          if (draft != null) {
-            var normal = line.normal(lbCircle.center);
-            draft.addLineSegment(lbCircle.center, normal.end);
-            draft.addLineSegment(chord.start, normal.end);
-            draft.addPoint(normal.end);
-          }
+          draft?.addPoint(chord.end);
         }
         //
         // Линия выходит за нижний круг
@@ -491,7 +249,10 @@ class MyPainter extends CustomPainter {
         ok = false;
         out.start = tangent.start;
         out.end = tangent.end;
-        draft?.showTopCorner = true;
+        if (draft != null) {
+          draft.showTopCorner = true;
+          draft.addLineSegment(ltCircle.center, tangent.end);
+        }
       }
     } else if (out.end.y > lbCircle.center.y && nipCircle.center.y + nipCircle.radius <= box.bottom) {
       var tangent = nipCircle.tangentToCircle(lbCircle, inverse ? 1.0 : -1.0, 1.0);
@@ -500,10 +261,14 @@ class MyPainter extends CustomPainter {
         ok = false;
         out.start = tangent.start;
         out.end = tangent.end;
-        draft?.showBottomCorner = true;
+        if (draft != null) {
+          draft.showBottomCorner = true;
+          draft.addLineSegment(lbCircle.center, tangent.end);
+        }
       }
     } else if (draft != null) {
-      if (out.end.y == box.top) draft.showTopSide = true;
+      if (out.end.y == box.top)
+        draft.showTopSide = true;
       else if (out.end.y == box.bottom) draft.showBottomSide = true;
     }
 
@@ -516,20 +281,38 @@ class MyPainter extends CustomPainter {
   }
 
   /// Прямая линия к углам бокса
-  bool lineToCorner(LineSegment out, double angle, bool inverse, Path path, Circle nipCircle, Rect box,
-      Circle ltCircle, Circle lbCircle, Circle rtCircle, Circle rbCircle,
+  bool lineToCorner(LineSegment out, double angle, bool inverse, Path path, Circle nipCircle, Rect box, Circle ltCircle,
+      Circle lbCircle, Circle rtCircle, Circle rbCircle,
       [DraftInfo draft]) {
     bool ok = true;
+    Point draftEnd;
 
     // Отрицательные значения - верхний круг, положительные - нижний
-    out.end = angle <= 0 ? ltCircle.point(angle) : lbCircle.point(angle);
-
-    var tangent = nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
-    out.start = tangent.start;
+    draftEnd = out.end = angle <= 0 ? ltCircle.point(angle) : lbCircle.point(angle);
 
     if (draft != null) {
-      draft.addPoint(out.end);
-      draft.addLineSegmentCopy(out);
+      draft.addPoint(draftEnd);
+      var tangent = nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
+      draft.addLineSegmentCopy(tangent);
+    }
+
+    // Проверям выход за границы четвертей
+    if (angle <= 0) {
+      if (angle > -math.pi / 2) {
+        ok = false;
+        out.end = Point(ltCircle.center.x, box.top);
+      } else if (angle < -math.pi) {
+        ok = false;
+        out.end = Point(box.left, ltCircle.center.y);
+      }
+    } else if (angle >= 0) {
+      if (angle < math.pi / 2) {
+        ok = false;
+        out.end = Point(lbCircle.center.x, box.bottom);
+      } else if (angle > math.pi) {
+        ok = false;
+        out.end = Point(box.left, lbCircle.center.y);
+      }
     }
 
     if (angle <= 0) {
@@ -538,7 +321,10 @@ class MyPainter extends CustomPainter {
         ok = false;
         out.start = tangent.start;
         out.end = tangent.end;
-        draft?.showTopCorner = true;
+        if (draft != null) {
+          draft.showTopCorner = true;
+          draft.addLineSegment(ltCircle.center, tangent.end);
+        }
       }
     } else if (angle >= 0) {
       var tangent = nipCircle.tangentToCircle(lbCircle, inverse ? 1.0 : -1.0, 1.0);
@@ -546,17 +332,31 @@ class MyPainter extends CustomPainter {
         ok = false;
         out.start = tangent.start;
         out.end = tangent.end;
-        draft?.showBottomCorner = true;
+        if (draft != null) {
+          draft.showBottomCorner = true;
+          draft.addLineSegment(lbCircle.center, tangent.end);
+        }
       }
     }
 
+    if (ok) {
+      var tangent = nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
+      out.start = tangent.start;
+    }
+
     if (draft != null) {
+      var tangent = nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
+      out.start = tangent.start;
+
+      draft.addPoint(draftEnd);
+      draft.addLineSegment(out.start, draftEnd);
+
       if (angle <= 0) {
         draft.showTopCorner = true;
-        draft.addLineSegment(ltCircle.center, out.end);
+        draft.addLineSegment(ltCircle.center, draftEnd);
       } else {
         draft.showBottomCorner = true;
-        draft.addLineSegment(lbCircle.center, out.end);
+        draft.addLineSegment(lbCircle.center, draftEnd);
       }
     }
 
@@ -569,11 +369,12 @@ class MyPainter extends CustomPainter {
     bool ok = true;
     var result = LineSegment(null, null);
 
-    print(nipLine.type);
+//    print(nipLine.type);
 
     switch (nipLine.type) {
       case NipLineType.line:
-        ok = line(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle, draft);
+        ok = line(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
+            rbCircle, draft);
         break;
 
       case NipLineType.lineTo:
@@ -581,13 +382,13 @@ class MyPainter extends CustomPainter {
         break;
 
       case NipLineType.relativeLineTo:
-        ok = lineTo(
-            result, nipYOffset + nipLine.pos, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle, draft);
+        ok = lineTo(result, nipYOffset + nipLine.pos, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
+            rbCircle, draft);
         break;
 
       case NipLineType.lineToCorner:
-        ok =
-            lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle, draft);
+        ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle,
+            rtCircle, rbCircle, draft);
         break;
 
       case NipLineType.arc:
@@ -639,7 +440,7 @@ class MyPainter extends CustomPainter {
       path.lineTo(result.end.x, result.end.y);
       path.lineTo(result.start.x, result.start.y);
     } else {
-      print('result: $result');
+//      print('result: $result');
       path.moveTo(result.start.x, result.start.y);
       path.lineTo(result.end.x, result.end.y);
     }
@@ -649,48 +450,60 @@ class MyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final offsetY = nipYOffset < 0 ? nipYOffset : 0.0;
-
-    size = Size(size.width / 4, size.height);
-    final maxRadius = math.min(size.width - nipWidth, size.height) / 2;
-    final boxCircle1R = boxRadius > maxRadius ? maxRadius : boxRadius;
-
     var paint = Paint();
     var path = Path();
 
-//    canvas.clipRect(Rect.fromLTRB(0, 0, size.width, size.height));
-    canvas.translate(0, -offsetY);
+    var topOffset = -nipYOffset;
+    if (topOffset < 0) topOffset = 0.0;
+
+    var bottomOffset = topOffset + nipYOffset + 2 * nipRadius - height;
+    if (bottomOffset < 0) bottomOffset = 0;
+
+    var pi = BubblePaintInfo();
+    pi.rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    pi.box = Rect.fromLTRB(nipWidth, topOffset, size.width / 3, size.height - bottomOffset);
+
+    final maxRadius = math.min(size.width - nipWidth, size.height) / 2;
+    final r = boxRadius > maxRadius ? maxRadius : boxRadius;
 
     paint.color = Colors.lightGreen;
+//    canvas.translate(size.width, 0);
+//    canvas.scale(-1, 1);
+//    canvas.translate(0, size.height);
+//    canvas.scale(1, -1);
+//    canvas.drawRRect(RRect.fromRectAndRadius(box, Radius.circular(r)), paint);
     canvas.drawRRect(
-        RRect.fromLTRBR(this.zoom * this.nipWidth, 0, this.zoom * size.width, this.zoom * size.height + offsetY,
-            Radius.circular(this.zoom * boxCircle1R)),
+        RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
+            topLeft: Radius.circular(r),
+            topRight: Radius.circular(r),
+            bottomLeft: Radius.circular(r),
+            bottomRight: Radius.circular(r)),
         paint);
 
-    final box = Rect.fromLTRB(nipWidth, 0, size.width, size.height + offsetY);
-    final nipCircle = Circle(Point(nipRadius, nipYOffset + nipRadius), nipRadius);
+    pi.nipCircle = Circle(Point(nipRadius, topOffset + nipYOffset + nipRadius), nipRadius);
+    pi.ltCircle = Circle(Point(pi.box.left + r, pi.box.top + r), r);
+    pi.lbCircle = Circle(Point(pi.box.left + r, pi.box.bottom - r), r);
+    pi.rtCircle = Circle(Point(pi.box.right - r, pi.box.top + r), r);
+    pi.rbCircle = Circle(Point(pi.box.right - r, pi.box.bottom - r), r);
 
-    var r = boxCircle1R;
-    final ltCircle = Circle(Point(box.left + r, r), r);
-    final lbCircle = Circle(Point(box.left + r, box.bottom - r), r);
-    final rtCircle = Circle(Point(box.right - r, r), r);
-    final rbCircle = Circle(Point(box.right - r, box.bottom - r), r);
+    pi.draft = this.drawDraft ? DraftInfo() : null;
 
-    DraftInfo draft = this.drawDraft ? DraftInfo() : null;
-
-    draft?.addPoint(ltCircle.center);
-    draft?.addPoint(lbCircle.center);
-    draft?.addPoint(rtCircle.center);
-    draft?.addPoint(rbCircle.center);
+    if (pi.draft != null) {
+      pi.draft.addPoint(pi.ltCircle.center);
+      pi.draft.addPoint(pi.lbCircle.center);
+      pi.draft.addPoint(pi.rtCircle.center);
+      pi.draft.addPoint(pi.rbCircle.center);
+    }
 
     path.reset();
-    addLine(topLine, false, path, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle, draft);
-    addLine(bottomLine, true, path, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle, draft);
+    addLine(topLine, false, path, pi.nipCircle, pi.box, pi.ltCircle, pi.lbCircle, pi.rtCircle, pi.rbCircle, pi.draft);
+    addLine(bottomLine, true, path, pi.nipCircle, pi.box, pi.ltCircle, pi.lbCircle, pi.rtCircle, pi.rbCircle, pi.draft);
     path.close();
-    path.addOval(Rect.fromCenter(center: nipCircle.center, width: nipCircle.diameter, height: nipCircle.diameter));
+    path.addOval(Rect.fromCenter(center: pi.nipCircle.center, width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
 
     canvas.drawPath(path, paint);
-    if (draft != null) draft.paint(canvas, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle);
+    if (pi.draft != null) pi.draft.paint(canvas, pi);
   }
 
   @override
