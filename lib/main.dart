@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:bubble_demo/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
 
@@ -601,7 +602,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
-  var _scale = 3.0;
+  var _scale = 4.0;
   var _zoomLevel = 0.0;
   var _drawDraft = true;
 
@@ -683,6 +684,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //        right: 10,
 //        bottom: 10.0 + (_nipOffset.absolute + 2 * _nipRadius > _height ? _nipOffset.absolute + 2 * _nipRadius - _height : 0));
 
+    var m = MediaQuery.of(context).size;
+    print(m);
     return Scaffold(
       appBar: AppBar(
         title: Text('Bubble demo'),
@@ -690,29 +693,58 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       body: Column(
         children: <Widget>[
           PhysicalModel(
-            color: Colors.yellow.shade100,
+            color: Colors.grey.shade300,
             elevation: 2.0,
-            child: Container(
-              padding: EdgeInsets.all(20),
-              child: Bubble(
-                  scale: _scale,
-                  radius: BubbleRadius(
-                      topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                  nipSide: _nipSide,
-                  nipRadius: _nipRadius,
-                  nipSize: _nipSize,
-                  nipOffset: _nipOffset,
-                  topLine: _topLine,
-                  bottomLine: _bottomLine,
-                  color: Colors.lightBlue,
-                  elevation: 1.0,
-                  drawDraft: _drawDraft,
-                  child: Container(
-                      height: _height,
+            child: LimitedBox(
+              maxHeight: MediaQuery.of(context).size.height / 2,
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    children: <Widget>[
+                      Bubble(
+                          radius: BubbleRadius(
+                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                          nipSide: _nipSide,
+                          nipRadius: _nipRadius,
+                          nipSize: _nipSize,
+                          nipOffset: _nipOffset,
+                          topLine: _topLine,
+                          bottomLine: _bottomLine,
+                          color: Colors.lightBlue,
+                          elevation: 1.0,
+//                      drawDraft: _drawDraft,
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            padding: EdgeInsets.all(10),
+                            child: Text('Lorem ipsum dolor sit amet'),
+                          )),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Bubble(
+                          scale: _scale,
+                          radius: BubbleRadius(
+                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                          nipSide: _nipSide,
+                          nipRadius: _nipRadius,
+                          nipSize: _nipSize,
+                          nipOffset: _nipOffset,
+                          topLine: _topLine,
+                          bottomLine: _bottomLine,
+                          color: Colors.lightBlue,
+                          elevation: 1.0,
+                          drawDraft: _drawDraft,
+                          child: Container(
+                              height: _height,
 //                    padding: EdgeInsets.all(10),
 //                    child: Text('a a a a a'),
 //                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
-                      )),
+                              )),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
 //          LimitedBox(
