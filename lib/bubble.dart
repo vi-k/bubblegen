@@ -209,10 +209,6 @@ class DraftInfo {
 
     var path = Path();
 
-    //
-    // Границы области
-    //
-
     // Левая граница
     path.moveTo(pi.rect.left, pi.rect.top - limitSize);
     path.lineTo(pi.rect.left, pi.rect.bottom + limitSize);
@@ -229,40 +225,17 @@ class DraftInfo {
     path.moveTo(pi.rect.left - limitSize, pi.rect.bottom);
     path.lineTo(pi.rect.right + limitSize, pi.rect.bottom);
 
-//    path.moveTo(pi.rect.topLeft.dx - limitSize, pi.rect.topLeft.dy);
-//    path.lineTo(pi.rect.topLeft.dx, pi.rect.topLeft.dy);
-//    path.lineTo(pi.rect.topLeft.dx, pi.rect.topLeft.dy - limitSize);
-
-//    path.moveTo(pi.rect.topRight.dx + limitSize, pi.rect.topRight.dy);
-//    path.lineTo(pi.rect.topRight.dx, pi.rect.topRight.dy);
-//    path.lineTo(pi.rect.topRight.dx, pi.rect.topRight.dy - limitSize);
-
-//    path.moveTo(pi.rect.bottomLeft.dx - limitSize, pi.rect.bottomLeft.dy);
-//    path.lineTo(pi.rect.bottomLeft.dx, pi.rect.bottomLeft.dy);
-//    path.lineTo(pi.rect.bottomLeft.dx, pi.rect.bottomLeft.dy + limitSize);
-
-//    path.moveTo(pi.rect.bottomRight.dx + limitSize, pi.rect.bottomRight.dy);
-//    path.lineTo(pi.rect.bottomRight.dx, pi.rect.bottomRight.dy);
-//    path.lineTo(pi.rect.bottomRight.dx, pi.rect.bottomRight.dy + limitSize);
-
     // Границы бокса
     path.moveTo(pi.box.left, pi.box.top - limitSize);
     path.lineTo(pi.box.left, pi.box.bottom + limitSize);
-//    path.moveTo(pi.box.topLeft.dx - limitSize, pi.box.topLeft.dy);
-//    path.lineTo(pi.box.topLeft.dx, pi.box.topLeft.dy);
-//    path.lineTo(pi.box.topLeft.dx, pi.box.topLeft.dy - limitSize);
-//
-//    path.moveTo(pi.box.bottomLeft.dx - limitSize, pi.box.bottomLeft.dy);
-//    path.lineTo(pi.box.bottomLeft.dx, pi.box.bottomLeft.dy);
-//    path.lineTo(pi.box.bottomLeft.dx, pi.box.bottomLeft.dy + limitSize);
 
     canvas.drawPath(path, paint);
   }
 
   void paint(Canvas canvas, BubblePaintInfo pi) {
-    final dp = 1.0 / pi.scale;
-    final sideSize = 4.0 * dp;
-    final pointSize = 2.0 * dp;
+    final dp = 1 / pi.scale;
+    final sideSize = 4 * dp;
+    final pointSize = 1.5 * dp;
 
     var path = Path();
     var paint = Paint();
@@ -313,23 +286,55 @@ class DraftInfo {
 
     // Верхний угол
     if (showTopCorner) {
+      paint.style = PaintingStyle.fill;
       canvas.drawArc(
           Rect.fromCenter(center: pi.ltCircle.center, width: pi.ltCircle.diameter, height: pi.ltCircle.diameter),
           -math.pi / 2,
           -math.pi / 2,
           true,
           paint);
+    } else {
+      path.reset();
+      path.moveTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy - pi.ltCircle.radius);
+      path.lineTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy);
+      path.lineTo(pi.ltCircle.center.dx - pi.ltCircle.radius, pi.ltCircle.center.dy);
+      paint.style = PaintingStyle.stroke;
+      canvas.drawPath(path, paint);
     }
 
     // Нижний угол
     if (showBottomCorner) {
+      paint.style = PaintingStyle.fill;
       canvas.drawArc(
           Rect.fromCenter(center: pi.lbCircle.center, width: pi.lbCircle.diameter, height: pi.lbCircle.diameter),
           math.pi / 2,
           math.pi / 2,
           true,
           paint);
+    } else {
+      path.reset();
+      path.moveTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy + pi.lbCircle.radius);
+      path.lineTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy);
+      path.lineTo(pi.lbCircle.center.dx - pi.lbCircle.radius, pi.lbCircle.center.dy);
+      paint.style = PaintingStyle.stroke;
+      canvas.drawPath(path, paint);
     }
+
+    // Правый верхний угол
+    path.reset();
+    path.moveTo(pi.rtCircle.center.dx, pi.rtCircle.center.dy - pi.rtCircle.radius);
+    path.lineTo(pi.rtCircle.center.dx, pi.rtCircle.center.dy);
+    path.lineTo(pi.rtCircle.center.dx + pi.rtCircle.radius, pi.rtCircle.center.dy);
+    paint.style = PaintingStyle.stroke;
+    canvas.drawPath(path, paint);
+
+    // Правый нижний угол
+    path.reset();
+    path.moveTo(pi.rbCircle.center.dx, pi.rbCircle.center.dy + pi.rbCircle.radius);
+    path.lineTo(pi.rbCircle.center.dx, pi.rbCircle.center.dy);
+    path.lineTo(pi.rbCircle.center.dx + pi.rbCircle.radius, pi.rbCircle.center.dy);
+    paint.style = PaintingStyle.stroke;
+    canvas.drawPath(path, paint);
 
     DraftType.values.forEach((type) {
       paint.color = type == DraftType.Error ? errorColor : type == DraftType.Main ? mainColor : draftColor;
@@ -386,7 +391,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
     elevation,
     shadowColor,
     scale,
-    this.drawDraft = false,
+    drawDraft,
   })  : radius = radius ?? BubbleRadius.all(0.0),
         nipSide = nipSide ?? NipSide.left,
         nipRadius = nipRadius ?? 0.0,
@@ -395,7 +400,8 @@ class CustomBubble extends SingleChildRenderObjectWidget {
         color = color ?? Colors.red,
         elevation = elevation ?? 1.0,
         scale = scale ?? 1.0,
-        shadowColor = shadowColor ?? Colors.black;
+        shadowColor = shadowColor ?? Colors.black,
+        drawDraft = drawDraft ?? false;
 
   final Widget child;
   final BubbleRadius radius;
@@ -473,13 +479,13 @@ class RenderBubble extends RenderProxyBox {
       }
 
       childConstraints = childConstraints / bubble.scale;
-      print('constraints: $constraints');
-      print('childConstraints: $childConstraints');
+//      print('constraints: $constraints');
+//      print('childConstraints: $childConstraints');
 
       child.layout(childConstraints, parentUsesSize: true);
       size = Size(child.size.width + changes.dx, child.size.height + changes.dy) * bubble.scale;
-      print('child.size: ${child.size}');
-      print('size: $size');
+//      print('child.size: ${child.size}');
+//      print('size: $size');
     } else {
       performResize();
     }
@@ -504,9 +510,9 @@ class RenderBubble extends RenderProxyBox {
       if (bubble.nipSide == NipSide.top) childOffset = offset.translate(0, bubble.nipSize * bubble.scale);
     }
 
-    print('offset: $offset');
-    print('pi.rect: ${pi.rect}');
-    print('pi.box: ${pi.box}');
+//    print('offset: $offset');
+//    print('pi.rect: ${pi.rect}');
+//    print('pi.box: ${pi.box}');
 
     //
     // Если радиусы больше сторон бокса, рассчитываем коэффициент, чтобы равномерно уменьшить все радиусы
@@ -547,13 +553,6 @@ class RenderBubble extends RenderProxyBox {
     pi.rbCircle = Circle(Point(pi.box.right - r, pi.box.bottom - r), r);
 
     pi.draft = bubble.drawDraft ? DraftInfo() : null;
-
-    if (pi.draft != null) {
-      pi.draft.addPoint(pi.ltCircle.center);
-      pi.draft.addPoint(pi.lbCircle.center);
-      pi.draft.addPoint(pi.rtCircle.center);
-      pi.draft.addPoint(pi.rbCircle.center);
-    }
 
     var path = Path();
     bubble.createNip(path, pi);
@@ -785,7 +784,11 @@ class Bubble extends CustomBubble {
         if (chord != null) {
           out.end = chord.start;
 
-          pi.draft?.addPoint(chord.end);
+          if (pi.draft != null) {
+            var normal = line.normal(pi.ltCircle.center);
+            pi.draft.addLineSegmentCopy(normal);
+            pi.draft.addPoint(normal.end);
+          }
         }
         //
         // Линия выходит за верхний круг
@@ -839,7 +842,11 @@ class Bubble extends CustomBubble {
         if (chord != null) {
           out.end = chord.start;
 
-          pi.draft?.addPoint(chord.end);
+          if (pi.draft != null) {
+            var normal = line.normal(pi.lbCircle.center);
+            pi.draft.addLineSegmentCopy(normal);
+            pi.draft.addPoint(normal.end);
+          }
         }
         //
         // Линия выходит за нижний круг
