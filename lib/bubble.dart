@@ -981,8 +981,11 @@ class Bubble extends CustomBubble {
 
   /// Прямая линия к углам бокса
   bool lineToCorner(LineSegment out, double angle, bool inverse, Path path, BubblePaintInfo pi) {
+    print('lineToCorner');
     bool ok = true;
     Point draftEnd;
+
+    out.start = null;
 
     // Отрицательные значения - верхний круг, положительные - нижний
     draftEnd = out.end = angle <= 0 ? pi.ltCircle.point(angle) : pi.lbCircle.point(angle);
@@ -1036,7 +1039,7 @@ class Bubble extends CustomBubble {
       }
     }
 
-    if (ok) {
+    if (out.start == null) {
       var tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
       out.start = tangent.start;
     }

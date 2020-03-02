@@ -606,14 +606,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _zoomLevel = 0.0;
   var _drawDraft = true;
 
-//  var _radius = 20.0;
-//  var _nipSide = NipSide.left;
-//  var _nipRadius = 10.0;
-//  var _nipSize = 40.0;
-//  var _nipOffset = NipOffset(absolute: 10.0);
-//  var _topLine = NipLine.line(0);
-//  var _bottomLine = NipLine.line(30);
-
   // Whatsapp
   var _radius = 8.0;
   var _nipSide = NipSide.left;
@@ -622,12 +614,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _nipOffset = NipOffset(absolute: 0.0);
   var _topLine = NipLine.line(0);
   var _bottomLine = NipLine.line(53);
-//  var _startTopAngle = 0.0;
-//  var _finishTopPos = 0.0;
-//  var _finishTopAngle = 180.0;
-//  var _startBottomAngle = -53.0;
-//  var _finishBottomPos = 14.0;
-//  var _finishBottomAngle = 127.0;
 
   // Telegram
 //  var _boxRadius = 12.0;
@@ -642,16 +628,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //  var _finishBottomAngle = 90.0;
 
   // Viber
-//  var _boxRadius = 20.0;
-//  var _nipWidth = 0.0;
-//  var _nipRadius = 1.0;
-//  var _nipYOffset = 0.0;
-//  var _startTopAngle = 0.0;
-//  var _finishTopPos = 0.0;
-//  var _finishTopAngle = 180.0;
-//  var _startBottomAngle = -90.0;
-//  var _finishBottomPos = -90.0;
-//  var _finishBottomAngle = 90.0;
+//  var _radius = 20.0;
+//  var _nipSide = NipSide.left;
+//  var _nipRadius = 0.0;
+//  var _nipSize = 0.0;
+//  var _nipOffset = NipOffset();
+//  var _topLine = NipLine.lineToCorner(-90);
+//  var _bottomLine = NipLine.lineToCorner(-180);
 
   // Sid chat
 //  var _boxRadius = 40.0;
@@ -683,6 +666,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //        top: 10.0 + (_nipOffset.absolute < 0 ? -_nipOffset.absolute : 0),
 //        right: 10,
 //        bottom: 10.0 + (_nipOffset.absolute + 2 * _nipRadius > _height ? _nipOffset.absolute + 2 * _nipRadius - _height : 0));
+
+  print('topLine.pos: ${_topLine.pos}');
+  print('bottomLine.pos: ${_bottomLine.pos}');
 
     var m = MediaQuery.of(context).size;
     print(m);
