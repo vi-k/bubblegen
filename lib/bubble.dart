@@ -657,7 +657,7 @@ class Bubble extends CustomBubble {
         break;
 
       case NipLineType.relativeLineTo:
-        ok = lineTo(result, pi.nipCircle.center.y - pi.nipCircle.radius + nipLine.pos, inverse, path, pi);
+        ok = lineTo(result, pi.nipCircle.center.y + (inverse ? pi.nipCircle.radius : -pi.nipCircle.radius) + nipLine.pos, inverse, path, pi);
         break;
 
       case NipLineType.lineToCorner:
@@ -872,7 +872,6 @@ class Bubble extends CustomBubble {
     bool ok = true;
     Point draftEnd;
 
-    //var pos = relative ? nipYOffset: nipLine.pos;
     //
     // Линия уходит к верхней стороне бокса
     //
@@ -936,7 +935,9 @@ class Bubble extends CustomBubble {
     if (pi.draft != null) {
       var tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
       pi.draft.addPoint(draftEnd);
-      pi.draft.addLineSegment(tangent.start, draftEnd);
+      pi.draft.addLineSegment(pi.nipCircle.center, tangent.start);
+      pi.draft.addPoint(tangent.start);
+      pi.draft.addLineSegmentCopy(tangent);
     }
 
     // Смотрим, не вышла ли линия за касательную
@@ -981,7 +982,6 @@ class Bubble extends CustomBubble {
 
   /// Прямая линия к углам бокса
   bool lineToCorner(LineSegment out, double angle, bool inverse, Path path, BubblePaintInfo pi) {
-    print('lineToCorner');
     bool ok = true;
     Point draftEnd;
 
