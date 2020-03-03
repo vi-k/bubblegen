@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:bubble_demo/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
@@ -121,7 +122,6 @@ class ZoomCustomPaintPainter extends CustomPainter {
   }
 }
 
-//enum LineType { line, arc, curve }
 enum PosType { angle, pos, offset, corner }
 
 class NipLineSelect extends StatefulWidget {
@@ -322,22 +322,62 @@ class _NipLineSelectState extends State<NipLineSelect> {
           widget.caption,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        ToggleButtons(
-          isSelected: List.generate(3, (_) => false)..[_lineTypeIndex] = true,
+//        ToggleButtons(
+//          isSelected: List.generate(3, (_) => false)..[_lineTypeIndex] = true,
+//          children: <Widget>[
+//            Text('line'),
+//            Text('arc'),
+//            Text('curve'),
+//          ],
+//          borderRadius: BorderRadius.circular(100),
+//          borderWidth: 5,
+//          borderColor: Colors.orange,
+//          selectedBorderColor: Colors.deepOrange,
+//          fillColor: Colors.orange.shade200,
+//          onPressed: (index) {
+//            _lineTypeIndex = index;
+//            doChange();
+//          },
+//        ),
+        Column(
           children: <Widget>[
-            Text('line'),
-            Text('arc'),
-            Text('curve'),
+            Table(
+              children: <TableRow>[
+                TableRow(children: [
+                  DropdownButton(
+                    value: getPosType(_type),
+                    items: <DropdownMenuItem<PosType>>[
+                      DropdownMenuItem(child: Text('line(a)'), value: PosType.angle),
+                      DropdownMenuItem(child: Text('lineTo(pos)'), value: PosType.pos),
+                      DropdownMenuItem(child: Text('relativeLineTo(pos)'), value: PosType.offset),
+                      DropdownMenuItem(child: Text('lineToCorner(a)'), value: PosType.corner),
+                    ],
+                    onChanged: (value) {
+                      _type = setType(_lineTypeIndex, value);
+                      doChange();
+                    },
+                  ),
+                  TextFormField(
+                    controller: TextEditingController(),
+                    decoration: new InputDecoration(labelText: "Enter your number"),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[WhitelistingTextInputFormatter.digitsOnly],
+                  ),
+                ])
+              ],
+            ),
+            Slider(
+              value: _lineAngle,
+              min: -90,
+              max: 90,
+              divisions: 180,
+              onChanged: (value) {
+                _lineAngle = value;
+                doChange();
+              },
+            ),
+            Text('${_lineAngle.toStringAsFixed(1)}'),
           ],
-          borderRadius: BorderRadius.circular(100),
-          borderWidth: 5,
-          borderColor: Colors.orange,
-          selectedBorderColor: Colors.deepOrange,
-          fillColor: Colors.orange.shade200,
-          onPressed: (index) {
-            _lineTypeIndex = index;
-            doChange();
-          },
         ),
         Row(
           children: <Widget>[
@@ -437,9 +477,9 @@ class _NipLineSelectState extends State<NipLineSelect> {
             Expanded(
               child: Slider(
                 value: _cornerAngle,
-                min: -270,
-                max: 270,
-                divisions: 560,
+                min: -180,
+                max: 180,
+                divisions: 360,
                 onChanged: getPosType(_type) != PosType.corner
                     ? null
                     : (value) {
@@ -602,6 +642,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
+  var _width = 100.0;
   var _scale = 4.0;
   var _zoomLevel = 0.0;
   var _drawDraft = true;
@@ -650,28 +691,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-//    final painter = MyPainter(
-//      topLine: _topLine,
-//      bottomLine: _bottomLine,
-//      boxRadius: _radius,
-//      nipWidth: _nipSize,
-//      nipRadius: _nipRadius,
-//      nipYOffset: _nipOffset.absolute,
-//      height: _height,
-//      drawDraft: _drawDraft,
-//    );
+//  print('topLine.pos: ${_topLine.pos}');
+//  print('bottomLine.pos: ${_bottomLine.pos}');
 
-//    final padding = EdgeInsets.only(
-//        left: _nipSize + 10,
-//        top: 10.0 + (_nipOffset.absolute < 0 ? -_nipOffset.absolute : 0),
-//        right: 10,
-//        bottom: 10.0 + (_nipOffset.absolute + 2 * _nipRadius > _height ? _nipOffset.absolute + 2 * _nipRadius - _height : 0));
+    var size = MediaQuery.of(context).size;
+    print('screen: $size');
 
-  print('topLine.pos: ${_topLine.pos}');
-  print('bottomLine.pos: ${_bottomLine.pos}');
-
-    var m = MediaQuery.of(context).size;
-    print(m);
     return Scaffold(
       appBar: AppBar(
         title: Text('Bubble demo'),
@@ -681,58 +706,75 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           PhysicalModel(
             color: Colors.grey.shade300,
             elevation: 2.0,
-            child: LimitedBox(
-              maxHeight: MediaQuery.of(context).size.height / 2,
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  child: Column(
-                    children: <Widget>[
-                      Bubble(
-                          radius: BubbleRadius(
-                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                          nipSide: _nipSide,
-                          nipRadius: _nipRadius,
-                          nipSize: _nipSize,
-                          nipOffset: _nipOffset,
-                          topLine: _topLine,
-                          bottomLine: _bottomLine,
-                          color: Colors.lightBlue,
-                          elevation: 1.0,
-//                      drawDraft: _drawDraft,
-                          child: Container(
-                            alignment: Alignment.topLeft,
-                            padding: EdgeInsets.all(10),
-                            child: Text('Lorem ipsum dolor sit amet'),
-                          )),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Bubble(
-                          scale: _scale,
-                          radius: BubbleRadius(
-                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                          nipSide: _nipSide,
-                          nipRadius: _nipRadius,
-                          nipSize: _nipSize,
-                          nipOffset: _nipOffset,
-                          topLine: _topLine,
-                          bottomLine: _bottomLine,
-                          color: Colors.lightBlue,
-                          elevation: 1.0,
-                          drawDraft: _drawDraft,
-                          child: Container(
-                              height: _height,
-//                    padding: EdgeInsets.all(10),
-//                    child: Text('a a a a a'),
-//                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
-                              )),
-                    ],
+            child: Container(
+              padding: EdgeInsets.all(20),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Bubble(
+                  radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                  nipSide: _nipSide,
+                  nipRadius: _nipRadius,
+                  nipSize: _nipSize,
+                  nipOffset: _nipOffset,
+                  topLine: _topLine,
+                  bottomLine: _bottomLine,
+                  color: Colors.lightBlue,
+                  elevation: 1.0,
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    child: Text('Lorem ipsum dolor sit amet'),
                   ),
                 ),
               ),
             ),
           ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.all(40),
+                child: Bubble(
+                    scale: _scale,
+                    radius: BubbleRadius(
+                        topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                    nipSide: _nipSide,
+                    nipRadius: _nipRadius,
+                    nipSize: _nipSize,
+                    nipOffset: _nipOffset,
+                    topLine: _topLine,
+                    bottomLine: _bottomLine,
+                    color: Colors.lightBlue,
+                    elevation: 1.0,
+                    drawDraft: _drawDraft,
+                    child: SizedBox(
+                        height: _height,
+                        width: _width,
+//                          child: Text('a a a a a')
+                    ),
+                ),
+              ),
+            ),
+          ),
+//          Bubble(
+//              scale: _scale,
+//              radius: BubbleRadius(
+//                  topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+//              nipSide: _nipSide,
+//              nipRadius: _nipRadius,
+//              nipSize: _nipSize,
+//              nipOffset: _nipOffset,
+//              topLine: _topLine,
+//              bottomLine: _bottomLine,
+//              color: Colors.lightBlue,
+//              elevation: 1.0,
+//              drawDraft: _drawDraft,
+//              child: Container(
+//                height: _height,
+////                    padding: EdgeInsets.all(10),
+////                    child: Text('a a a a a'),
+////                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
+//              )),
 //          LimitedBox(
 //            maxHeight: 200,
 //            child: Container(
@@ -762,201 +804,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //              ),
 //            ),
 //          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Text('scale', textAlign: TextAlign.right),
-                            Slider(
-                              value: _scale,
-                              min: 1.0,
-                              max: 8.0,
-                              divisions: 7,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _scale = value;
-                                });
-                              },
-                            ),
-                            Text('${_scale.toStringAsFixed(1)}x'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('zoom', textAlign: TextAlign.right),
-                            Slider(
-                              value: _zoomLevel,
-                              //label: '${_zoom.round()}',
-                              min: 0.0,
-                              max: 5.0,
-                              divisions: 5,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _zoomLevel = value;
-                                });
-                              },
-                            ),
-                            Text('${pow(2, _zoomLevel).toStringAsFixed(0)}x'),
-                          ],
-                        ),
-                        Divider(),
-                        Text(
-                          'Box',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('height', textAlign: TextAlign.right),
-                            Slider(
-                              value: _height,
-                              min: 10.0,
-                              max: 200.0,
-                              divisions: 190,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _height = value;
-                                });
-                              },
-                            ),
-                            Text('${_height.toStringAsFixed(0)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('corner\'s radius', textAlign: TextAlign.right),
-                            Slider(
-                              value: _radius,
-                              min: 0.0,
-                              max: 40.0,
-                              divisions: 40,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _radius = value;
-                                });
-                              },
-                            ),
-                            Text('${_radius.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Divider(),
-                        Text(
-                          'Nip',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('side', textAlign: TextAlign.right),
-                            Slider(
-                              value: _nipSide.index.toDouble(),
-                              min: NipSide.left.index.toDouble(),
-                              max: NipSide.bottom.index.toDouble(),
-                              divisions: 3,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _nipSide = NipSide.values[value.floor()];
-                                });
-                              },
-                            ),
-                            Text(_nipSide.toString().replaceFirst(RegExp(r'NipSide\.'), '')),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('radius', textAlign: TextAlign.right),
-                            Slider(
-                              value: _nipRadius,
-                              min: 0.0,
-                              max: 10.0,
-                              divisions: 40,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _nipRadius = value;
-                                });
-                              },
-                            ),
-                            Text('${_nipRadius.toStringAsFixed(2)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('size', textAlign: TextAlign.right),
-                            Slider(
-                              value: _nipSize,
-                              min: 0.0,
-                              max: 40.0,
-                              divisions: 40,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _nipSize = value;
-                                });
-                              },
-                            ),
-                            Text('${_nipSize.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('offset.rel', textAlign: TextAlign.right),
-                            Slider(
-                              value: _nipOffset.relative,
-                              min: 0.0,
-                              max: 1.0,
-                              divisions: 10,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _nipOffset = NipOffset(relative: value, absolute: _nipOffset.absolute);
-                                });
-                              },
-                            ),
-                            Text('${_nipOffset.relative.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('offset.abs', textAlign: TextAlign.right),
-                            Slider(
-                              value: _nipOffset.absolute,
-                              min: -40.0,
-                              max: 120.0,
-                              divisions: 160,
-                              onChanged: (double value) {
-                                setState(() {
-                                  _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
-                                });
-                              },
-                            ),
-                            Text('${_nipOffset.absolute.toStringAsFixed(1)}'),
-                          ],
-                        ),
-                        Divider(),
-                        NipLineSelect(
-                          caption: 'Top line',
-                          nipLine: _topLine,
-                          onChange: (nipLine) => setState(() {
-                            _topLine = nipLine;
-                          }),
-                        ),
-                        Divider(),
-                        NipLineSelect(
-                          caption: 'Bottom line',
-                          nipLine: _bottomLine,
-                          onChange: (nipLine) => setState(() {
-                            _bottomLine = nipLine;
-                          }),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
           PhysicalModel(
             color: Colors.grey.shade300,
             elevation: 2.0,
@@ -978,6 +825,209 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Text('scale', textAlign: TextAlign.right),
+                Slider(
+                  value: _scale,
+                  min: 1.0,
+                  max: 8.0,
+                  divisions: 7,
+                  onChanged: (double value) {
+                    setState(() {
+                      _scale = value;
+                    });
+                  },
+                ),
+                Text('${_scale.toStringAsFixed(1)}x'),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('zoom', textAlign: TextAlign.right),
+                Slider(
+                  value: _zoomLevel,
+                  //label: '${_zoom.round()}',
+                  min: 0.0,
+                  max: 5.0,
+                  divisions: 5,
+                  onChanged: (double value) {
+                    setState(() {
+                      _zoomLevel = value;
+                    });
+                  },
+                ),
+                Text('${pow(2, _zoomLevel).toStringAsFixed(0)}x'),
+              ],
+            ),
+            Divider(),
+            Text(
+              'Box',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Row(
+              children: <Widget>[
+                Text('height', textAlign: TextAlign.right),
+                Slider(
+                  value: _height,
+                  min: 10.0,
+                  max: 200.0,
+                  divisions: 190,
+                  onChanged: (double value) {
+                    setState(() {
+                      _height = value;
+                    });
+                  },
+                ),
+                Text('${_height.toStringAsFixed(0)}'),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('width', textAlign: TextAlign.right),
+                Slider(
+                  value: _width,
+                  min: 10.0,
+                  max: 400.0,
+                  divisions: 390,
+                  onChanged: (double value) {
+                    setState(() {
+                      _width = value;
+                    });
+                  },
+                ),
+                Text('${_width.toStringAsFixed(0)}'),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('corner\'s radius', textAlign: TextAlign.right),
+                Slider(
+                  value: _radius,
+                  min: 0.0,
+                  max: 40.0,
+                  divisions: 40,
+                  onChanged: (double value) {
+                    setState(() {
+                      _radius = value;
+                    });
+                  },
+                ),
+                Text('${_radius.toStringAsFixed(1)}'),
+              ],
+            ),
+            Divider(),
+            Text(
+              'Nip',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Row(
+              children: <Widget>[
+                Text('side', textAlign: TextAlign.right),
+                Slider(
+                  value: _nipSide.index.toDouble(),
+                  min: NipSide.left.index.toDouble(),
+                  max: NipSide.bottom.index.toDouble(),
+                  divisions: 3,
+                  onChanged: (double value) {
+                    setState(() {
+                      _nipSide = NipSide.values[value.floor()];
+                    });
+                  },
+                ),
+                Text(_nipSide.toString().replaceFirst(RegExp(r'NipSide\.'), '')),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('radius', textAlign: TextAlign.right),
+                Slider(
+                  value: _nipRadius,
+                  min: 0.0,
+                  max: 10.0,
+                  divisions: 40,
+                  onChanged: (double value) {
+                    setState(() {
+                      _nipRadius = value;
+                    });
+                  },
+                ),
+                Text('${_nipRadius.toStringAsFixed(2)}'),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('size', textAlign: TextAlign.right),
+                Slider(
+                  value: _nipSize,
+                  min: 0.0,
+                  max: 40.0,
+                  divisions: 40,
+                  onChanged: (double value) {
+                    setState(() {
+                      _nipSize = value;
+                    });
+                  },
+                ),
+                Text('${_nipSize.toStringAsFixed(1)}'),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('offset.rel', textAlign: TextAlign.right),
+                Slider(
+                  value: _nipOffset.relative,
+                  min: 0.0,
+                  max: 1.0,
+                  divisions: 10,
+                  onChanged: (double value) {
+                    setState(() {
+                      _nipOffset = NipOffset(relative: value, absolute: _nipOffset.absolute);
+                    });
+                  },
+                ),
+                Text('${_nipOffset.relative.toStringAsFixed(1)}'),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('offset.abs', textAlign: TextAlign.right),
+                Slider(
+                  value: _nipOffset.absolute,
+                  min: -40.0,
+                  max: 120.0,
+                  divisions: 160,
+                  onChanged: (double value) {
+                    setState(() {
+                      _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
+                    });
+                  },
+                ),
+                Text('${_nipOffset.absolute.toStringAsFixed(1)}'),
+              ],
+            ),
+            Divider(),
+            NipLineSelect(
+              caption: 'Top line',
+              nipLine: _topLine,
+              onChange: (nipLine) => setState(() {
+                _topLine = nipLine;
+              }),
+            ),
+            Divider(),
+            NipLineSelect(
+              caption: 'Bottom line',
+              nipLine: _bottomLine,
+              onChange: (nipLine) => setState(() {
+                _bottomLine = nipLine;
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
