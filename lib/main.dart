@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:bubble_demo/bubble.dart';
@@ -640,11 +640,89 @@ class _NipLineSelectState extends State<NipLineSelect> {
   }
 }
 
+class Value extends StatelessWidget {
+  Value({
+    this.caption,
+    this.units,
+    @required this.value,
+    @required this.min,
+    @required this.max,
+    @required this.step,
+    fractionDigits,
+    this.onChanged,
+  })  : divisions = ((max - min) / step).round(),
+        num = ((value - min) / step).round(),
+        fractionDigits = fractionDigits ?? 1;
+
+  final String caption;
+  final String units;
+  final double value;
+  final double min;
+  final double max;
+  final double step;
+  final int divisions;
+  final int num;
+  final int fractionDigits;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 5),
+      child: Column(
+        children: <Widget>[
+          Table(children: [
+            TableRow(
+              children: <Widget>[
+                Text(caption),
+                Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
+//                Text('$num $divisions $value', textAlign: TextAlign.end)
+              ],
+            ),
+          ]),
+          Table(
+            columnWidths: {
+              0: FixedColumnWidth(40),
+              1: FlexColumnWidth(40),
+              2: FixedColumnWidth(40),
+            },
+            children: [
+              TableRow(
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text('–'),
+                    onPressed: () {
+                      onChanged(num > 0 ? min + (num - 1) * step : min);
+                    },
+                  ),
+                  Slider(
+                    value: value,
+                    min: min,
+                    max: max,
+                    divisions: divisions,
+                    onChanged: onChanged,
+                  ),
+                  RaisedButton(
+                    child: Text('+'),
+                    onPressed: () {
+                      onChanged(num < divisions ? min + (num + 1) * step : max);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
   var _width = 100.0;
-  var _scale = 4.0;
-  var _zoomLevel = 0.0;
+  var _scale = 8.0;
+//  var _zoomLevel = 0.0;
   var _drawDraft = true;
 
   // Whatsapp
@@ -697,6 +775,191 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     var size = MediaQuery.of(context).size;
     print('screen: $size');
 
+    var _drawer = Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: MaterialLocalizations.of(context)?.drawerLabel,
+      child: ConstrainedBox(
+        constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width / 2),
+        child: Material(
+          elevation: 1.0,
+          child: ListView(
+            children: <Widget>[
+              Value(
+                caption: 'scale',
+                value: _scale,
+                units: 'x',
+                min: 1.0,
+                max: 16.0,
+                step: 1.0,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _scale = value;
+                  });
+                },
+              ),
+//              Row(
+//                children: <Widget>[
+//                  Text('zoom', textAlign: TextAlign.right),
+//                  Slider(
+//                    value: _zoomLevel,
+//                    //label: '${_zoom.round()}',
+//                    min: 0.0,
+//                    max: 5.0,
+//                    divisions: 5,
+//                    onChanged: (double value) {
+//                      setState(() {
+//                        _zoomLevel = value;
+//                      });
+//                    },
+//                  ),
+//                  Text('${math.pow(2, _zoomLevel).toStringAsFixed(0)}x'),
+//                ],
+//              ),
+              Divider(),
+              Text(
+                'Box',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Value(
+                caption: 'height',
+                value: _height,
+                units: ' dp',
+                min: 10,
+                max: 200,
+                step: 1,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _height = value;
+                  });
+                },
+              ),
+              Value(
+                caption: 'width',
+                value: _width,
+                units: ' dp',
+                min: 10,
+                max: 400,
+                step: 1,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _width = value;
+                  });
+                },
+              ),
+              Value(
+                caption: 'corner\'s radius',
+                value: _radius,
+                units: ' dp',
+                min: 0,
+                max: 40,
+                step: 1,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _radius = value;
+                  });
+                },
+              ),
+              Divider(),
+              Text(
+                'Nip',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Value(
+                caption: 'side',
+                value: _nipSide.index.toDouble(),
+                min: NipSide.left.index.toDouble(),
+                max: NipSide.bottom.index.toDouble(),
+                step: 1,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _nipSide = NipSide.values[value.floor()];
+                  });
+                },
+              ),
+              Value(
+                caption: 'radius',
+                value: _nipRadius,
+                units: ' dp',
+                min: 0,
+                max: 10,
+                step: 0.25,
+                fractionDigits: 2,
+                onChanged: (double value) {
+                  setState(() {
+                    _nipRadius = value;
+                  });
+                },
+              ),
+              Value(
+                caption: 'size',
+                value: _nipSize,
+                units: ' dp',
+                min: 0,
+                max: 40,
+                step: 1,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _nipSize = value;
+                  });
+                },
+              ),
+              Value(
+                caption: 'offset.rel',
+                value: _nipOffset.relative,
+                min: 0,
+                max: 1,
+                step: 0.1,
+                fractionDigits: 1,
+                onChanged: (double value) {
+                  setState(() {
+                    _nipOffset = NipOffset(relative: value, absolute: _nipOffset.absolute);
+                  });
+                },
+              ),
+              Value(
+                caption: 'offset.abs',
+                value: _nipOffset.absolute,
+                units: ' dp',
+                min: -40,
+                max: 120,
+                step: 1,
+                fractionDigits: 0,
+                onChanged: (double value) {
+                  setState(() {
+                    _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
+                  });
+                },
+              ),
+              Divider(),
+              NipLineSelect(
+                caption: 'Top line',
+                nipLine: _topLine,
+                onChange: (nipLine) => setState(() {
+                  _topLine = nipLine;
+                }),
+              ),
+              Divider(),
+              NipLineSelect(
+                caption: 'Bottom line',
+                nipLine: _bottomLine,
+                onChange: (nipLine) => setState(() {
+                  _bottomLine = nipLine;
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Bubble demo'),
@@ -735,23 +998,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.all(40),
                 child: Bubble(
-                    scale: _scale,
-                    radius: BubbleRadius(
-                        topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                    nipSide: _nipSide,
-                    nipRadius: _nipRadius,
-                    nipSize: _nipSize,
-                    nipOffset: _nipOffset,
-                    topLine: _topLine,
-                    bottomLine: _bottomLine,
-                    color: Colors.lightBlue,
-                    elevation: 1.0,
-                    drawDraft: _drawDraft,
-                    child: SizedBox(
-                        height: _height,
-                        width: _width,
+                  scale: _scale,
+                  radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                  nipSide: _nipSide,
+                  nipRadius: _nipRadius,
+                  nipSize: _nipSize,
+                  nipOffset: _nipOffset,
+                  topLine: _topLine,
+                  bottomLine: _bottomLine,
+                  color: Colors.lightBlue,
+                  elevation: 1.0,
+                  drawDraft: _drawDraft,
+                  child: SizedBox(
+                    height: _height,
+                    width: _width,
 //                          child: Text('a a a a a')
-                    ),
+                  ),
                 ),
               ),
             ),
@@ -826,209 +1088,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
         ],
       ),
-      endDrawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Text('scale', textAlign: TextAlign.right),
-                Slider(
-                  value: _scale,
-                  min: 1.0,
-                  max: 8.0,
-                  divisions: 7,
-                  onChanged: (double value) {
-                    setState(() {
-                      _scale = value;
-                    });
-                  },
-                ),
-                Text('${_scale.toStringAsFixed(1)}x'),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('zoom', textAlign: TextAlign.right),
-                Slider(
-                  value: _zoomLevel,
-                  //label: '${_zoom.round()}',
-                  min: 0.0,
-                  max: 5.0,
-                  divisions: 5,
-                  onChanged: (double value) {
-                    setState(() {
-                      _zoomLevel = value;
-                    });
-                  },
-                ),
-                Text('${pow(2, _zoomLevel).toStringAsFixed(0)}x'),
-              ],
-            ),
-            Divider(),
-            Text(
-              'Box',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Row(
-              children: <Widget>[
-                Text('height', textAlign: TextAlign.right),
-                Slider(
-                  value: _height,
-                  min: 10.0,
-                  max: 200.0,
-                  divisions: 190,
-                  onChanged: (double value) {
-                    setState(() {
-                      _height = value;
-                    });
-                  },
-                ),
-                Text('${_height.toStringAsFixed(0)}'),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('width', textAlign: TextAlign.right),
-                Slider(
-                  value: _width,
-                  min: 10.0,
-                  max: 400.0,
-                  divisions: 390,
-                  onChanged: (double value) {
-                    setState(() {
-                      _width = value;
-                    });
-                  },
-                ),
-                Text('${_width.toStringAsFixed(0)}'),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('corner\'s radius', textAlign: TextAlign.right),
-                Slider(
-                  value: _radius,
-                  min: 0.0,
-                  max: 40.0,
-                  divisions: 40,
-                  onChanged: (double value) {
-                    setState(() {
-                      _radius = value;
-                    });
-                  },
-                ),
-                Text('${_radius.toStringAsFixed(1)}'),
-              ],
-            ),
-            Divider(),
-            Text(
-              'Nip',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Row(
-              children: <Widget>[
-                Text('side', textAlign: TextAlign.right),
-                Slider(
-                  value: _nipSide.index.toDouble(),
-                  min: NipSide.left.index.toDouble(),
-                  max: NipSide.bottom.index.toDouble(),
-                  divisions: 3,
-                  onChanged: (double value) {
-                    setState(() {
-                      _nipSide = NipSide.values[value.floor()];
-                    });
-                  },
-                ),
-                Text(_nipSide.toString().replaceFirst(RegExp(r'NipSide\.'), '')),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('radius', textAlign: TextAlign.right),
-                Slider(
-                  value: _nipRadius,
-                  min: 0.0,
-                  max: 10.0,
-                  divisions: 40,
-                  onChanged: (double value) {
-                    setState(() {
-                      _nipRadius = value;
-                    });
-                  },
-                ),
-                Text('${_nipRadius.toStringAsFixed(2)}'),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('size', textAlign: TextAlign.right),
-                Slider(
-                  value: _nipSize,
-                  min: 0.0,
-                  max: 40.0,
-                  divisions: 40,
-                  onChanged: (double value) {
-                    setState(() {
-                      _nipSize = value;
-                    });
-                  },
-                ),
-                Text('${_nipSize.toStringAsFixed(1)}'),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('offset.rel', textAlign: TextAlign.right),
-                Slider(
-                  value: _nipOffset.relative,
-                  min: 0.0,
-                  max: 1.0,
-                  divisions: 10,
-                  onChanged: (double value) {
-                    setState(() {
-                      _nipOffset = NipOffset(relative: value, absolute: _nipOffset.absolute);
-                    });
-                  },
-                ),
-                Text('${_nipOffset.relative.toStringAsFixed(1)}'),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Text('offset.abs', textAlign: TextAlign.right),
-                Slider(
-                  value: _nipOffset.absolute,
-                  min: -40.0,
-                  max: 120.0,
-                  divisions: 160,
-                  onChanged: (double value) {
-                    setState(() {
-                      _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
-                    });
-                  },
-                ),
-                Text('${_nipOffset.absolute.toStringAsFixed(1)}'),
-              ],
-            ),
-            Divider(),
-            NipLineSelect(
-              caption: 'Top line',
-              nipLine: _topLine,
-              onChange: (nipLine) => setState(() {
-                _topLine = nipLine;
-              }),
-            ),
-            Divider(),
-            NipLineSelect(
-              caption: 'Bottom line',
-              nipLine: _bottomLine,
-              onChange: (nipLine) => setState(() {
-                _bottomLine = nipLine;
-              }),
-            ),
-          ],
-        ),
-      ),
+      drawer: _drawer,
+      endDrawer: _drawer,
     );
   }
 }
