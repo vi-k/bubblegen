@@ -430,13 +430,13 @@ class CustomBubble extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    print('createRenderObject');
+//    print('createRenderObject');
     return RenderBubble(this);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBubble renderObject) {
-    print('updateRenderObject');
+//    print('updateRenderObject');
     renderObject.bubble = this;
   }
 
@@ -467,7 +467,7 @@ class RenderBubble extends RenderProxyBox {
 
   @override
   void performLayout() {
-    print('performLayout');
+//    print('performLayout');
 
     if (child != null) {
       // Вычисляем размер child
