@@ -55,6 +55,11 @@ class NipOffset {
 
   @override
   int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
+
+  @override
+  String toString() {
+    return 'NipOffset(relative: $relative, absolute: $absolute)';
+  }
 }
 
 enum NipLineType {
@@ -442,6 +447,11 @@ class CustomBubble extends SingleChildRenderObjectWidget {
 
   @protected
   void createNip(Path path, BubblePaintInfo pi) {}
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'CustomBubble($radius, $nipSide, nipRadius: $nipRadius, nipSize: $nipSize, $nipOffset, scale: $scale, drawDraft: $drawDraft)';
+  }
 }
 
 class RenderBubble extends RenderProxyBox {
@@ -460,6 +470,7 @@ class RenderBubble extends RenderProxyBox {
     assert(bubble != null);
     if (_bubble.scale != bubble.scale || _bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
       markNeedsLayout();
+//      markNeedsSemanticsUpdate();
     }
     markNeedsPaint();
     _bubble = bubble;
@@ -512,18 +523,22 @@ class RenderBubble extends RenderProxyBox {
     pi.scale = bubble.scale;
     Offset childOffset = offset;
 
+//    print('$bubble');
+//    print('size: $size');
+//    print('original size: ${size / pi.scale}');
+
     if (bubble.nipSide == NipSide.left || bubble.nipSide == NipSide.right) {
       pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
       pi.box = Rect.fromLTWH(bubble.nipSize, 0, size.width / bubble.scale - bubble.nipSize, size.height / bubble.scale);
       if (bubble.nipSide == NipSide.left) childOffset = offset.translate(bubble.nipSize * bubble.scale, 0);
     } else {
-      pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
+      pi.rect = Rect.fromLTWH(0, 0, size.height / bubble.scale, size.width / bubble.scale);
       pi.box = Rect.fromLTWH(
-          bubble.nipSize, 0, child.size.height / bubble.scale - bubble.nipSize, child.size.width / bubble.scale);
+          bubble.nipSize, 0, size.height / bubble.scale - bubble.nipSize, size.width / bubble.scale);
       if (bubble.nipSide == NipSide.top) childOffset = offset.translate(0, bubble.nipSize * bubble.scale);
     }
 
-//    print('offset: $offset');
+//    print('childOffset: $childOffset');
 //    print('pi.rect: ${pi.rect}');
 //    print('pi.box: ${pi.box}');
 

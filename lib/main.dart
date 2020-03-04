@@ -792,8 +792,9 @@ class NipLinePos extends StatelessWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
-  var _width = 100.0;
-  var _scale = 8.0;
+  var _width = 50.0;
+  var _elevation = 0.5;
+  var _scale = 6.0;
 //  var _zoomLevel = 0.0;
   var _drawDraft = true;
 
@@ -936,6 +937,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   });
                 },
               ),
+              Value(
+                caption: 'elevation',
+                value: _elevation,
+                units: ' dp',
+                min: 0,
+                max: 10,
+                step: 0.25,
+                fractionDigits: 2,
+                onChanged: (double value) {
+                  setState(() {
+                    _elevation = value;
+                  });
+                },
+              ),
               Divider(),
               Text(
                 'Nip',
@@ -1067,7 +1082,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   topLine: _topLine,
                   bottomLine: _bottomLine,
                   color: Colors.white,
-                  elevation: 0.5,
+                  elevation: _elevation,
                   child: Container(
                     padding: EdgeInsets.all(8),
                     child: Text('Lorem ipsum dolor sit amet'),
@@ -1092,7 +1107,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   topLine: _topLine,
                   bottomLine: _bottomLine,
                   color: Colors.lightBlue,
-                  elevation: 0.5,
+                  elevation: _elevation,
                   drawDraft: _drawDraft,
                   child: SizedBox(
                     height: _height,
