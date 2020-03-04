@@ -371,56 +371,39 @@ class MyPainter extends CustomPainter {
 
 //    print(nipLine.type);
 
-    switch (nipLine.type) {
+    switch (nipLine.lineType) {
       case NipLineType.line:
-        ok = line(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
-            rbCircle, draft);
-        break;
+        switch (nipLine.posType) {
+          case NipLinePosType.angle:
+            ok = line(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
+                rbCircle, draft);
+            break;
 
-      case NipLineType.lineTo:
-        ok = lineTo(result, nipLine.pos, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle, rbCircle, draft);
-        break;
+          case NipLinePosType.pos:
+            ok = lineTo(result, nipLine.pos, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
+                rbCircle, draft);
+            break;
 
-      case NipLineType.relativeLineTo:
-        ok = lineTo(result, nipYOffset + nipLine.pos, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
-            rbCircle, draft);
-        break;
+          case NipLinePosType.offset:
+            ok = lineTo(
+                result, nipYOffset + nipLine.pos,
+                inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
+                rbCircle, draft);
+            break;
 
-      case NipLineType.lineToCorner:
-        ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle,
-            rtCircle, rbCircle, draft);
+          case NipLinePosType.corner:
+            ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
+                rbCircle, draft);
+            break;
+        }
         break;
 
       case NipLineType.arc:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.arcTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.relativeArcTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.arcToCorner:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
 
       case NipLineType.curve:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.curveTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.relativeCurveTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.curveToCorner:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
     }
 
