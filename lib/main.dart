@@ -50,7 +50,7 @@ class _ZoomCustomPaintState extends State<ZoomCustomPaint> {
     var ratio = MediaQuery.of(context).devicePixelRatio;
     var update = this._update;
     this._update = true;
-    print('build $this');
+//    print('build $this');
 
     return Container(
       child: CustomPaint(
@@ -66,7 +66,7 @@ class _ZoomCustomPaintState extends State<ZoomCustomPaint> {
               setState(() {
                 this._image = image;
                 this._update = false;
-                print('repaint without updating');
+//                print('repaint without updating');
               });
             }),
       ),
@@ -93,7 +93,7 @@ class ZoomCustomPaintPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('paint $image $size $this');
+//    print('paint $image $size $this');
     if (this.image != null) {
       var paint = Paint();
       paint.isAntiAlias = true;
@@ -103,14 +103,14 @@ class ZoomCustomPaintPainter extends CustomPainter {
 
     if (this.update) {
       var imageSize = Size(size.width * this.ratio, size.height * this.ratio);
-      print('update $ratio $imageSize');
+//      print('update $ratio $imageSize');
       var pictureRecorder = ui.PictureRecorder();
       var canvas = Canvas(pictureRecorder);
       canvas.scale(this.ratio);
       painter.paint(canvas, size);
       var pic = pictureRecorder.endRecording();
       pic.toImage(imageSize.width.ceil(), imageSize.height.ceil()).then((image) {
-        print('onUpdate');
+//        print('onUpdate');
         this.onUpdate?.call(image);
       });
     }
@@ -798,10 +798,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _drawDraft = true;
 
   // Whatsapp
-  var _radius = 8.0;
+  var _radius = 6.0;
   var _nipSide = NipSide.left;
-  var _nipRadius = 1.0;
-  var _nipSize = 10.0;
+  var _nipRadius = 1.5;
+  var _nipSize = 7.0;
   var _nipOffset = NipOffset(absolute: 0.0);
   var _topLine = NipLine.line(0);
   var _bottomLine = NipLine.line(53);
@@ -844,8 +844,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //  print('topLine.pos: ${_topLine.pos}');
 //  print('bottomLine.pos: ${_bottomLine.pos}');
 
-    var size = MediaQuery.of(context).size;
-    print('screen: $size');
+//    print('screen: $size');
 
     var _drawer = Semantics(
       scopesRoute: true,
@@ -1067,10 +1066,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   nipOffset: _nipOffset,
                   topLine: _topLine,
                   bottomLine: _bottomLine,
-                  color: Colors.lightBlue,
-                  elevation: 1.0,
+                  color: Colors.white,
+                  elevation: 0.5,
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(8),
                     child: Text('Lorem ipsum dolor sit amet'),
                   ),
                 ),
@@ -1093,7 +1092,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   topLine: _topLine,
                   bottomLine: _bottomLine,
                   color: Colors.lightBlue,
-                  elevation: 1.0,
+                  elevation: 0.5,
                   drawDraft: _drawDraft,
                   child: SizedBox(
                     height: _height,
