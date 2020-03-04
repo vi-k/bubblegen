@@ -59,30 +59,30 @@ class NipOffset {
 
 enum NipLineType {
   line,
-  lineTo,
-  relativeLineTo,
-  lineToCorner,
+//  lineTo,
+//  relativeLineTo,
+//  lineToCorner,
   arc,
-  arcTo,
-  relativeArcTo,
-  arcToCorner,
+//  arcTo,
+//  relativeArcTo,
+//  arcToCorner,
   curve,
-  curveTo,
-  relativeCurveTo,
-  curveToCorner
+//  curveTo,
+//  relativeCurveTo,
+//  curveToCorner
+}
+
+enum NipLinePosType {
+  angle,
+  pos,
+  offset,
+  corner,
 }
 
 class NipLine {
-  final NipLineType type;
-  final double pos;
-  final double h; // arc's radius
-  final double a1; // curve's α₁
-  final double a2; // curve's α₂
-  final double sz1; // curve's sz₁
-  final double sz2; // curve's sz₂
-
-  const NipLine._internal(
-    this.type,
+  const NipLine(
+    this.lineType,
+    this.posType,
     this.pos, {
     this.h = 0.0,
     this.a1,
@@ -91,21 +91,31 @@ class NipLine {
     this.sz2,
   }) : assert(pos != null);
 
-  const NipLine.line(double lineAngle) : this._internal(NipLineType.line, lineAngle);
-  const NipLine.lineTo(double pos) : this._internal(NipLineType.lineTo, pos);
-  const NipLine.relativeLineTo(double offset) : this._internal(NipLineType.relativeLineTo, offset);
-  const NipLine.lineToCorner(double cornerAngle) : this._internal(NipLineType.lineToCorner, cornerAngle);
+  final NipLineType lineType;
+  final NipLinePosType posType;
+  final double pos;
+  final double h; // arc's radius
+  final double a1; // curve's α₁
+  final double a2; // curve's α₂
+  final double sz1; // curve's sz₁
+  final double sz2; // curve's sz₂
 
-  const NipLine.arc(double lineAngle, double arcAngle) : this._internal(NipLineType.arc, lineAngle, a1: arcAngle);
-  const NipLine.arcTo(double pos, double arcAngle) : this._internal(NipLineType.arcTo, pos, a1: arcAngle);
+  const NipLine.line(double lineAngle) : this(NipLineType.line, NipLinePosType.angle, lineAngle);
+  const NipLine.lineTo(double pos) : this(NipLineType.line, NipLinePosType.pos, pos);
+  const NipLine.relativeLineTo(double offset) : this(NipLineType.line, NipLinePosType.offset, offset);
+  const NipLine.lineToCorner(double cornerAngle) : this(NipLineType.line, NipLinePosType.corner, cornerAngle);
+
+  const NipLine.arc(double lineAngle, double arcAngle) : this(NipLineType.arc, NipLinePosType.angle, lineAngle, a1: arcAngle);
+  const NipLine.arcTo(double pos, double arcAngle) : this(NipLineType.arc, NipLinePosType.pos, pos, a1: arcAngle);
   const NipLine.relativeArcTo(double offset, double arcAngle)
-      : this._internal(NipLineType.relativeArcTo, offset, a1: arcAngle);
+      : this(NipLineType.arc, NipLinePosType.offset, offset, a1: arcAngle);
   const NipLine.arcToCorner(double cornerAngle, double arcAngle)
-      : this._internal(NipLineType.arcToCorner, cornerAngle, a1: arcAngle);
+      : this(NipLineType.arc, NipLinePosType.corner, cornerAngle, a1: arcAngle);
 
   const NipLine.curve(double lineAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
+      : this(
           NipLineType.curve,
+          NipLinePosType.angle,
           lineAngle,
           a1: angle1,
           a2: angle2,
@@ -114,8 +124,9 @@ class NipLine {
         );
 
   const NipLine.curveTo(double pos, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.curveTo,
+      : this(
+          NipLineType.curve,
+          NipLinePosType.pos,
           pos,
           a1: angle1,
           a2: angle2,
@@ -124,8 +135,9 @@ class NipLine {
         );
 
   const NipLine.relativeCurveTo(double pos, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.relativeCurveTo,
+      : this(
+          NipLineType.curve,
+          NipLinePosType.offset,
           pos,
           a1: angle1,
           a2: angle2,
@@ -134,8 +146,9 @@ class NipLine {
         );
 
   const NipLine.curveToCorner(double cornerAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this._internal(
-          NipLineType.curveToCorner,
+      : this(
+          NipLineType.curve,
+          NipLinePosType.corner,
           cornerAngle,
           a1: angle1,
           a2: angle2,
@@ -647,52 +660,34 @@ class Bubble extends CustomBubble {
 
 //    print(nipLine.type);
 
-    switch (nipLine.type) {
+    switch (nipLine.lineType) {
       case NipLineType.line:
-        ok = line(result, nipLine.pos * math.pi / 180, inverse, path, pi);
-        break;
+        switch (nipLine.posType) {
+          case NipLinePosType.angle:
+            ok = line(result, nipLine.pos * math.pi / 180, inverse, path, pi);
+            break;
 
-      case NipLineType.lineTo:
-        ok = lineTo(result, nipLine.pos, inverse, path, pi);
-        break;
+          case NipLinePosType.pos:
+            ok = lineTo(result, nipLine.pos, inverse, path, pi);
+            break;
 
-      case NipLineType.relativeLineTo:
-        ok = lineTo(result, pi.nipCircle.center.y + (inverse ? pi.nipCircle.radius : -pi.nipCircle.radius) + nipLine.pos, inverse, path, pi);
-        break;
+          case NipLinePosType.offset:
+            ok = lineTo(
+                result, pi.nipCircle.center.y + (inverse ? pi.nipCircle.radius : -pi.nipCircle.radius) + nipLine.pos,
+                inverse, path, pi);
+            break;
 
-      case NipLineType.lineToCorner:
-        ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, pi);
+          case NipLinePosType.corner:
+            ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, pi);
+            break;
+        }
         break;
 
       case NipLineType.arc:
         // TODO: Handle this case.
         break;
 
-      case NipLineType.arcTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.relativeArcTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.arcToCorner:
-        // TODO: Handle this case.
-        break;
-
       case NipLineType.curve:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.curveTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.relativeCurveTo:
-        // TODO: Handle this case.
-        break;
-
-      case NipLineType.curveToCorner:
         // TODO: Handle this case.
         break;
     }

@@ -122,8 +122,6 @@ class ZoomCustomPaintPainter extends CustomPainter {
   }
 }
 
-enum PosType { angle, pos, offset, corner }
-
 class NipLineSelect extends StatefulWidget {
   final String caption;
   final NipLine nipLine;
@@ -139,7 +137,8 @@ class NipLineSelect extends StatefulWidget {
 
 class _NipLineSelectState extends State<NipLineSelect> {
   var _lineTypeIndex = 0;
-  NipLineType _type = NipLineType.line;
+  NipLineType _lineType = NipLineType.line;
+  NipLinePosType _posType = NipLinePosType.angle;
   var _lineAngle = 0.0;
   var _pos = 0.0;
   var _offset = 0.0;
@@ -154,18 +153,14 @@ class _NipLineSelectState extends State<NipLineSelect> {
 
   @override
   void initState() {
-    _type = widget.nipLine.type;
-    if (_type == NipLineType.line || _type == NipLineType.arc || _type == NipLineType.curve) {
+    _posType = widget.nipLine.posType;
+    if (_posType == NipLinePosType.angle) {
       _lineAngle = widget.nipLine.pos;
-    } else if (_type == NipLineType.lineTo || _type == NipLineType.arcTo || _type == NipLineType.curveTo) {
+    } else if (_posType == NipLinePosType.pos) {
       _pos = widget.nipLine.pos;
-    } else if (_type == NipLineType.relativeLineTo ||
-        _type == NipLineType.relativeArcTo ||
-        _type == NipLineType.relativeCurveTo) {
+    } else if (_posType == NipLinePosType.offset) {
       _offset = widget.nipLine.pos;
-    } else if (_type == NipLineType.lineToCorner ||
-        _type == NipLineType.arcToCorner ||
-        _type == NipLineType.curveToCorner) {
+    } else if (_posType == NipLinePosType.corner) {
       _cornerAngle = widget.nipLine.pos;
     }
 
@@ -187,124 +182,80 @@ class _NipLineSelectState extends State<NipLineSelect> {
     super.initState();
   }
 
-  PosType getPosType(NipLineType lineType) {
-    PosType posType;
-
-    switch (lineType) {
-      case NipLineType.line:
-      case NipLineType.arc:
-      case NipLineType.curve:
-        posType = PosType.angle;
-        break;
-
-      case NipLineType.lineTo:
-      case NipLineType.arcTo:
-      case NipLineType.curveTo:
-        posType = PosType.pos;
-        break;
-
-      case NipLineType.relativeLineTo:
-      case NipLineType.relativeArcTo:
-      case NipLineType.relativeCurveTo:
-        posType = PosType.offset;
-        break;
-
-      case NipLineType.lineToCorner:
-      case NipLineType.arcToCorner:
-      case NipLineType.curveToCorner:
-        posType = PosType.corner;
-        break;
-    }
-
-    return posType;
-  }
-
-  NipLineType setType(int lineTypeIndex, PosType posType) {
-    NipLineType type;
-
-    switch (posType) {
-      case PosType.angle:
-        type = lineTypeIndex == 0 ? NipLineType.line : lineTypeIndex == 1 ? NipLineType.arc : NipLineType.curve;
-        break;
-
-      case PosType.pos:
-        type = lineTypeIndex == 0 ? NipLineType.lineTo : lineTypeIndex == 1 ? NipLineType.arcTo : NipLineType.curveTo;
-        break;
-
-      case PosType.offset:
-        type = lineTypeIndex == 0
-            ? NipLineType.relativeLineTo
-            : lineTypeIndex == 1 ? NipLineType.relativeArcTo : NipLineType.relativeCurveTo;
-        break;
-
-      case PosType.corner:
-        type = lineTypeIndex == 0
-            ? NipLineType.lineToCorner
-            : lineTypeIndex == 1 ? NipLineType.arcToCorner : NipLineType.curveToCorner;
-        break;
-    }
-
-    return type;
+  NipLineType setType(int lineTypeIndex) {
+    return lineTypeIndex == 0 ? NipLineType.line : lineTypeIndex == 1 ? NipLineType.arc : NipLineType.curve;
   }
 
   void doChange() {
-    if (widget.onChange != null) {
-      NipLine nipLine;
+    NipLine nipLine;
 
-      switch (_type) {
+    if (widget.onChange != null) {
+      switch (_lineType) {
         case NipLineType.line:
-          nipLine = NipLine.line(_lineAngle);
-          break;
-        case NipLineType.lineTo:
-          nipLine = NipLine.lineTo(_pos);
-          break;
-        case NipLineType.relativeLineTo:
-          nipLine = NipLine.relativeLineTo(_offset);
-          break;
-        case NipLineType.lineToCorner:
-          nipLine = NipLine.lineToCorner(_cornerAngle);
+          switch (_posType) {
+            case NipLinePosType.angle:
+              nipLine = NipLine.line(_lineAngle);
+              break;
+            case NipLinePosType.pos:
+              nipLine = NipLine.lineTo(_pos);
+              break;
+            case NipLinePosType.offset:
+              nipLine = NipLine.relativeLineTo(_offset);
+              break;
+            case NipLinePosType.corner:
+              nipLine = NipLine.lineToCorner(_cornerAngle);
+              break;
+          }
           break;
 
         case NipLineType.arc:
-          nipLine = NipLine.arc(_lineAngle, _a1);
-          break;
-        case NipLineType.arcTo:
-          nipLine = NipLine.arcTo(_pos, _a1);
-          break;
-        case NipLineType.relativeArcTo:
-          nipLine = NipLine.relativeArcTo(_offset, _a1);
-          break;
-        case NipLineType.arcToCorner:
-          nipLine = NipLine.arcToCorner(_cornerAngle, _a1);
+          switch (_posType) {
+            case NipLinePosType.angle:
+              nipLine = NipLine.arc(_lineAngle, _a1);
+              break;
+            case NipLinePosType.pos:
+              nipLine = NipLine.arcTo(_pos, _a1);
+              break;
+            case NipLinePosType.offset:
+              nipLine = NipLine.relativeArcTo(_offset, _a1);
+              break;
+            case NipLinePosType.corner:
+              nipLine = NipLine.arcToCorner(_cornerAngle, _a1);
+              break;
+          }
           break;
 
         case NipLineType.curve:
-          nipLine = NipLine.curve(_lineAngle,
-              angle1: _curve1Enabled ? _a1 : null,
-              size1: _curve1Enabled ? _sz1 : null,
-              angle2: _curve2Enabled ? _a2 : null,
-              size2: _curve2Enabled ? _sz2 : null);
-          break;
-        case NipLineType.curveTo:
-          nipLine = NipLine.curveTo(_pos,
-              angle1: _curve1Enabled ? _a1 : null,
-              size1: _curve1Enabled ? _sz1 : null,
-              angle2: _curve2Enabled ? _a2 : null,
-              size2: _curve2Enabled ? _sz2 : null);
-          break;
-        case NipLineType.relativeCurveTo:
-          nipLine = NipLine.relativeCurveTo(_offset,
-              angle1: _curve1Enabled ? _a1 : null,
-              size1: _curve1Enabled ? _sz1 : null,
-              angle2: _curve2Enabled ? _a2 : null,
-              size2: _curve2Enabled ? _sz2 : null);
-          break;
-        case NipLineType.curveToCorner:
-          nipLine = NipLine.curveToCorner(_cornerAngle,
-              angle1: _curve1Enabled ? _a1 : null,
-              size1: _curve1Enabled ? _sz1 : null,
-              angle2: _curve2Enabled ? _a2 : null,
-              size2: _curve2Enabled ? _sz2 : null);
+          switch (_posType) {
+            case NipLinePosType.angle:
+              nipLine = NipLine.curve(_lineAngle,
+                  angle1: _curve1Enabled ? _a1 : null,
+                  size1: _curve1Enabled ? _sz1 : null,
+                  angle2: _curve2Enabled ? _a2 : null,
+                  size2: _curve2Enabled ? _sz2 : null);
+              break;
+            case NipLinePosType.pos:
+              nipLine = NipLine.curveTo(_pos,
+                  angle1: _curve1Enabled ? _a1 : null,
+                  size1: _curve1Enabled ? _sz1 : null,
+                  angle2: _curve2Enabled ? _a2 : null,
+                  size2: _curve2Enabled ? _sz2 : null);
+              break;
+            case NipLinePosType.offset:
+              nipLine = NipLine.relativeCurveTo(_offset,
+                  angle1: _curve1Enabled ? _a1 : null,
+                  size1: _curve1Enabled ? _sz1 : null,
+                  angle2: _curve2Enabled ? _a2 : null,
+                  size2: _curve2Enabled ? _sz2 : null);
+              break;
+            case NipLinePosType.corner:
+              nipLine = NipLine.curveToCorner(_cornerAngle,
+                  angle1: _curve1Enabled ? _a1 : null,
+                  size1: _curve1Enabled ? _sz1 : null,
+                  angle2: _curve2Enabled ? _a2 : null,
+                  size2: _curve2Enabled ? _sz2 : null);
+              break;
+          }
           break;
       }
 
@@ -345,15 +296,15 @@ class _NipLineSelectState extends State<NipLineSelect> {
               children: <TableRow>[
                 TableRow(children: [
                   DropdownButton(
-                    value: getPosType(_type),
-                    items: <DropdownMenuItem<PosType>>[
-                      DropdownMenuItem(child: Text('line(a)'), value: PosType.angle),
-                      DropdownMenuItem(child: Text('lineTo(pos)'), value: PosType.pos),
-                      DropdownMenuItem(child: Text('relativeLineTo(pos)'), value: PosType.offset),
-                      DropdownMenuItem(child: Text('lineToCorner(a)'), value: PosType.corner),
+                    value: _posType,
+                    items: <DropdownMenuItem<NipLinePosType>>[
+                      DropdownMenuItem(child: Text('line(a)'), value: NipLinePosType.angle),
+                      DropdownMenuItem(child: Text('lineTo(pos)'), value: NipLinePosType.pos),
+                      DropdownMenuItem(child: Text('relativeLineTo(pos)'), value: NipLinePosType.offset),
+                      DropdownMenuItem(child: Text('lineToCorner(a)'), value: NipLinePosType.corner),
                     ],
                     onChanged: (value) {
-                      _type = setType(_lineTypeIndex, value);
+                      _lineType = setType(_lineTypeIndex);
                       doChange();
                     },
                   ),
@@ -382,10 +333,10 @@ class _NipLineSelectState extends State<NipLineSelect> {
         Row(
           children: <Widget>[
             Radio(
-              value: PosType.angle,
-              groupValue: getPosType(_type),
+              value: NipLinePosType.angle,
+              groupValue: _posType,
               onChanged: (value) {
-                _type = setType(_lineTypeIndex, value);
+                _lineType = setType(_lineTypeIndex);
                 doChange();
               },
             ),
@@ -396,7 +347,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 min: -90,
                 max: 90,
                 divisions: 180,
-                onChanged: getPosType(_type) != PosType.angle
+                onChanged: _posType != NipLinePosType.angle
                     ? null
                     : (value) {
                         _lineAngle = value;
@@ -410,10 +361,10 @@ class _NipLineSelectState extends State<NipLineSelect> {
         Row(
           children: <Widget>[
             Radio(
-              value: PosType.pos,
-              groupValue: getPosType(_type),
+              value: NipLinePosType.pos,
+              groupValue: _posType,
               onChanged: (value) {
-                _type = setType(_lineTypeIndex, value);
+                _lineType = setType(_lineTypeIndex);
                 doChange();
               },
             ),
@@ -424,7 +375,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 min: -100,
                 max: 100,
                 divisions: 200,
-                onChanged: getPosType(_type) != PosType.pos
+                onChanged: _posType != NipLinePosType.pos
                     ? null
                     : (value) {
                         _pos = value;
@@ -438,10 +389,10 @@ class _NipLineSelectState extends State<NipLineSelect> {
         Row(
           children: <Widget>[
             Radio(
-              value: PosType.offset,
-              groupValue: getPosType(_type),
+              value: NipLinePosType.offset,
+              groupValue: _posType,
               onChanged: (value) {
-                _type = setType(_lineTypeIndex, value);
+                _lineType = setType(_lineTypeIndex);
                 doChange();
               },
             ),
@@ -452,7 +403,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 min: -100,
                 max: 100,
                 divisions: 200,
-                onChanged: getPosType(_type) != PosType.offset
+                onChanged: _posType != NipLinePosType.offset
                     ? null
                     : (value) {
                         _offset = value;
@@ -466,10 +417,10 @@ class _NipLineSelectState extends State<NipLineSelect> {
         Row(
           children: <Widget>[
             Radio(
-              value: PosType.corner,
-              groupValue: getPosType(_type),
+              value: NipLinePosType.corner,
+              groupValue: _posType,
               onChanged: (value) {
-                _type = setType(_lineTypeIndex, value);
+                _lineType = setType(_lineTypeIndex);
                 doChange();
               },
             ),
@@ -480,7 +431,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
                 min: -180,
                 max: 180,
                 divisions: 360,
-                onChanged: getPosType(_type) != PosType.corner
+                onChanged: _posType != NipLinePosType.corner
                     ? null
                     : (value) {
                         _cornerAngle = value;
@@ -718,6 +669,127 @@ class Value extends StatelessWidget {
   }
 }
 
+class NipLinePos extends StatelessWidget {
+  NipLinePos({
+    this.caption,
+    @required this.nipLine,
+    this.onChanged,
+  });
+
+  final String caption;
+  final NipLine nipLine;
+  final ValueChanged<NipLine> onChanged;
+
+  NipLineType setType(int lineTypeIndex) {
+    return lineTypeIndex == 0 ? NipLineType.line : lineTypeIndex == 1 ? NipLineType.arc : NipLineType.curve;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var value = nipLine.pos;
+    double min;
+    double max;
+    var step = 1.0;
+    var fractionDigits = 1;
+    String units;
+
+    switch (nipLine.posType) {
+      case NipLinePosType.angle:
+        min = -90;
+        max = 90;
+        units = '°';
+        break;
+
+      case NipLinePosType.pos:
+        min = -100;
+        max = 100;
+        units = ' px';
+        break;
+
+      case NipLinePosType.offset:
+        min = -100;
+        max = 100;
+        units = ' px';
+        break;
+
+      case NipLinePosType.corner:
+        min = -180;
+        max = 180;
+        units = '°';
+        break;
+    }
+
+    var divisions = ((max - min) / step).round();
+    var num = ((value - min) / step).round();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 5),
+      child: Column(
+        children: <Widget>[
+          Text(caption),
+          Table(
+            columnWidths: {
+              0: FlexColumnWidth(),
+              1: FixedColumnWidth(60),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              TableRow(
+                children: <Widget>[
+                  DropdownButton(
+                    value: nipLine.posType,
+                    items: <DropdownMenuItem<NipLinePosType>>[
+                      DropdownMenuItem(child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
+                      DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
+                      DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
+                      DropdownMenuItem(child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corner),
+                    ],
+                    onChanged: (value) {
+                      onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
+                    },
+                  ),
+                  Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
+  //                Text('0.0', textAlign: TextAlign.end)
+                ],
+              ),
+            ]
+          ),
+          Table(
+            columnWidths: {
+              0: FixedColumnWidth(40),
+              1: FlexColumnWidth(40),
+              2: FixedColumnWidth(40),
+            },
+            children: [
+              TableRow(
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text('–'),
+                    onPressed: () =>
+                        onChanged(NipLine(nipLine.lineType, nipLine.posType, num > 0 ? min + (num - 1) * step : min)),
+                  ),
+                  Slider(
+                    value: value,
+                    min: min,
+                    max: max,
+                    divisions: divisions,
+                    onChanged: (value) => onChanged(NipLine(nipLine.lineType, nipLine.posType, value)),
+                  ),
+                  RaisedButton(
+                    child: Text('+'),
+                    onPressed: () =>
+                        onChanged(NipLine(nipLine.lineType, nipLine.posType, num > 0 ? min + (num + 1) * step : min)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _height = 50.0;
   var _width = 100.0;
@@ -781,7 +853,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       explicitChildNodes: true,
       label: MaterialLocalizations.of(context)?.drawerLabel,
       child: ConstrainedBox(
-        constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width / 2),
+        constraints: BoxConstraints.expand(width: math.min(MediaQuery.of(context).size.width / 2, 320)),
         child: Material(
           elevation: 1.0,
           child: ListView(
@@ -939,21 +1011,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 },
               ),
               Divider(),
-              NipLineSelect(
+              NipLinePos(
                 caption: 'Top line',
                 nipLine: _topLine,
-                onChange: (nipLine) => setState(() {
+                onChanged: (nipLine) => setState(() {
                   _topLine = nipLine;
                 }),
               ),
+//              NipLineSelect(
+//                caption: 'Top line',
+//                nipLine: _topLine,
+//                onChange: (nipLine) => setState(() {
+//                  _topLine = nipLine;
+//                }),
+//              ),
               Divider(),
-              NipLineSelect(
+              NipLinePos(
                 caption: 'Bottom line',
                 nipLine: _bottomLine,
-                onChange: (nipLine) => setState(() {
+                onChanged: (nipLine) => setState(() {
                   _bottomLine = nipLine;
                 }),
               ),
+//              NipLineSelect(
+//                caption: 'Bottom line',
+//                nipLine: _bottomLine,
+//                onChange: (nipLine) => setState(() {
+//                  _bottomLine = nipLine;
+//                }),
+//              ),
             ],
           ),
         ),
