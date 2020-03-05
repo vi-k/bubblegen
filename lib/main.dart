@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:bubble_demo/bubble.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -594,6 +595,7 @@ class _NipLineSelectState extends State<NipLineSelect> {
 class Value extends StatelessWidget {
   Value({
     this.caption,
+    this.horizontal = false,
     this.units,
     @required this.value,
     @required this.min,
@@ -606,6 +608,7 @@ class Value extends StatelessWidget {
         fractionDigits = fractionDigits ?? 1;
 
   final String caption;
+  final bool horizontal;
   final String units;
   final double value;
   final double min;
@@ -620,51 +623,101 @@ class Value extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 5),
-      child: Column(
-        children: <Widget>[
-          Table(children: [
-            TableRow(
-              children: <Widget>[
-                Text(caption),
-                Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
-//                Text('$num $divisions $value', textAlign: TextAlign.end)
-              ],
-            ),
-          ]),
-          Table(
-            columnWidths: {
-              0: FixedColumnWidth(40),
-              1: FlexColumnWidth(40),
-              2: FixedColumnWidth(40),
-            },
+      child: !horizontal
+        ? Column(
             children: [
-              TableRow(
-                children: <Widget>[
-                  RaisedButton(
-                    child: Text('–'),
-                    onPressed: () {
-                      onChanged(num > 0 ? min + (num - 1) * step : min);
-                    },
+              Table(
+                children: [
+                  TableRow(
+                    children: <Widget>[
+                      Text(caption),
+                      Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
+  //                Text('$num $divisions $value', textAlign: TextAlign.end)
+                    ],
                   ),
-                  Slider(
-                    value: value,
-                    min: min,
-                    max: max,
-                    divisions: divisions,
-                    onChanged: onChanged,
-                  ),
-                  RaisedButton(
-                    child: Text('+'),
-                    onPressed: () {
-                      onChanged(num < divisions ? min + (num + 1) * step : max);
-                    },
+                ]
+              ),
+              Table(
+                columnWidths: {
+                  0: FixedColumnWidth(40),
+                  1: FlexColumnWidth(40),
+                  2: FixedColumnWidth(40),
+                },
+                children: [
+                  TableRow(
+                    children: <Widget>[
+                      RaisedButton(
+                        color: Colors.blue,
+                        child: Text('–'),
+                        onPressed: () {
+                          onChanged(num > 0 ? min + (num - 1) * step : min);
+                        },
+                      ),
+                      Slider(
+                        value: value,
+                        min: min,
+                        max: max,
+                        divisions: divisions,
+                        onChanged: onChanged,
+                      ),
+                      RaisedButton(
+                        color: Colors.blue,
+                        child: Text('+'),
+                        onPressed: () {
+                          onChanged(num < divisions ? min + (num + 1) * step : max);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
-          ),
-        ],
-      ),
+          )
+        : Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(caption),
+              ),
+              Container(
+                width: 40,
+                child: RaisedButton(
+                  color: Colors.blue,
+                  child: Text('–'),
+                  onPressed: () {
+                    onChanged(num > 0 ? min + (num - 1) * step : min);
+                  },
+                ),
+              ),
+              Container(
+                width: 120,
+                child: Slider(
+                  value: value,
+                  min: min,
+                  max: max,
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
+              ),
+              Container(
+                width: 40,
+                child: RaisedButton(
+                  color: Colors.blue,
+                  child: Text('+'),
+                  onPressed: () {
+                    onChanged(num < divisions ? min + (num + 1) * step : max);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                    '${value.toStringAsFixed(fractionDigits)}${units ?? ""}',
+                    textAlign: TextAlign.end
+                ),
+              ),
+            ],
+        ),
     );
   }
 }
@@ -728,32 +781,33 @@ class NipLinePos extends StatelessWidget {
         children: <Widget>[
           Text(caption),
           Table(
-            columnWidths: {
-              0: FlexColumnWidth(),
-              1: FixedColumnWidth(60),
-            },
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: [
-              TableRow(
-                children: <Widget>[
-                  DropdownButton(
-                    value: nipLine.posType,
-                    items: <DropdownMenuItem<NipLinePosType>>[
-                      DropdownMenuItem(child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
-                      DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
-                      DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
-                      DropdownMenuItem(child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corner),
-                    ],
-                    onChanged: (value) {
-                      onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
-                    },
-                  ),
-                  Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
-  //                Text('0.0', textAlign: TextAlign.end)
-                ],
-              ),
-            ]
-          ),
+              columnWidths: {
+                0: FlexColumnWidth(),
+                1: FixedColumnWidth(60),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                TableRow(
+                  children: <Widget>[
+                    DropdownButton(
+                      value: nipLine.posType,
+                      items: <DropdownMenuItem<NipLinePosType>>[
+                        DropdownMenuItem(
+                            child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
+                        DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
+                        DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
+                        DropdownMenuItem(
+                            child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corner),
+                      ],
+                      onChanged: (value) {
+                        onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
+                      },
+                    ),
+                    Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
+                    //                Text('0.0', textAlign: TextAlign.end)
+                  ],
+                ),
+              ]),
           Table(
             columnWidths: {
               0: FixedColumnWidth(40),
@@ -858,20 +912,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           elevation: 1.0,
           child: ListView(
             children: <Widget>[
-              Value(
-                caption: 'scale',
-                value: _scale,
-                units: 'x',
-                min: 1.0,
-                max: 16.0,
-                step: 1.0,
-                fractionDigits: 0,
-                onChanged: (double value) {
-                  setState(() {
-                    _scale = value;
-                  });
-                },
-              ),
 //              Row(
 //                children: <Widget>[
 //                  Text('zoom', textAlign: TextAlign.right),
@@ -890,7 +930,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //                  Text('${math.pow(2, _zoomLevel).toStringAsFixed(0)}x'),
 //                ],
 //              ),
-              Divider(),
               Text(
                 'Box',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -1032,13 +1071,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   _topLine = nipLine;
                 }),
               ),
-//              NipLineSelect(
-//                caption: 'Top line',
-//                nipLine: _topLine,
-//                onChange: (nipLine) => setState(() {
-//                  _topLine = nipLine;
-//                }),
-//              ),
               Divider(),
               NipLinePos(
                 caption: 'Bottom line',
@@ -1047,13 +1079,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   _bottomLine = nipLine;
                 }),
               ),
-//              NipLineSelect(
-//                caption: 'Bottom line',
-//                nipLine: _bottomLine,
-//                onChange: (nipLine) => setState(() {
-//                  _bottomLine = nipLine;
-//                }),
-//              ),
             ],
           ),
         ),
@@ -1092,28 +1117,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.all(40),
-                child: Bubble(
-                  scale: _scale,
-                  radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                  nipSide: _nipSide,
-                  nipRadius: _nipRadius,
-                  nipSize: _nipSize,
-                  nipOffset: _nipOffset,
-                  topLine: _topLine,
-                  bottomLine: _bottomLine,
-                  color: Colors.lightBlue,
-                  elevation: _elevation,
-                  drawDraft: _drawDraft,
-                  child: SizedBox(
-                    height: _height,
-                    width: _width,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Bubble(
+                scale: _scale,
+                radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                nipSide: _nipSide,
+                nipRadius: _nipRadius,
+                nipSize: _nipSize,
+                nipOffset: _nipOffset,
+                topLine: _topLine,
+                bottomLine: _bottomLine,
+                color: Colors.lightBlue,
+                elevation: _elevation,
+                drawDraft: _drawDraft,
+                child: SizedBox(
+                  height: _height,
+                  width: _width,
 //                          child: Text('a a a a a')
-                  ),
                 ),
               ),
             ),
@@ -1172,13 +1193,33 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Draft'),
-                  Switch(
-                    value: _drawDraft,
-                    onChanged: (bool value) {
+                  Row(
+                    children: <Widget>[
+                      Text('Draft'),
+                      Switch(
+                        value: _drawDraft,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _drawDraft = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Value(
+                    caption: 'Scale',
+                    horizontal: true,
+                    value: _scale,
+                    units: 'x',
+                    min: 1.0,
+                    max: 16.0,
+                    step: 1.0,
+                    fractionDigits: 0,
+                    onChanged: (double value) {
                       setState(() {
-                        _drawDraft = value;
+                        _scale = value;
                       });
                     },
                   ),

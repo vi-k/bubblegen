@@ -469,7 +469,7 @@ class RenderBubble extends RenderProxyBox {
   set bubble(CustomBubble bubble) {
     assert(bubble != null);
     if (_bubble.scale != bubble.scale || _bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
-      markNeedsLayout();
+//      markNeedsLayout();
 //      markNeedsSemanticsUpdate();
     }
     markNeedsPaint();
