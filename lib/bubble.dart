@@ -193,6 +193,7 @@ class DraftInfo {
   bool showBottomCorner = false;
 
   static final Color draftColor = Colors.black26;
+  static final Color lineColor = Colors.orange;
   static final Color mainColor = Colors.black;
   static final Color errorColor = Colors.red;
 
@@ -256,10 +257,10 @@ class DraftInfo {
     final pointSize = 1.5 * dp;
 
     var path = Path();
-    var paint = Paint();
-    paint.strokeWidth = 1 * dp;
-    paint.color = draftColor;
-    paint.style = PaintingStyle.fill;
+    var paint = Paint()
+      ..strokeWidth = 1 * dp
+      ..color = draftColor
+      ..style = PaintingStyle.fill;
 
     // Малый круг
     if (showNip) {
@@ -362,16 +363,30 @@ class DraftInfo {
       // Линии
       lines.forEach((item) {
         if (item.type == type) {
-          // Рассчитываем концы линий - бесконечными они быть не могут, а длинные отрисовываются медленно
-          Point pt;
-          if (item.line.direct < math.pi / 2 && item.line.direct > -math.pi / 2) pt = item.line.pointByX(pi.rect.right);
-          else pt = item.line.pointByX(pi.rect.left);
-          if (pt == null || pt.y < 0 || pt.y > pi.rect.bottom) {
-            if (item.line.direct < 0) pt = item.line.pointByY(pi.rect.top);
-            else pt = item.line.pointByX(pi.rect.bottom);
-          }
+          final interval = 6 / pi.scale;
+          final padding = 4 * interval;
 
-          if (pt != null) canvas.drawLine(item.line.start, pt, paint);
+          // Рассчитываем концы линий - бесконечными они быть не могут, а длинные отрисовываются медленно
+//          Point pt;
+//          if (item.line.direct < math.pi / 2 && item.line.direct > -math.pi / 2) pt = item.line.pointByX(pi.rect.right + pad);
+//          else pt = item.line.pointByX(pi.rect.left - pad);
+//          if (pt == null || pt.y < 0 || pt.y > pi.rect.bottom) {
+//            if (item.line.direct > 0) pt = item.line.pointByY(pi.rect.bottom + pad);
+//            else pt = item.line.pointByX(pi.rect.top - pad);
+//          }
+//
+//          if (pt != null) canvas.drawLine(item.line.start, pt, paint);
+
+          // Пунктирные линии
+          var size = 0.0;
+          while (true) {
+            var start = item.line.point(size);
+            if (start.x < pi.rect.left - padding || start.x > pi.rect.right + padding
+                || start.y < pi.rect.top - padding || start.y > pi.rect.bottom + padding) break;
+            var end = item.line.point(size + interval);
+            size += 2 * interval;
+            canvas.drawLine(start, end, paint);
+          }
         }
       });
 
