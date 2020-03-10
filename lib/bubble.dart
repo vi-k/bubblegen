@@ -362,7 +362,16 @@ class DraftInfo {
       // Линии
       lines.forEach((item) {
         if (item.type == type) {
-          canvas.drawLine(item.line.start, item.line.point(1000.0), paint);
+          // Рассчитываем концы линий - бесконечными они быть не могут, а длинные отрисовываются медленно
+          Point pt;
+          if (item.line.direct < math.pi / 2 && item.line.direct > -math.pi / 2) pt = item.line.pointByX(pi.rect.right);
+          else pt = item.line.pointByX(pi.rect.left);
+          if (pt == null || pt.y < 0 || pt.y > pi.rect.bottom) {
+            if (item.line.direct < 0) pt = item.line.pointByY(pi.rect.top);
+            else pt = item.line.pointByX(pi.rect.bottom);
+          }
+
+          if (pt != null) canvas.drawLine(item.line.start, pt, paint);
         }
       });
 
