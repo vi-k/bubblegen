@@ -819,6 +819,7 @@ class NipLinePos extends StatelessWidget {
                 children: <Widget>[
                   RaisedButton(
                     child: Text('–'),
+                    color: Colors.blue,
                     onPressed: () =>
                         onChanged(NipLine(nipLine.lineType, nipLine.posType, num > 0 ? min + (num - 1) * step : min)),
                   ),
@@ -831,6 +832,7 @@ class NipLinePos extends StatelessWidget {
                   ),
                   RaisedButton(
                     child: Text('+'),
+                    color: Colors.blue,
                     onPressed: () =>
                         onChanged(NipLine(nipLine.lineType, nipLine.posType, num < divisions ? min + (num + 1) * step : max)),
                   ),
