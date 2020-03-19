@@ -7,7 +7,44 @@ import 'geometry.dart';
 
 RRect rect;
 
-enum NipSide { left, right, top, bottom }
+enum NipSideEnum { left, right, top, bottom }
+class NipSide {
+  const NipSide._internal(this._value);
+
+  final NipSideEnum _value;
+
+  static const left = const NipSide._internal(NipSideEnum.left);
+  static const right = const NipSide._internal(NipSideEnum.right);
+  static const top = const NipSide._internal(NipSideEnum.top);
+  static const bottom = const NipSide._internal(NipSideEnum.bottom);
+  static const int minIndex = 0;
+  static const int maxIndex = 3;
+
+  static NipSide byIndex(int index) {
+    switch (index) {
+      case 0: return left;
+      case 1: return right;
+      case 2: return top;
+      case 3: return bottom;
+    }
+
+    throw RangeError.range(index, 0, 3);
+  }
+
+  int get index => _value.index;
+  bool get isLeft => _value == NipSideEnum.left;
+  bool get isRight => _value == NipSideEnum.right;
+  bool get isTop => _value == NipSideEnum.top;
+  bool get isBottom => _value == NipSideEnum.bottom;
+  bool get isHorizontal => _value == NipSideEnum.left || _value == NipSideEnum.right;
+  bool get isVertical => _value == NipSideEnum.top || _value == NipSideEnum.bottom;
+
+  @override
+  String toString({bool onlyValue = false}) {
+    String str = _value.toString().substring(12);
+    return onlyValue ? str : 'NipSide.$str';
+  }
+}
 
 class BubbleRadius {
   const BubbleRadius({
@@ -426,6 +463,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
     this.child,
     radius,
     nipSide,
+    inverse,
     nipRadius,
     nipSize,
     nipOffset,
@@ -436,6 +474,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
     drawDraft,
   })  : radius = radius ?? BubbleRadius.all(0.0),
         nipSide = nipSide ?? NipSide.left,
+        inverse = inverse ?? false,
         nipRadius = nipRadius ?? 0.0,
         nipSize = nipSize ?? 0,
         nipOffset = nipOffset ?? NipOffset(),
@@ -448,6 +487,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
   final Widget child;
   final BubbleRadius radius;
   final NipSide nipSide;
+  final bool inverse;
   final double nipRadius;
   final double nipSize;
   final NipOffset nipOffset;
@@ -491,10 +531,10 @@ class RenderBubble extends RenderProxyBox {
   CustomBubble get bubble => _bubble;
 
   set bubble(CustomBubble bubble) {
+    print('set bubble');
     assert(bubble != null);
     if (_bubble.scale != bubble.scale || _bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
-//      markNeedsLayout();
-//      markNeedsSemanticsUpdate();
+      markNeedsLayout();
     }
     markNeedsPaint();
     _bubble = bubble;
@@ -541,6 +581,7 @@ class RenderBubble extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    print('paint $this');
     if (child == null) return;
 
     var pi = BubblePaintInfo();
@@ -620,16 +661,22 @@ class RenderBubble extends RenderProxyBox {
 
     context.canvas.save();
     context.canvas.translate(offset.dx, offset.dy);
-    if (bubble.nipSide == NipSide.right) {
+
+    if (bubble.nipSide.isRight) {
       context.canvas.translate(size.width, 0);
       context.canvas.scale(-1, 1);
-    } else if (bubble.nipSide == NipSide.top) {
+    } else if (bubble.nipSide.isTop) {
       context.canvas.scale(-1, 1);
       context.canvas.rotate(math.pi * 90 / 180);
-    } else if (bubble.nipSide == NipSide.bottom) {
+    } else if (bubble.nipSide.isBottom) {
       context.canvas.translate(0, size.height);
       context.canvas.scale(-1, -1);
       context.canvas.rotate(math.pi * 90 / 180);
+    }
+
+    if (bubble.inverse) {
+      context.canvas.translate(0, bubble.nipSide.isHorizontal ? size.height : size.width);
+      context.canvas.scale(1, -1);
     }
 
     context.canvas.scale(bubble.scale);
@@ -657,6 +704,7 @@ class Bubble extends CustomBubble {
     child,
     radius,
     nipSide,
+    inverse,
     nipRadius,
     nipSize,
     nipOffset,
@@ -673,6 +721,7 @@ class Bubble extends CustomBubble {
           child: child,
           radius: radius,
           nipSide: nipSide,
+          inverse: inverse,
           nipRadius: nipRadius,
           nipSize: nipSize,
           nipOffset: nipOffset,
