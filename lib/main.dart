@@ -10,13 +10,29 @@ import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
 
+//var primaryColor = Colors.blue;//Color(0xFF407A52);//Color.fromARGB(255, 132, 151, 176);
+var primaryColor = Color.fromARGB(255, 132, 151, 176);
+var primarySwatch = MaterialColor(primaryColor.value,
+{
+  50:  Color.alphaBlend(primaryColor.withOpacity(0.1), Colors.white),
+  100: Color.alphaBlend(primaryColor.withOpacity(0.2), Colors.white),
+  200: Color.alphaBlend(primaryColor.withOpacity(0.4), Colors.white),
+  300: Color.alphaBlend(primaryColor.withOpacity(0.6), Colors.white),
+  400: Color.alphaBlend(primaryColor.withOpacity(0.8), Colors.white),
+  500: primaryColor,
+  600: Color.alphaBlend(primaryColor.withOpacity(0.8), Colors.black),
+  700: Color.alphaBlend(primaryColor.withOpacity(0.6), Colors.black),
+  800: Color.alphaBlend(primaryColor.withOpacity(0.4), Colors.black),
+  900: Color.alphaBlend(primaryColor.withOpacity(0.2), Colors.black),
+});
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Bubble Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: primarySwatch,
       ),
       home: MyHomePage(),
     );
@@ -716,6 +732,12 @@ class _ValueState extends State<Value> {
   Widget build(BuildContext context) {
     print('build $this');
 
+    if (_value != widget.value) {
+      _value = widget.value;
+      _controller.text = convertToText(_value);
+    }
+
+
     var textField = FocusableActionDetector(
       onFocusChange: (focused) {
         if (!focused) submit(_controller.text);
@@ -726,7 +748,7 @@ class _ValueState extends State<Value> {
           readOnly: widget.onConvertToText != null,
           controller: _controller,
           focusNode: _focusNode,
-          textAlign: TextAlign.end,
+          textAlign: widget.textAlign,
           decoration: InputDecoration(
             fillColor: Colors.white.withAlpha(128),
             filled: true,
@@ -758,7 +780,6 @@ class _ValueState extends State<Value> {
             onPressed: () => change(-widget.step),
           ),
         ),
-//        widget.inputWidth == null ? Expanded(child: textField) : SizedBox(width: widget.inputWidth, child: textField),
         Expanded(child: textField),
         SizedBox(
           width: 40,
@@ -776,9 +797,12 @@ class _ValueState extends State<Value> {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: widget.caption,
+            Visibility(
+              visible: widget.caption != null,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: widget.caption,
+              ),
             ),
             SizedBox(
               width: widget.inputWidth,
@@ -789,9 +813,12 @@ class _ValueState extends State<Value> {
       : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: widget.caption,
+            Visibility(
+              visible: widget.caption != null,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: widget.caption,
+              ),
             ),
             input
           ],
@@ -926,7 +953,7 @@ class NipLinePos extends StatelessWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   static final _staticPadding = 20.0;
   var _additionalPadding = 0.0;
-  Widget _settings;
+//  Widget _settings;
   var _showSettings = false;
   static final _settingsWidth = 180.0;
   AnimationController _settingsController;
@@ -946,6 +973,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _nipSize = 7.0;
   var _nipOffset = NipOffset(absolute: 0.0);
   var _topLine = NipLine.line(0.0);
+  var _topLineValues = [0.0, 0.0, 0.0, -90.0];
   var _bottomLine = NipLine.line(53.0);
 
   // Telegram
@@ -990,7 +1018,261 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _settings = Material(
+    super.initState();
+  }
+
+  void toggleSettings() {
+    _showSettings = !_showSettings;
+    (_showSettings ? _settingsController.forward : _settingsController.reverse)();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('build');
+
+    final animation = Tween(begin: _settingsWidth, end: 0.0).animate(_settingsController);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Bubble demo'),
+        elevation: 4.0,
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem(
+                  child: Text('1'),
+                ),
+                PopupMenuItem(
+                  child: Text('2'),
+                ),
+                PopupMenuItem(
+                  child: Text('3'),
+                ),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            PhysicalModel(
+              color: primarySwatch.shade200,//Colors.lime.shade100,
+              elevation: 4.0,
+              child: Container(
+                padding: _nipSide.isHorizontal
+                    ? EdgeInsets.symmetric(horizontal: _staticPadding / 2.0, vertical: (_staticPadding + _additionalPadding) / 2.0)
+                    : EdgeInsets.symmetric(horizontal: (_staticPadding + _additionalPadding) / 2.0, vertical: _staticPadding / 2.0),
+                child: Column(
+                  children: <Widget>[
+                    Align(
+                      alignment: _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
+//                    child: const Text('test'),
+                      child: Bubble(
+                        radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                        nipSide: _nipSide,
+                        inverse: _inverse,
+                        nipRadius: _nipRadius,
+                        nipSize: _nipSize,
+                        nipOffset: _nipOffset,
+                        topLine: _topLine,
+                        bottomLine: _bottomLine,
+                        color: Colors.white,
+                        elevation: _elevation,
+                        child: Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('Lorem ipsum dolor sit amet'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: (_nipSide.isHorizontal ? _staticPadding + _additionalPadding : _staticPadding) / 2.0,
+                    ),
+                    Align(
+                      alignment: _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
+//                    child: const Text('test'),
+                      child: Bubble(
+                        radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                        nipSide: _nipSide,
+                        inverse: _inverse,
+                        nipRadius: _nipRadius,
+                        nipSize: _nipSize,
+                        nipOffset: _nipOffset,
+                        topLine: _topLine,
+                        bottomLine: _bottomLine,
+                        color: Colors.white,
+                        elevation: _elevation,
+                        child: Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => toggleSettings(),
+                          child: Padding(
+                            padding: _nipSide.isHorizontal
+                                ? EdgeInsets.symmetric(horizontal: _staticPadding, vertical: _staticPadding + _additionalPadding)
+                                : EdgeInsets.symmetric(horizontal: _staticPadding + _additionalPadding, vertical: _staticPadding),
+                            // child: const Text('TEST'),
+                            child: Bubble(
+                              scale: _scale,
+                              radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                              nipSide: _nipSide,
+                              inverse: _inverse,
+                              nipRadius: _nipRadius,
+                              nipSize: _nipSize,
+                              nipOffset: _nipOffset,
+                              topLine: _topLine,
+                              bottomLine: _bottomLine,
+                              color: Colors.lightBlue,
+                              elevation: _elevation,
+                              drawDraft: _drawDraft,
+                              child: SizedBox(
+                                height: _height,
+                                width: _width,
+    //                          child: Text('a a a a a')
+                              ),
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Container(
+                            height: double.infinity,
+                            width: _settingsWidth,
+                            // color: Colors.grey,
+                            child: AnimatedBuilder(
+                              animation: animation,
+                              child: getSettings(),//_settings,
+                              builder: (BuildContext context, Widget child) {
+                                return Transform.translate(
+                                  offset: Offset(animation.value, 0.0),
+                                  child: child,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+//          Bubble(
+//              scale: _scale,
+//              radius: BubbleRadius(
+//                  topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+//              nipSide: _nipSide,
+//              nipRadius: _nipRadius,
+//              nipSize: _nipSize,
+//              nipOffset: _nipOffset,
+//              topLine: _topLine,
+//              bottomLine: _bottomLine,
+//              color: Colors.lightBlue,
+//              elevation: 1.0,
+//              drawDraft: _drawDraft,
+//              child: Container(
+//                height: _height,
+////                    padding: EdgeInsets.all(10),
+////                    child: Text('a a a a a'),
+////                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
+//              )),
+//          LimitedBox(
+//            maxHeight: 200,
+//            child: Container(
+////                width: double.infinity,
+////                height: 400.0,
+//              color: Colors.yellow.withAlpha(64),
+//              padding: EdgeInsets.all(20),
+//              child: Builder(
+//                builder: (BuildContext context) {
+//                  return _zoomLevel == 0
+//                      ? CustomPaint(
+//                          painter: painter,
+//                          child: Container(
+//                              height: _height +
+//                                  (_nipOffset.absolute < 0
+//                                      ? -_nipOffset.absolute
+//                                      : 0 +
+//                                          (_nipOffset.absolute + 2 * _nipRadius > _height
+//                                              ? _nipOffset.absolute + 2 * _nipRadius - _height
+//                                              : 0))))
+//                      : ZoomCustomPaint(
+//                          painter: painter,
+//                          padding: padding,
+//                          child: Container(height: _height),
+//                          zoom: pow(2, _zoomLevel));
+//                },
+//              ),
+//            ),
+//          ),
+            PhysicalModel(
+              color: Colors.grey.shade300,
+              elevation: 8.0,
+              child: Container(
+                padding: EdgeInsets.all(4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        const Text('Draft'),
+                        Switch(
+                          value: _drawDraft,
+                          onChanged: (bool value) {
+                            setState(() {
+                              _drawDraft = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    Value(
+                      caption: Text('Scale:'),
+                      horizontal: true,
+                      inputWidth: _settingsWidth - 8.0,
+                      value: _scale,
+                      units: 'x',
+                      min: 1.0,
+                      max: 16.0,
+                      step: 1.0,
+                      onChanged: (double value) {
+                        setState(() {
+                          _scale = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+//      drawer: _settings,
+//      endDrawer: _drawer,
+    );
+  }
+
+  Widget getSettings() {
+    return Material(
       elevation: 2.0,
 //        color: Colors.lime.shade100.withAlpha(224),
       color: Colors.white.withAlpha(160),
@@ -1114,13 +1396,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 textAlign: TextAlign.center,
                 onChanged: (double value) {
                   setState(() {
-                    final index = value.floor();
+                    final index = value.round();
                     _nipSide = NipSide.byIndex(index >> 1);
                     _inverse = index % 2 == 1;
                   });
                 },
                 onConvertToText: (value) {
-                  final index = value.floor();
+                  final index = value.round();
                   var nipSide = NipSide.byIndex(index >> 1);
                   return nipSide.toString(onlyValue: true) + (index % 2 == 0 ? '' : nipSide.isHorizontal ? '↑' : '←');
                 }
@@ -1188,6 +1470,145 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           const Divider(),
+          const Text(
+            'Top line',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Value(
+                caption: Text('Type of position:'),
+                value: _topLine.posType.index.toDouble(),
+                min: 0.0,
+                max: (NipLinePosType.values.length - 1).toDouble(),
+                step: 1,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.values[index], _topLineValues[index]);
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.floor();
+                  return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
+                }
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.angle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Angle of line:'),
+                value: _topLineValues[NipLinePosType.angle.index],
+                units: '°',
+                min: -90.0,
+                max: 90.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.angle.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.angle, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.pos,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Position on the side:'),
+                value: _topLineValues[NipLinePosType.pos.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.pos.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.pos, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.offset,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Offset from the nip:'),
+                value: _topLineValues[NipLinePosType.offset.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.offset.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.offset, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.corner,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Position on the corners:'),
+                value: _topLineValues[NipLinePosType.corner.index],
+                units: '°',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    /*if (value > -90.0 && value < 90.0) {
+                      value = value > _topLineValues[NipLinePosType.corner.index] ? 90.0 : -90.0;
+                    } else*/
+                    if (value < -180.0) value = 180.0;
+                    else if (value > 180.0) value = -180.0;
+                    else if (value > -90.0 && value <= 0.0) value = -90.0;
+                    else if (value > 0.0 && value < 90.0) value = 90.0;
+
+                    _topLineValues[NipLinePosType.corner.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.corner, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: DropdownButton(
+              value: _topLine.posType,
+              items: <DropdownMenuItem<NipLinePosType>>[
+                DropdownMenuItem(
+                    child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
+                DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
+                DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
+                DropdownMenuItem(
+                    child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corner),
+              ],
+              onChanged: (value) {
+//                  onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Value(
+              value: _nipOffset.absolute,
+              units: 'dp',
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
+                });
+              },
+            ),
+          ),
+          const Divider(),
           NipLinePos(
             caption: 'Top line',
             nipLine: _topLine,
@@ -1205,264 +1626,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
         ],
       ),
-    );
-
-    super.initState();
-  }
-
-  void toggleSettings() {
-    _showSettings = !_showSettings;
-    (_showSettings ? _settingsController.forward : _settingsController.reverse)();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print('build');
-
-    final animation = Tween(begin: _settingsWidth, end: 0.0).animate(_settingsController);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bubble demo'),
-        actions: [
-          PopupMenuButton(
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(
-                  child: Text('1'),
-                ),
-                PopupMenuItem(
-                  child: Text('2'),
-                ),
-                PopupMenuItem(
-                  child: Text('3'),
-                ),
-              ];
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          PhysicalModel(
-            color: Colors.lime.shade300,
-            elevation: 8.0,
-            child: Container(
-              padding: _nipSide.isHorizontal
-                  ? EdgeInsets.symmetric(horizontal: _staticPadding / 2.0, vertical: (_staticPadding + _additionalPadding) / 2.0)
-                  : EdgeInsets.symmetric(horizontal: (_staticPadding + _additionalPadding) / 2.0, vertical: _staticPadding / 2.0),
-              child: Column(
-                children: <Widget>[
-                  Align(
-                    alignment: _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
-//                    child: const Text('test'),
-                    child: Bubble(
-                      radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                      nipSide: _nipSide,
-                      inverse: _inverse,
-                      nipRadius: _nipRadius,
-                      nipSize: _nipSize,
-                      nipOffset: _nipOffset,
-                      topLine: _topLine,
-                      bottomLine: _bottomLine,
-                      color: Colors.white,
-                      elevation: _elevation,
-                      child: Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('Lorem ipsum dolor sit amet'),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: (_nipSide.isHorizontal ? _staticPadding + _additionalPadding : _staticPadding) / 2.0,
-                  ),
-                  Align(
-                    alignment: _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
-//                    child: const Text('test'),
-                    child: Bubble(
-                      radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                      nipSide: _nipSide,
-                      inverse: _inverse,
-                      nipRadius: _nipRadius,
-                      nipSize: _nipSize,
-                      nipOffset: _nipOffset,
-                      topLine: _topLine,
-                      bottomLine: _bottomLine,
-                      color: Colors.white,
-                      elevation: _elevation,
-                      child: Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: <Widget>[
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => toggleSettings(),
-                        child: Padding(
-                          padding: _nipSide.isHorizontal
-                              ? EdgeInsets.symmetric(horizontal: _staticPadding, vertical: _staticPadding + _additionalPadding)
-                              : EdgeInsets.symmetric(horizontal: _staticPadding + _additionalPadding, vertical: _staticPadding),
-                          // child: const Text('TEST'),
-                          child: Bubble(
-                            scale: _scale,
-                            radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                            nipSide: _nipSide,
-                            inverse: _inverse,
-                            nipRadius: _nipRadius,
-                            nipSize: _nipSize,
-                            nipOffset: _nipOffset,
-                            topLine: _topLine,
-                            bottomLine: _bottomLine,
-                            color: Colors.lightBlue,
-                            elevation: _elevation,
-                            drawDraft: _drawDraft,
-                            child: SizedBox(
-                              height: _height,
-                              width: _width,
-    //                          child: Text('a a a a a')
-                            ),
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          height: double.infinity,
-                          width: _settingsWidth,
-                          // color: Colors.grey,
-                          child: AnimatedBuilder(
-                            animation: animation,
-                            child: _settings,
-                            builder: (BuildContext context, Widget child) {
-                              return Transform.translate(
-                                offset: Offset(animation.value, 0.0),
-                                child: child,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-//                AnimatedPositioned(
-//                  left: _showDrawer ? MediaQuery.of(context).size.width - 180 : MediaQuery.of(context).size.width,
-//                  top: 0,
-//                  child: Container(
-//                      width: 180,
-//                      height: MediaQuery.of(context).size.height / 2,
-//                      child: _drawer
-//                  ), duration: Duration(milliseconds: 100),
-//                ),
-              ],
-            ),
-          ),
-//          Bubble(
-//              scale: _scale,
-//              radius: BubbleRadius(
-//                  topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-//              nipSide: _nipSide,
-//              nipRadius: _nipRadius,
-//              nipSize: _nipSize,
-//              nipOffset: _nipOffset,
-//              topLine: _topLine,
-//              bottomLine: _bottomLine,
-//              color: Colors.lightBlue,
-//              elevation: 1.0,
-//              drawDraft: _drawDraft,
-//              child: Container(
-//                height: _height,
-////                    padding: EdgeInsets.all(10),
-////                    child: Text('a a a a a'),
-////                    child: Text('a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'),
-//              )),
-//          LimitedBox(
-//            maxHeight: 200,
-//            child: Container(
-////                width: double.infinity,
-////                height: 400.0,
-//              color: Colors.yellow.withAlpha(64),
-//              padding: EdgeInsets.all(20),
-//              child: Builder(
-//                builder: (BuildContext context) {
-//                  return _zoomLevel == 0
-//                      ? CustomPaint(
-//                          painter: painter,
-//                          child: Container(
-//                              height: _height +
-//                                  (_nipOffset.absolute < 0
-//                                      ? -_nipOffset.absolute
-//                                      : 0 +
-//                                          (_nipOffset.absolute + 2 * _nipRadius > _height
-//                                              ? _nipOffset.absolute + 2 * _nipRadius - _height
-//                                              : 0))))
-//                      : ZoomCustomPaint(
-//                          painter: painter,
-//                          padding: padding,
-//                          child: Container(height: _height),
-//                          zoom: pow(2, _zoomLevel));
-//                },
-//              ),
-//            ),
-//          ),
-          PhysicalModel(
-            color: Colors.grey.shade300,
-            elevation: 8.0,
-            child: Container(
-              padding: EdgeInsets.all(4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      const Text('Draft'),
-                      Switch(
-                        value: _drawDraft,
-                        onChanged: (bool value) {
-                          setState(() {
-                            _drawDraft = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  Value(
-                    caption: Text('Scale:'),
-                    horizontal: true,
-                    inputWidth: _settingsWidth - 8.0,
-                    value: _scale,
-                    units: 'x',
-                    min: 1.0,
-                    max: 16.0,
-                    step: 1.0,
-                    onChanged: (double value) {
-                      setState(() {
-                        _scale = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-//      drawer: _settings,
-//      endDrawer: _drawer,
     );
   }
 }
