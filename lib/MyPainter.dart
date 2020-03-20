@@ -391,7 +391,7 @@ class MyPainter extends CustomPainter {
                 rbCircle, draft);
             break;
 
-          case NipLinePosType.corner:
+          case NipLinePosType.corners:
             ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, nipCircle, box, ltCircle, lbCircle, rtCircle,
                 rbCircle, draft);
             break;

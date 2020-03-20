@@ -118,7 +118,7 @@ enum NipLinePosType {
   angle,
   pos,
   offset,
-  corner,
+  corners,
 }
 
 class NipLine {
@@ -145,14 +145,14 @@ class NipLine {
   const NipLine.line(double lineAngle) : this(NipLineType.line, NipLinePosType.angle, lineAngle);
   const NipLine.lineTo(double pos) : this(NipLineType.line, NipLinePosType.pos, pos);
   const NipLine.relativeLineTo(double offset) : this(NipLineType.line, NipLinePosType.offset, offset);
-  const NipLine.lineToCorner(double cornerAngle) : this(NipLineType.line, NipLinePosType.corner, cornerAngle);
+  const NipLine.lineToCorner(double cornerAngle) : this(NipLineType.line, NipLinePosType.corners, cornerAngle);
 
   const NipLine.arc(double lineAngle, double arcAngle) : this(NipLineType.arc, NipLinePosType.angle, lineAngle, a1: arcAngle);
   const NipLine.arcTo(double pos, double arcAngle) : this(NipLineType.arc, NipLinePosType.pos, pos, a1: arcAngle);
   const NipLine.relativeArcTo(double offset, double arcAngle)
       : this(NipLineType.arc, NipLinePosType.offset, offset, a1: arcAngle);
   const NipLine.arcToCorner(double cornerAngle, double arcAngle)
-      : this(NipLineType.arc, NipLinePosType.corner, cornerAngle, a1: arcAngle);
+      : this(NipLineType.arc, NipLinePosType.corners, cornerAngle, a1: arcAngle);
 
   const NipLine.curve(double lineAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
       : this(
@@ -190,7 +190,7 @@ class NipLine {
   const NipLine.curveToCorner(double cornerAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
       : this(
           NipLineType.curve,
-          NipLinePosType.corner,
+          NipLinePosType.corners,
           cornerAngle,
           a1: angle1,
           a2: angle2,
@@ -765,7 +765,7 @@ class Bubble extends CustomBubble {
                 inverse, path, pi);
             break;
 
-          case NipLinePosType.corner:
+          case NipLinePosType.corners:
             ok = lineToCorner(result, nipLine.pos * math.pi / 180, inverse, path, pi);
             break;
         }
