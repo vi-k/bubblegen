@@ -1171,7 +1171,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           behavior: HitTestBehavior.opaque,
                           onTap: () => toggleSettings(),
                           child: Padding(
-                            padding: EdgeInsets.all(_staticPadding) + getAddingPadding(1.0),
+                            padding: EdgeInsets.all(_staticPadding) + getAddingPadding(_scale),
                             // child: const Text('TEST'),
                             child: Bubble(
                               scale: _scale,
@@ -1344,7 +1344,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               value: _additionalPadding,
               units: 'dp',
               min: 0.0,
-              step: 5.0,
+              step: 1.0,
               onChanged: (double value) {
                 setState(() {
                   _additionalPadding = value;
