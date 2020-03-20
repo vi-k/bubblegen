@@ -10,37 +10,49 @@ import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
 
-//var primaryColor = Colors.blue;//Color(0xFF407A52);//Color.fromARGB(255, 132, 151, 176);
-var primaryColor = Color.fromARGB(255, 132, 151, 176);
-var primarySwatch = MaterialColor(primaryColor.value,
-{
-  50:  Color.alphaBlend(primaryColor.withOpacity(0.1), Colors.white),
-  100: Color.alphaBlend(primaryColor.withOpacity(0.2), Colors.white),
-  200: Color.alphaBlend(primaryColor.withOpacity(0.4), Colors.white),
-  300: Color.alphaBlend(primaryColor.withOpacity(0.6), Colors.white),
-  400: Color.alphaBlend(primaryColor.withOpacity(0.8), Colors.white),
-  500: primaryColor,
-  600: Color.alphaBlend(primaryColor.withOpacity(0.8), Colors.black),
-  700: Color.alphaBlend(primaryColor.withOpacity(0.6), Colors.black),
-  800: Color.alphaBlend(primaryColor.withOpacity(0.4), Colors.black),
-  900: Color.alphaBlend(primaryColor.withOpacity(0.2), Colors.black),
-});
+final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
+MaterialColor cursorSwatch;
+
+MaterialColor createSwatch(Color color) {
+  return MaterialColor(color.value, {
+    50: Color.alphaBlend(color.withOpacity(0.12), Colors.white), // Почти совпадают с Colors.blue
+    100: Color.alphaBlend(color.withOpacity(0.30), Colors.white),
+    200: Color.alphaBlend(color.withOpacity(0.50), Colors.white),
+    300: Color.alphaBlend(color.withOpacity(0.70), Colors.white),
+    400: Color.alphaBlend(color.withOpacity(0.85), Colors.white),
+    500: color,
+    600: Color.alphaBlend(
+        color.withOpacity(0.91), Colors.black), // Синяя составляющая расходится с Colors.blue, равнялся по зелёному
+    700: Color.alphaBlend(
+        color.withOpacity(0.79), Colors.black), // Тогда они расходятся по цвету, но совпдают по яркости
+    800: Color.alphaBlend(color.withOpacity(0.68), Colors.black),
+    900: Color.alphaBlend(color.withOpacity(0.48), Colors.black),
+  });
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+//    cursorSwatch = createSwatch(Theme.of(context).cursorColor);
+    cursorSwatch = createSwatch(Colors.blue);
+
     return MaterialApp(
       title: 'Bubble Demo',
       theme: ThemeData(
         primarySwatch: primarySwatch,
+        cursorColor: cursorSwatch[500],
+        textSelectionColor: cursorSwatch[200],
+        textSelectionHandleColor: cursorSwatch[400],
       ),
-      home: MyHomePage(),
+      home: MyHomePage(title: 'Bubble Demo'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+  MyHomePage({Key key, this.title}) : super(key: key);
+
+  final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -620,9 +632,13 @@ class Value extends StatefulWidget {
     @required this.step,
     this.fractionDigits = 0,
     this.textAlign = TextAlign.end,
+    this.onBeforeChanging,
     @required this.onChanged,
     this.onConvertToText,
-  }) : assert(!horizontal || inputWidth != null);
+  })  : assert(!horizontal || inputWidth != null),
+        assert(step != 0),
+        assert(min < max),
+        assert(onChanged != null);
 
   final Widget caption;
   final bool horizontal;
@@ -634,6 +650,7 @@ class Value extends StatefulWidget {
   final double step;
   final int fractionDigits;
   final TextAlign textAlign;
+  final double Function(double) onBeforeChanging;
   final Function(double) onChanged;
   final String Function(double) onConvertToText;
 
@@ -645,6 +662,7 @@ class _ValueState extends State<Value> {
   double _value;
   TextEditingController _controller;
   FocusNode _focusNode;
+  String _errorText;
 
   @override
   void initState() {
@@ -668,50 +686,64 @@ class _ValueState extends State<Value> {
   }
 
   void change(double diff) {
-//    print('change _value: $_value diff: $diff');
     final floorValue = floor(_value, widget.fractionDigits);
-//    print('floorValue: $floorValue');
 
     // Если значение не выровнено по границе шага, то выравниваем в соответствующую сторону
     var value = _value;
-    if (floorValue == value) value = floor(value + diff, widget.fractionDigits);
-    else if (diff < 0) value = floorValue;
+    if (floorValue == value)
+      value = floor(value + diff, widget.fractionDigits);
+    else if (diff < 0)
+      value = floorValue;
     else if (diff > 0) value = floor(floorValue + diff, widget.fractionDigits);
 
-    if (widget.min != null && value < widget.min) value = widget.min;
-    if (widget.max != null && value > widget.max) value = widget.max;
-    _value = value;
-//    print('_value: $_value');
+    setNewValue(value, true);
 
-    final str = convertToText(value);
-    _controller.text = str;
-    _controller.selection = TextSelection.fromPosition(TextPosition(offset: str.length));
-
-//    print('onChanged()');
-    widget.onChanged(value);
     _focusNode.requestFocus();
     _focusNode.unfocus();
   }
 
-  void submit(String str) {
-//    print('submit $str');
-    final convertedValue = convertToValue(str);
-    var value = convertedValue;
-    if (value == null) value = _value;
-    if (value < widget.min) value = widget.min;
-    if (value > widget.max) value = widget.max;
+  void setNewValue(double value, bool correctTextField) {
+    String errorText;
 
-//    print('value $value convertedValue $convertedValue');
-    if (value != convertedValue) {
-      String text = convertToText(value);
-      _controller.text = text;
-      value = convertToValue(text);
+    var correctedValue = value;
+    if (correctedValue < widget.min) {
+      correctedValue = widget.min;
+      errorText = 'value must be ≥ ${widget.min}';
     }
 
-    if (value != _value) {
+    if (correctedValue > widget.max) {
+      correctedValue = widget.max;
+      errorText = 'value must be ≤ ${widget.max}';
+    }
+
+    var setValue = true;
+    if (widget.onBeforeChanging != null) {
+      final correctedValue2 = widget.onBeforeChanging(correctedValue);
+      if (correctedValue2 != correctedValue) {
+        correctedValue = correctedValue2;
+        errorText = 'value incorrect';
+        setValue = false;
+      }
+    }
+
+    // Вносим изменения в TextField
+    if (correctTextField) {
+      final str = convertToText(correctedValue);
+      _controller.text = str;
+      _controller.selection = TextSelection.fromPosition(TextPosition(offset: str.length));
+      // Во время преобразования могло произойти округление, учитываем это
+      _value = widget.onConvertToText == null ? convertToValue(str) : correctedValue;
+      widget.onChanged(_value);
+      errorText = null;
+    } else if (correctedValue != _value && setValue) {
       _value = value;
-      widget.onChanged?.call(value);
+      widget.onChanged(_value);
     }
+
+    if (errorText != _errorText)
+      setState(() {
+        _errorText = errorText;
+      });
   }
 
   String convertToText(double value) {
@@ -737,57 +769,60 @@ class _ValueState extends State<Value> {
       _controller.text = convertToText(_value);
     }
 
-
-    var textField = FocusableActionDetector(
+    final textField = FocusableActionDetector(
       onFocusChange: (focused) {
-        if (!focused) submit(_controller.text);
+        if (!focused) setNewValue(convertToValue(_controller.text) ?? _value, true);
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: TextField(
-          readOnly: widget.onConvertToText != null,
-          controller: _controller,
-          focusNode: _focusNode,
-          textAlign: widget.textAlign,
-          decoration: InputDecoration(
-            fillColor: Colors.white.withAlpha(128),
-            filled: true,
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
-            border: OutlineInputBorder(),
-            suffix: Text(widget.units ?? ''),
-          ),
-          keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
-          onChanged: (str) {
-            final value = convertToValue(str);
-            if (value != null && value >= widget.min && value <= widget.max) {
-              _value = value;
-              widget.onChanged?.call(value);
-            }
-          },
-          onSubmitted: (str) => submit(str),
+      child: TextField(
+        readOnly: widget.onConvertToText != null,
+        controller: _controller,
+        focusNode: _focusNode,
+        textAlign: widget.textAlign,
+        decoration: InputDecoration(
+          fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
+          filled: true,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
+          border: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: _errorText == null ? Colors.grey[600] : Theme.of(context).errorColor)),
+          focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
+                  width: 2.0)),
+          suffix: Text(widget.units ?? ''),
         ),
+        keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
+        onChanged: (str) {
+          setNewValue(convertToValue(str) ?? _value, false);
+        },
+        onSubmitted: (str) {
+          setNewValue(convertToValue(str) ?? _value, true);
+        },
       ),
     );
 
-    var input = Row(
+    final input = Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        SizedBox(
-          width: 40,
-          child: RaisedButton(
-            color: Theme.of(context).primaryColor,
-            child: const Text('–'),
-            onPressed: () => change(-widget.step),
+        Expanded(child: textField),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: SizedBox(
+            width: 40,
+            child: RaisedButton(
+              color: Theme.of(context).primaryColor,
+              child: Text(widget.onConvertToText == null ? '–' : '<'),
+              onPressed: () => change(-widget.step),
+            ),
           ),
         ),
-        Expanded(child: textField),
         SizedBox(
           width: 40,
           child: RaisedButton(
             color: Theme.of(context).primaryColor,
-            child: const Text('+'),
+            child: Text(widget.onConvertToText == null ? '+' : '>'),
             onPressed: () => change(widget.step),
           ),
         ),
@@ -795,162 +830,163 @@ class _ValueState extends State<Value> {
     );
 
     return widget.horizontal
-      ? Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: <Widget>[
-            Visibility(
-              visible: widget.caption != null,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: widget.caption,
-              ),
-            ),
-            SizedBox(
-              width: widget.inputWidth,
-              child: input
-            )
-          ],
-        )
-      : Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Visibility(
-              visible: widget.caption != null,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: widget.caption,
-              ),
-            ),
-            input
-          ],
-        );
-  }
-}
-
-class NipLinePos extends StatelessWidget {
-  NipLinePos({
-    this.caption,
-    @required this.nipLine,
-    this.onChanged,
-  });
-
-  final String caption;
-  final NipLine nipLine;
-  final ValueChanged<NipLine> onChanged;
-
-  NipLineType setType(int lineTypeIndex) {
-    return lineTypeIndex == 0 ? NipLineType.line : lineTypeIndex == 1 ? NipLineType.arc : NipLineType.curve;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var value = nipLine.pos;
-    double min;
-    double max;
-    var step = 1.0;
-    var fractionDigits = 1;
-    String units;
-
-    switch (nipLine.posType) {
-      case NipLinePosType.angle:
-        min = -90;
-        max = 90;
-        units = '°';
-        break;
-
-      case NipLinePosType.pos:
-        min = -100;
-        max = 100;
-        units = ' px';
-        break;
-
-      case NipLinePosType.offset:
-        min = -100;
-        max = 100;
-        units = ' px';
-        break;
-
-      case NipLinePosType.corner:
-        min = -180;
-        max = 180;
-        units = '°';
-        break;
-    }
-
-    var divisions = ((max - min) / step).round();
-    var num = ((value - min) / step).round();
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5),
-      child: Column(
-        children: <Widget>[
-          Text(caption),
-          Table(
-              columnWidths: {
-                0: FlexColumnWidth(),
-                1: FixedColumnWidth(60),
-              },
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: [
-                TableRow(
-                  children: <Widget>[
-                    DropdownButton(
-                      value: nipLine.posType,
-                      items: <DropdownMenuItem<NipLinePosType>>[
-                        DropdownMenuItem(
-                            child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
-                        DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
-                        DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
-                        DropdownMenuItem(
-                            child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corner),
-                      ],
-                      onChanged: (value) {
-                        onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
-                      },
-                    ),
-                    Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
-                    //                Text('0.0', textAlign: TextAlign.end)
-                  ],
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: <Widget>[
+              Visibility(
+                visible: widget.caption != null,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: widget.caption,
                 ),
-              ]),
-          Table(
-            columnWidths: {
-              0: FixedColumnWidth(40),
-              1: FlexColumnWidth(40),
-              2: FixedColumnWidth(40),
-            },
-            children: [
-              TableRow(
-                children: <Widget>[
-                  RaisedButton(
-                    child: Text('–'),
-                    color: Colors.blue,
-                    onPressed: () =>
-                        onChanged(NipLine(nipLine.lineType, nipLine.posType, num > 0 ? min + (num - 1) * step : min)),
-                  ),
-                  Slider(
-                    value: value,
-                    min: min,
-                    max: max,
-                    divisions: divisions,
-                    onChanged: (value) => onChanged(NipLine(nipLine.lineType, nipLine.posType, value)),
-                  ),
-                  RaisedButton(
-                    child: Text('+'),
-                    color: Colors.blue,
-                    onPressed: () =>
-                        onChanged(NipLine(nipLine.lineType, nipLine.posType, num < divisions ? min + (num + 1) * step : max)),
-                  ),
-                ],
+              ),
+              SizedBox(width: widget.inputWidth, child: input)
+            ],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Visibility(
+                visible: widget.caption != null,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: widget.caption,
+                ),
+              ),
+              input,
+              Visibility(
+                visible: _errorText != null,
+                child: Text(_errorText ?? '', style: TextStyle(fontSize: 12.0, color: Theme.of(context).errorColor)),
               ),
             ],
-          ),
-        ],
-      ),
-    );
+          );
   }
 }
+
+//class NipLinePos extends StatelessWidget {
+//  NipLinePos({
+//    this.caption,
+//    @required this.nipLine,
+//    this.onChanged,
+//  });
+//
+//  final String caption;
+//  final NipLine nipLine;
+//  final ValueChanged<NipLine> onChanged;
+//
+//  NipLineType setType(int lineTypeIndex) {
+//    return lineTypeIndex == 0 ? NipLineType.line : lineTypeIndex == 1 ? NipLineType.arc : NipLineType.curve;
+//  }
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    var value = nipLine.pos;
+//    double min;
+//    double max;
+//    var step = 1.0;
+//    var fractionDigits = 1;
+//    String units;
+//
+//    switch (nipLine.posType) {
+//      case NipLinePosType.angle:
+//        min = -90;
+//        max = 90;
+//        units = '°';
+//        break;
+//
+//      case NipLinePosType.pos:
+//        min = -100;
+//        max = 100;
+//        units = ' px';
+//        break;
+//
+//      case NipLinePosType.offset:
+//        min = -100;
+//        max = 100;
+//        units = ' px';
+//        break;
+//
+//      case NipLinePosType.corners:
+//        min = -180;
+//        max = 180;
+//        units = '°';
+//        break;
+//    }
+//
+//    var divisions = ((max - min) / step).round();
+//    var num = ((value - min) / step).round();
+//
+//    return Padding(
+//      padding: EdgeInsets.symmetric(horizontal: 5),
+//      child: Column(
+//        children: <Widget>[
+//          Text(caption),
+//          Table(
+//              columnWidths: {
+//                0: FlexColumnWidth(),
+//                1: FixedColumnWidth(60),
+//              },
+//              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+//              children: [
+//                TableRow(
+//                  children: <Widget>[
+//                    DropdownButton(
+//                      value: nipLine.posType,
+//                      items: <DropdownMenuItem<NipLinePosType>>[
+//                        DropdownMenuItem(
+//                            child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
+//                        DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
+//                        DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
+//                        DropdownMenuItem(
+//                            child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corners),
+//                      ],
+//                      onChanged: (value) {
+//                        onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
+//                      },
+//                    ),
+//                    Text('${value.toStringAsFixed(fractionDigits)}${units ?? ""}', textAlign: TextAlign.end)
+//                    //                Text('0.0', textAlign: TextAlign.end)
+//                  ],
+//                ),
+//              ]),
+//          Table(
+//            columnWidths: {
+//              0: FixedColumnWidth(40),
+//              1: FlexColumnWidth(40),
+//              2: FixedColumnWidth(40),
+//            },
+//            children: [
+//              TableRow(
+//                children: <Widget>[
+//                  RaisedButton(
+//                    child: Text('–'),
+//                    color: Colors.blue,
+//                    onPressed: () =>
+//                        onChanged(NipLine(nipLine.lineType, nipLine.posType, num > 0 ? min + (num - 1) * step : min)),
+//                  ),
+//                  Slider(
+//                    value: value,
+//                    min: min,
+//                    max: max,
+//                    divisions: divisions,
+//                    onChanged: (value) => onChanged(NipLine(nipLine.lineType, nipLine.posType, value)),
+//                  ),
+//                  RaisedButton(
+//                    child: Text('+'),
+//                    color: Colors.blue,
+//                    onPressed: () =>
+//                        onChanged(NipLine(nipLine.lineType, nipLine.posType, num < divisions ? min + (num + 1) * step : max)),
+//                  ),
+//                ],
+//              ),
+//            ],
+//          ),
+//        ],
+//      ),
+//    );
+//  }
+//}
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   static final _staticPadding = 20.0;
@@ -1037,7 +1073,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bubble demo'),
+        title: Text(widget.title),
         elevation: 4.0,
         actions: [
           PopupMenuButton(
@@ -1061,54 +1097,60 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           children: <Widget>[
             PhysicalModel(
-              color: primarySwatch.shade200,//Colors.lime.shade100,
+              color: primarySwatch[200],
               elevation: 4.0,
               child: Container(
-                padding: _nipSide.isHorizontal
-                    ? EdgeInsets.symmetric(horizontal: _staticPadding / 2.0, vertical: (_staticPadding + _additionalPadding) / 2.0)
-                    : EdgeInsets.symmetric(horizontal: (_staticPadding + _additionalPadding) / 2.0, vertical: _staticPadding / 2.0),
+                padding: EdgeInsets.all(_staticPadding / 2.0),
                 child: Column(
                   children: <Widget>[
-                    Align(
-                      alignment: _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
+                    Padding(
+                      padding: getAddingPadding(1.0),
+                      child: Align(
+                        alignment:
+                            _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
 //                    child: const Text('test'),
-                      child: Bubble(
-                        radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                        nipSide: _nipSide,
-                        inverse: _inverse,
-                        nipRadius: _nipRadius,
-                        nipSize: _nipSize,
-                        nipOffset: _nipOffset,
-                        topLine: _topLine,
-                        bottomLine: _bottomLine,
-                        color: Colors.white,
-                        elevation: _elevation,
-                        child: Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Lorem ipsum dolor sit amet'),
+                        child: Bubble(
+                          radius: BubbleRadius(
+                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                          nipSide: _nipSide,
+                          inverse: _inverse,
+                          nipRadius: _nipRadius,
+                          nipSize: _nipSize,
+                          nipOffset: _nipOffset,
+                          topLine: _topLine,
+                          bottomLine: _bottomLine,
+                          color: Colors.white,
+                          elevation: _elevation,
+                          child: Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text('Lorem ipsum dolor sit amet'),
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: (_nipSide.isHorizontal ? _staticPadding + _additionalPadding : _staticPadding) / 2.0,
-                    ),
-                    Align(
-                      alignment: _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
+                    Padding(
+                      padding: EdgeInsets.only(top: _staticPadding / 2.0) + getAddingPadding(1.0),
+                      child: Align(
+                        alignment:
+                            _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
 //                    child: const Text('test'),
-                      child: Bubble(
-                        radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
-                        nipSide: _nipSide,
-                        inverse: _inverse,
-                        nipRadius: _nipRadius,
-                        nipSize: _nipSize,
-                        nipOffset: _nipOffset,
-                        topLine: _topLine,
-                        bottomLine: _bottomLine,
-                        color: Colors.white,
-                        elevation: _elevation,
-                        child: Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
+                        child: Bubble(
+                          radius: BubbleRadius(
+                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                          nipSide: _nipSide,
+                          inverse: _inverse,
+                          nipRadius: _nipRadius,
+                          nipSize: _nipSize,
+                          nipOffset: _nipOffset,
+                          topLine: _topLine,
+                          bottomLine: _bottomLine,
+                          color: Colors.white,
+                          elevation: _elevation,
+                          child: Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
+                          ),
                         ),
                       ),
                     ),
@@ -1129,13 +1171,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           behavior: HitTestBehavior.opaque,
                           onTap: () => toggleSettings(),
                           child: Padding(
-                            padding: _nipSide.isHorizontal
-                                ? EdgeInsets.symmetric(horizontal: _staticPadding, vertical: _staticPadding + _additionalPadding)
-                                : EdgeInsets.symmetric(horizontal: _staticPadding + _additionalPadding, vertical: _staticPadding),
+                            padding: EdgeInsets.all(_staticPadding) + getAddingPadding(1.0),
                             // child: const Text('TEST'),
                             child: Bubble(
                               scale: _scale,
-                              radius: BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                              radius: BubbleRadius(
+                                  topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
                               nipSide: _nipSide,
                               inverse: _inverse,
                               nipRadius: _nipRadius,
@@ -1149,7 +1190,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               child: SizedBox(
                                 height: _height,
                                 width: _width,
-    //                          child: Text('a a a a a')
+                                //                          child: Text('a a a a a')
                               ),
                             ),
                           ),
@@ -1159,10 +1200,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           child: Container(
                             height: double.infinity,
                             width: _settingsWidth,
-                            // color: Colors.grey,
                             child: AnimatedBuilder(
                               animation: animation,
-                              child: getSettings(),//_settings,
+                              child: getSettings(),
                               builder: (BuildContext context, Widget child) {
                                 return Transform.translate(
                                   offset: Offset(animation.value, 0.0),
@@ -1227,7 +1267,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //            ),
 //          ),
             PhysicalModel(
-              color: Colors.grey.shade300,
+              color: primarySwatch[200],
               elevation: 8.0,
               child: Container(
                 padding: EdgeInsets.all(4.0),
@@ -1269,8 +1309,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
-//      drawer: _settings,
-//      endDrawer: _drawer,
     );
   }
 
@@ -1278,7 +1316,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return Material(
       elevation: 2.0,
 //        color: Colors.lime.shade100.withAlpha(224),
-      color: Colors.white.withAlpha(160),
+      color: primarySwatch[200].withAlpha(160),
       child: ListView(
         children: <Widget>[
           //              Row(
@@ -1408,8 +1446,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   final index = value.round();
                   var nipSide = NipSide.byIndex(index >> 1);
                   return nipSide.toString(onlyValue: true) + (index % 2 == 0 ? '' : nipSide.isHorizontal ? '↑' : '←');
-                }
-            ),
+                }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -1496,8 +1533,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 onConvertToText: (value) {
                   final index = value.floor();
                   return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
-                }
-            ),
+                }),
           ),
           Visibility(
             visible: _topLine.posType == NipLinePosType.angle,
@@ -1556,26 +1592,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           Visibility(
-            visible: _topLine.posType == NipLinePosType.corner,
+            visible: _topLine.posType == NipLinePosType.corners,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
                 caption: Text('Position on the corners:'),
-                value: _topLineValues[NipLinePosType.corner.index],
+                value: _topLineValues[NipLinePosType.corners.index],
                 units: '°',
                 step: 1.0,
+                onBeforeChanging: (double value) {
+                  var newValue = value;
+                  if (newValue < -180.0)
+                    newValue = 180.0;
+                  else if (newValue > 180.0)
+                    newValue = -180.0;
+                  else if (newValue > -90.0 && newValue <= 0.0)
+                    newValue = -90.0;
+                  else if (newValue > 0.0 && newValue < 90.0) newValue = 90.0;
+
+                  return newValue;
+                },
                 onChanged: (double value) {
                   setState(() {
-                    /*if (value > -90.0 && value < 90.0) {
-                      value = value > _topLineValues[NipLinePosType.corner.index] ? 90.0 : -90.0;
-                    } else*/
-                    if (value < -180.0) value = 180.0;
-                    else if (value > 180.0) value = -180.0;
-                    else if (value > -90.0 && value <= 0.0) value = -90.0;
-                    else if (value > 0.0 && value < 90.0) value = 90.0;
-
-                    _topLineValues[NipLinePosType.corner.index] = value;
-                    _topLine = NipLine(_topLine.lineType, NipLinePosType.corner, value);
+                    _topLineValues[NipLinePosType.corners.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.corners, value);
                   });
                 },
               ),
@@ -1606,8 +1646,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 onConvertToText: (value) {
                   final index = value.floor();
                   return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
-                }
-            ),
+                }),
           ),
           Visibility(
             visible: _bottomLine.posType == NipLinePosType.angle,
@@ -1666,12 +1705,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           Visibility(
-            visible: _bottomLine.posType == NipLinePosType.corner,
+            visible: _bottomLine.posType == NipLinePosType.corners,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
                 caption: Text('Position on the corners:'),
-                value: _bottomLineValues[NipLinePosType.corner.index],
+                value: _bottomLineValues[NipLinePosType.corners.index],
                 units: '°',
                 step: 1.0,
                 onChanged: (double value) {
@@ -1679,13 +1718,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     /*if (value > -90.0 && value < 90.0) {
                       value = value > _bottomLineValues[NipLinePosType.corner.index] ? 90.0 : -90.0;
                     } else*/
-                    if (value < -180.0) value = 180.0;
-                    else if (value > 180.0) value = -180.0;
-                    else if (value > -90.0 && value <= 0.0) value = -90.0;
+                    if (value < -180.0)
+                      value = 180.0;
+                    else if (value > 180.0)
+                      value = -180.0;
+                    else if (value > -90.0 && value <= 0.0)
+                      value = -90.0;
                     else if (value > 0.0 && value < 90.0) value = 90.0;
 
-                    _bottomLineValues[NipLinePosType.corner.index] = value;
-                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.corner, value);
+                    _bottomLineValues[NipLinePosType.corners.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.corners, value);
                   });
                 },
               ),
@@ -1711,5 +1753,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  EdgeInsets getAddingPadding(double scale) {
+    var padding = _additionalPadding * scale;
+    return _nipSide.isHorizontal
+        ? _inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
+        : _inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
   }
 }
