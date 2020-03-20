@@ -771,6 +771,8 @@ class _ValueState extends State<Value> {
     );
 
     var input = Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
         SizedBox(
           width: 40,
@@ -975,6 +977,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var _topLine = NipLine.line(0.0);
   var _topLineValues = [0.0, 0.0, 0.0, -90.0];
   var _bottomLine = NipLine.line(53.0);
+  var _bottomLineValues = [53.0, 6.0, 3.0, -180.0];
 
   // Telegram
 //  var _boxRadius = 12.0;
@@ -1578,52 +1581,133 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: DropdownButton(
-              value: _topLine.posType,
-              items: <DropdownMenuItem<NipLinePosType>>[
-                DropdownMenuItem(
-                    child: Text('line\'s angle', textScaleFactor: 0.9), value: NipLinePosType.angle),
-                DropdownMenuItem(child: Text('pos', textScaleFactor: 0.9), value: NipLinePosType.pos),
-                DropdownMenuItem(child: Text('offset', textScaleFactor: 0.9), value: NipLinePosType.offset),
-                DropdownMenuItem(
-                    child: Text('corners angle', textScaleFactor: 0.9), value: NipLinePosType.corner),
-              ],
-              onChanged: (value) {
-//                  onChanged(NipLine(nipLine.lineType, value, nipLine.pos));
-              },
-            ),
+
+          const Divider(),
+          const Text(
+            'Bottom line',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Padding(
-            padding: const EdgeInsets.all(4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              value: _nipOffset.absolute,
-              units: 'dp',
-              step: 1.0,
-              onChanged: (double value) {
-                setState(() {
-                  _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
-                });
-              },
+                caption: Text('Type of position:'),
+                value: _bottomLine.posType.index.toDouble(),
+                min: 0.0,
+                max: (NipLinePosType.values.length - 1).toDouble(),
+                step: 1,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.values[index], _bottomLineValues[index]);
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.floor();
+                  return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
+                }
             ),
           ),
-          const Divider(),
-          NipLinePos(
-            caption: 'Top line',
-            nipLine: _topLine,
-            onChanged: (nipLine) => setState(() {
-              _topLine = nipLine;
-            }),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.angle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Angle of line:'),
+                value: _bottomLineValues[NipLinePosType.angle.index],
+                units: '°',
+                min: -90.0,
+                max: 90.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.angle.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.angle, value);
+                  });
+                },
+              ),
+            ),
           ),
-          const Divider(),
-          NipLinePos(
-            caption: 'Bottom line',
-            nipLine: _bottomLine,
-            onChanged: (nipLine) => setState(() {
-              _bottomLine = nipLine;
-            }),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.pos,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Position on the side:'),
+                value: _bottomLineValues[NipLinePosType.pos.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.pos.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.pos, value);
+                  });
+                },
+              ),
+            ),
           ),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.offset,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Offset from the nip:'),
+                value: _bottomLineValues[NipLinePosType.offset.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.offset.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.offset, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.corner,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Value(
+                caption: Text('Position on the corners:'),
+                value: _bottomLineValues[NipLinePosType.corner.index],
+                units: '°',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    /*if (value > -90.0 && value < 90.0) {
+                      value = value > _bottomLineValues[NipLinePosType.corner.index] ? 90.0 : -90.0;
+                    } else*/
+                    if (value < -180.0) value = 180.0;
+                    else if (value > 180.0) value = -180.0;
+                    else if (value > -90.0 && value <= 0.0) value = -90.0;
+                    else if (value > 0.0 && value < 90.0) value = 90.0;
+
+                    _bottomLineValues[NipLinePosType.corner.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.corner, value);
+                  });
+                },
+              ),
+            ),
+          ),
+
+//          const Divider(),
+//          NipLinePos(
+//            caption: 'Top line',
+//            nipLine: _topLine,
+//            onChanged: (nipLine) => setState(() {
+//              _topLine = nipLine;
+//            }),
+//          ),
+//          const Divider(),
+//          NipLinePos(
+//            caption: 'Bottom line',
+//            nipLine: _bottomLine,
+//            onChanged: (nipLine) => setState(() {
+//              _bottomLine = nipLine;
+//            }),
+//          ),
         ],
       ),
     );
