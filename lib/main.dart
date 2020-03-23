@@ -665,7 +665,6 @@ class _ValueState extends State<Value> {
   TextEditingController _controller;
   FocusNode _focusNode;
   String _errorText;
-  String _debugText;
   static const _buttonWidth = 36.0;
   static const _buttonPadding = 4.0;
 
@@ -741,7 +740,7 @@ class _ValueState extends State<Value> {
       widget.onChanged(_value);
       errorText = null;
     } else if (correctedValue != _value && setValue) {
-      _value = value;
+      _value = correctedValue;
       widget.onChanged(_value);
     }
 
@@ -783,7 +782,6 @@ class _ValueState extends State<Value> {
               fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
               filled: true,
               errorText: _errorText,
-              helperText: _debugText,
               contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
               prefix: SizedBox(width: _buttonWidth + _buttonPadding,),
               suffix: Padding(
@@ -823,21 +821,19 @@ class _ValueState extends State<Value> {
             child: SizedBox(
               width: _buttonWidth,
               child: GestureDetector(
-                //behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    _debugText = 'tap';                    
-                  });
-                },
-                onVerticalDragStart: (details) {
-                  _errorText = 'dragStart';
-                },
-                onVerticalDragEnd: (details) {
-                  _errorText = 'dragEnd';
-                },
-                onVerticalDragUpdate: (details) {
-                  _errorText = 'dragUpdate';
-                },
+                // behavior: HitTestBehavior.translucent,
+                // onTap: () {
+                //   print('!!!!!!!!!!!!!!!!!11 onTap()');
+                // },
+                // onVerticalDragStart: (details) {
+                //   _errorText = 'dragStart';
+                // },
+                // onVerticalDragEnd: (details) {
+                //   _errorText = 'dragEnd';
+                // },
+                // onVerticalDragUpdate: (details) {
+                //   _errorText = 'dragUpdate';
+                // },
                 child: FlatButton(
                   padding: EdgeInsets.zero,
                   color: primarySwatch[200],
@@ -876,7 +872,7 @@ class _ValueState extends State<Value> {
                 visible: widget.caption != null,
                 child: Padding(
                   padding: const EdgeInsets.only(left: _buttonPadding, right: _buttonPadding, top: 6.0, bottom: 2.0),
-                  child: Text(widget.caption),
+                  child: Text(widget.caption + ' $_value'),
                 ),
               ),
               input,
