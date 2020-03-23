@@ -1,5 +1,5 @@
-import 'dart:math' as math;
-import 'dart:ui' as ui;
+//import 'dart:math' as math;
+//import 'dart:ui' as ui;
 
 import 'package:bubble_demo/bubble.dart';
 import 'package:flutter/cupertino.dart';
@@ -642,7 +642,7 @@ class Value extends StatefulWidget {
         assert(min < max),
         assert(onChanged != null);
 
-  final Widget caption;
+  final String caption;
   final bool horizontal;
   final double inputWidth;
   final String units;
@@ -665,6 +665,9 @@ class _ValueState extends State<Value> {
   TextEditingController _controller;
   FocusNode _focusNode;
   String _errorText;
+  String _debugText;
+  static const _buttonWidth = 36.0;
+  static const _buttonPadding = 4.0;
 
   @override
   void initState() {
@@ -708,18 +711,18 @@ class _ValueState extends State<Value> {
     String errorText;
 
     var correctedValue = value;
-    if (correctedValue < widget.min) {
+    var setValue = true;
+
+    if (correctedValue == null) {
+      correctedValue = _value;
+      errorText = 'value incorrect';
+    } else if (correctedValue < widget.min) {
       correctedValue = widget.min;
       errorText = 'value must be ≥ ${widget.min}';
-    }
-
-    if (correctedValue > widget.max) {
+    } else if (correctedValue > widget.max) {
       correctedValue = widget.max;
       errorText = 'value must be ≤ ${widget.max}';
-    }
-
-    var setValue = true;
-    if (widget.onBeforeChanging != null) {
+    } else if (widget.onBeforeChanging != null) {
       final correctedValue2 = widget.onBeforeChanging(correctedValue);
       if (correctedValue2 != correctedValue) {
         correctedValue = correctedValue2;
@@ -757,23 +760,17 @@ class _ValueState extends State<Value> {
   }
 
   @override
-  void setState(VoidCallback fn) {
-    super.setState(fn);
-    print('setState $this');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print('build $this');
+    // print('build $this');
 
     if (_value != widget.value) {
       _value = widget.value;
       _controller.text = convertToText(_value);
     }
 
-    final textField = FocusableActionDetector(
+    final input = FocusableActionDetector(
       onFocusChange: (focused) {
-        if (!focused) setNewValue(convertToValue(_controller.text) ?? _value, true);
+        if (!focused) setNewValue(convertToValue(_controller.text), false);
       },
       child: Stack(
         children: <Widget>[
@@ -786,19 +783,14 @@ class _ValueState extends State<Value> {
               fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
               filled: true,
               errorText: _errorText,
-//              isDense: true,
-//              contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
-              contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
-              prefix: SizedBox(width: 44,),
-              suffix: Wrap(
-                children: <Widget>[
-                  Text(widget.units ?? ''),
-                  SizedBox(width: 44),
-                ],
+              helperText: _debugText,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
+              prefix: SizedBox(width: _buttonWidth + _buttonPadding,),
+              suffix: Padding(
+                padding: EdgeInsets.only(right: _buttonPadding +_buttonWidth + _buttonPadding),
+                child: Text(widget.units ?? ''),
               ),
               border: OutlineInputBorder(),
-//              enabledBorder: OutlineInputBorder(
-//                  borderSide: BorderSide(color: _errorText == null ? Colors.grey[600] : Theme.of(context).errorColor)),
               focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
                       color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
@@ -808,68 +800,55 @@ class _ValueState extends State<Value> {
             ),
             keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
             onChanged: (str) {
-              setNewValue(convertToValue(str) ?? _value, false);
+              setNewValue(convertToValue(str), false);
             },
             onSubmitted: (str) {
-              setNewValue(convertToValue(str) ?? _value, true);
+              setNewValue(convertToValue(str), false);
             },
           ),
           Positioned(
-            top: 0.0,
-            left: 4.0,
+            left: _buttonPadding,
             child: SizedBox(
-              width: 40.0,
+              width: _buttonWidth,
               child: FlatButton(
                 padding: EdgeInsets.zero,
-//                color: Theme.of(context).primaryColor,
-                child: Text(widget.onConvertToText == null ? '–' : '<', style: TextStyle(fontSize: 20)),
+                color: primarySwatch[200],
+                child: Text(widget.onConvertToText == null ? '–' : '<', style: TextStyle(fontSize: 20.0)),
                 onPressed: () => change(-widget.step),
               ),
             ),
           ),
           Positioned(
-            top: 0.0,
-            right: 4.0,
-//            alignment: Alignment.topRight,
+            right: _buttonPadding,
             child: SizedBox(
-              width: 40.0,
-              child: FlatButton(
-                padding: EdgeInsets.zero,
-//                color: Theme.of(context).primaryColor,
-                child: Text(widget.onConvertToText == null ? '+' : '>', style: TextStyle(fontSize: 20)),
-                onPressed: () => change(widget.step),
+              width: _buttonWidth,
+              child: GestureDetector(
+                //behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _debugText = 'tap';                    
+                  });
+                },
+                onVerticalDragStart: (details) {
+                  _errorText = 'dragStart';
+                },
+                onVerticalDragEnd: (details) {
+                  _errorText = 'dragEnd';
+                },
+                onVerticalDragUpdate: (details) {
+                  _errorText = 'dragUpdate';
+                },
+                child: FlatButton(
+                  padding: EdgeInsets.zero,
+                  color: primarySwatch[200],
+                  child: Text(widget.onConvertToText == null ? '+' : '>', style: TextStyle(fontSize: 20.0)),
+                  onPressed: () => change(widget.step),
+                ),
               ),
             ),
           ),
         ],
       ),
-    );
-
-    final input = Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: <Widget>[
-        Expanded(child: textField),
-//        Padding(
-//          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-//          child: SizedBox(
-//            width: 40,
-//            child: RaisedButton(
-//              color: Theme.of(context).primaryColor,
-//              child: Text(widget.onConvertToText == null ? '–' : '<'),
-//              onPressed: () => change(-widget.step),
-//            ),
-//          ),
-//        ),
-//        SizedBox(
-//          width: 40,
-//          child: RaisedButton(
-//            color: Theme.of(context).primaryColor,
-//            child: Text(widget.onConvertToText == null ? '+' : '>'),
-//            onPressed: () => change(widget.step),
-//          ),
-//        ),
-      ],
     );
 
     return widget.horizontal
@@ -881,10 +860,13 @@ class _ValueState extends State<Value> {
                 visible: widget.caption != null,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: widget.caption,
+                  child: Text(widget.caption),
                 ),
               ),
-              SizedBox(width: widget.inputWidth, child: input)
+              SizedBox(
+                width: widget.inputWidth,
+                child: input
+              )
             ],
           )
         : Column(
@@ -893,15 +875,11 @@ class _ValueState extends State<Value> {
               Visibility(
                 visible: widget.caption != null,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: widget.caption,
+                  padding: const EdgeInsets.only(left: _buttonPadding, right: _buttonPadding, top: 6.0, bottom: 2.0),
+                  child: Text(widget.caption),
                 ),
               ),
               input,
-//              Visibility(
-//                visible: _errorText != null,
-//                child: Text(_errorText ?? '', style: TextStyle(fontSize: 12.0, color: Theme.of(context).errorColor)),
-//              ),
             ],
           );
   }
@@ -1331,7 +1309,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ],
                     ),
                     Value(
-                      caption: Text('Scale:'),
+                      caption: 'Scale:',
                       horizontal: true,
                       inputWidth: _settingsWidth - 8.0,
                       value: _scale,
@@ -1380,10 +1358,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           //                  Text('${math.pow(2, _zoomLevel).toStringAsFixed(0)}x'),
           //                ],
           //              ),
+          const Text(
+            'View',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           Padding(
             padding: const EdgeInsets.all(4.0),
             child: Value(
-              caption: Text('Additional padding:'),
+              caption: 'Additional padding:',
               value: _additionalPadding,
               units: 'dp',
               min: 0.0,
@@ -1404,7 +1387,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //          Padding(
 //            padding: const EdgeInsets.all(4.0),
 //            child: Value(
-//              caption: Text('Height:'),
+//              caption: 'Height:',
 //              value: _height,
 //              units: 'dp',
 //              min: 10.0,
@@ -1420,7 +1403,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //          Padding(
 //            padding: const EdgeInsets.symmetric(horizontal: 4.0),
 //            child: Value(
-//              caption: Text('Width:'),
+//              caption: 'Width:',
 //              value: _width,
 //              units: 'dp',
 //              min: 10.0,
@@ -1435,7 +1418,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              caption: Text('Corner\'s radius:'),
+              caption: 'Corner\'s radius:',
               value: _radius,
               units: 'dp',
               min: 0.0,
@@ -1450,7 +1433,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              caption: Text('Elevation:'),
+              caption: 'Elevation:',
               value: _elevation,
               units: 'dp',
               min: 0.0,
@@ -1472,7 +1455,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-                caption: Text('Side:'),
+                caption: 'Side:',
                 value: _nipSide.index.toDouble() * 2.0 + (_inverse ? 1.0 : 0.0),
                 min: NipSide.minIndex.toDouble(),
                 max: NipSide.maxIndex.toDouble() * 2.0 + 1.0,
@@ -1494,7 +1477,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              caption: Text('Radius:'),
+              caption: 'Radius:',
               value: _nipRadius,
               units: 'dp',
               min: 0.0,
@@ -1510,7 +1493,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              caption: Text('Size:'),
+              caption: 'Size:',
               value: _nipSize,
               units: 'dp',
               min: 0.0,
@@ -1525,7 +1508,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              caption: Text('Relative offset:'),
+              caption: 'Relative offset:',
               value: _nipOffset.relative * 100.0,
               units: '%',
               min: 0.0,
@@ -1541,7 +1524,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-              caption: Text('Absolute offset:'),
+              caption: 'Absolute offset:',
               value: _nipOffset.absolute,
               units: 'dp',
               step: 1.0,
@@ -1561,7 +1544,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-                caption: Text('Type of position:'),
+                caption: 'Type of position:',
                 value: _topLine.posType.index.toDouble(),
                 min: 0.0,
                 max: (NipLinePosType.values.length - 1).toDouble(),
@@ -1583,7 +1566,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Angle of line:'),
+                caption: 'Angle of line:',
                 value: _topLineValues[NipLinePosType.angle.index],
                 units: '°',
                 min: -90.0,
@@ -1603,7 +1586,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Position on the side:'),
+                caption: 'Position on the side:',
                 value: _topLineValues[NipLinePosType.pos.index],
                 units: 'dp',
                 step: 1.0,
@@ -1621,7 +1604,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Offset from the nip:'),
+                caption: 'Offset from the nip:',
                 value: _topLineValues[NipLinePosType.offset.index],
                 units: 'dp',
                 step: 1.0,
@@ -1639,21 +1622,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Position on the corners:'),
+                caption: 'Position on the corners:',
                 value: _topLineValues[NipLinePosType.corners.index],
                 units: '°',
                 step: 1.0,
                 onBeforeChanging: (double value) {
-                  var newValue = value;
-                  if (newValue < -180.0)
-                    newValue = 180.0;
-                  else if (newValue > 180.0)
-                    newValue = -180.0;
-                  else if (newValue > -90.0 && newValue <= 0.0)
-                    newValue = -90.0;
-                  else if (newValue > 0.0 && newValue < 90.0) newValue = 90.0;
-
-                  return newValue;
+                  if (value < -180.0) value = 180.0;
+                  else if (value > 180.0) value = -180.0;
+                  else if (value > -90.0 && value <= 0.0) value = -90.0;
+                  else if (value > 0.0 && value < 90.0) value = 90.0;
+                  return value;
                 },
                 onChanged: (double value) {
                   setState(() {
@@ -1674,7 +1652,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Value(
-                caption: Text('Type of position:'),
+                caption: 'Type of position:',
                 value: _bottomLine.posType.index.toDouble(),
                 min: 0.0,
                 max: (NipLinePosType.values.length - 1).toDouble(),
@@ -1696,7 +1674,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Angle of line:'),
+                caption: 'Angle of line:',
                 value: _bottomLineValues[NipLinePosType.angle.index],
                 units: '°',
                 min: -90.0,
@@ -1716,7 +1694,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Position on the side:'),
+                caption: 'Position on the side:',
                 value: _bottomLineValues[NipLinePosType.pos.index],
                 units: 'dp',
                 step: 1.0,
@@ -1734,7 +1712,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Offset from the nip:'),
+                caption: 'Offset from the nip:',
                 value: _bottomLineValues[NipLinePosType.offset.index],
                 units: 'dp',
                 step: 1.0,
@@ -1752,23 +1730,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Value(
-                caption: Text('Position on the corners:'),
+                caption: 'Position on the corners:',
                 value: _bottomLineValues[NipLinePosType.corners.index],
                 units: '°',
                 step: 1.0,
+                onBeforeChanging: (double value) {
+                  if (value < -180.0) value = 180.0;
+                  else if (value > 180.0) value = -180.0;
+                  else if (value > -90.0 && value <= 0.0) value = -90.0;
+                  else if (value > 0.0 && value < 90.0) value = 90.0;
+                  return value;
+                },
                 onChanged: (double value) {
                   setState(() {
-                    /*if (value > -90.0 && value < 90.0) {
-                      value = value > _bottomLineValues[NipLinePosType.corner.index] ? 90.0 : -90.0;
-                    } else*/
-                    if (value < -180.0)
-                      value = 180.0;
-                    else if (value > 180.0)
-                      value = -180.0;
-                    else if (value > -90.0 && value <= 0.0)
-                      value = -90.0;
-                    else if (value > 0.0 && value < 90.0) value = 90.0;
-
                     _bottomLineValues[NipLinePosType.corners.index] = value;
                     _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.corners, value);
                   });
