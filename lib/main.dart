@@ -10,7 +10,9 @@ import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
 
-final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
+//final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
+//final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
+final primarySwatch = Colors.blue;
 MaterialColor cursorSwatch;
 
 MaterialColor createSwatch(Color color) {
@@ -773,32 +775,73 @@ class _ValueState extends State<Value> {
       onFocusChange: (focused) {
         if (!focused) setNewValue(convertToValue(_controller.text) ?? _value, true);
       },
-      child: TextField(
-        readOnly: widget.onConvertToText != null,
-        controller: _controller,
-        focusNode: _focusNode,
-        textAlign: widget.textAlign,
-        decoration: InputDecoration(
-          fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
-          filled: true,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
-          border: OutlineInputBorder(),
-          enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: _errorText == null ? Colors.grey[600] : Theme.of(context).errorColor)),
-          focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
-                  width: 2.0)),
-          suffix: Text(widget.units ?? ''),
-        ),
-        keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
-        onChanged: (str) {
-          setNewValue(convertToValue(str) ?? _value, false);
-        },
-        onSubmitted: (str) {
-          setNewValue(convertToValue(str) ?? _value, true);
-        },
+      child: Stack(
+        children: <Widget>[
+          TextField(
+            readOnly: widget.onConvertToText != null,
+            controller: _controller,
+            focusNode: _focusNode,
+            textAlign: widget.textAlign,
+            decoration: InputDecoration(
+              fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
+              filled: true,
+              errorText: _errorText,
+//              isDense: true,
+//              contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
+              contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+              prefix: SizedBox(width: 44,),
+              suffix: Wrap(
+                children: <Widget>[
+                  Text(widget.units ?? ''),
+                  SizedBox(width: 44),
+                ],
+              ),
+              border: OutlineInputBorder(),
+//              enabledBorder: OutlineInputBorder(
+//                  borderSide: BorderSide(color: _errorText == null ? Colors.grey[600] : Theme.of(context).errorColor)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
+                      width: 2.0
+                  )
+              ),
+            ),
+            keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
+            onChanged: (str) {
+              setNewValue(convertToValue(str) ?? _value, false);
+            },
+            onSubmitted: (str) {
+              setNewValue(convertToValue(str) ?? _value, true);
+            },
+          ),
+          Positioned(
+            top: 0.0,
+            left: 4.0,
+            child: SizedBox(
+              width: 40.0,
+              child: FlatButton(
+                padding: EdgeInsets.zero,
+//                color: Theme.of(context).primaryColor,
+                child: Text(widget.onConvertToText == null ? '–' : '<', style: TextStyle(fontSize: 20)),
+                onPressed: () => change(-widget.step),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0.0,
+            right: 4.0,
+//            alignment: Alignment.topRight,
+            child: SizedBox(
+              width: 40.0,
+              child: FlatButton(
+                padding: EdgeInsets.zero,
+//                color: Theme.of(context).primaryColor,
+                child: Text(widget.onConvertToText == null ? '+' : '>', style: TextStyle(fontSize: 20)),
+                onPressed: () => change(widget.step),
+              ),
+            ),
+          ),
+        ],
       ),
     );
 
@@ -807,25 +850,25 @@ class _ValueState extends State<Value> {
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
         Expanded(child: textField),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: SizedBox(
-            width: 40,
-            child: RaisedButton(
-              color: Theme.of(context).primaryColor,
-              child: Text(widget.onConvertToText == null ? '–' : '<'),
-              onPressed: () => change(-widget.step),
-            ),
-          ),
-        ),
-        SizedBox(
-          width: 40,
-          child: RaisedButton(
-            color: Theme.of(context).primaryColor,
-            child: Text(widget.onConvertToText == null ? '+' : '>'),
-            onPressed: () => change(widget.step),
-          ),
-        ),
+//        Padding(
+//          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+//          child: SizedBox(
+//            width: 40,
+//            child: RaisedButton(
+//              color: Theme.of(context).primaryColor,
+//              child: Text(widget.onConvertToText == null ? '–' : '<'),
+//              onPressed: () => change(-widget.step),
+//            ),
+//          ),
+//        ),
+//        SizedBox(
+//          width: 40,
+//          child: RaisedButton(
+//            color: Theme.of(context).primaryColor,
+//            child: Text(widget.onConvertToText == null ? '+' : '>'),
+//            onPressed: () => change(widget.step),
+//          ),
+//        ),
       ],
     );
 
@@ -855,10 +898,10 @@ class _ValueState extends State<Value> {
                 ),
               ),
               input,
-              Visibility(
-                visible: _errorText != null,
-                child: Text(_errorText ?? '', style: TextStyle(fontSize: 12.0, color: Theme.of(context).errorColor)),
-              ),
+//              Visibility(
+//                visible: _errorText != null,
+//                child: Text(_errorText ?? '', style: TextStyle(fontSize: 12.0, color: Theme.of(context).errorColor)),
+//              ),
             ],
           );
   }
@@ -1316,7 +1359,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return Material(
       elevation: 2.0,
 //        color: Colors.lime.shade100.withAlpha(224),
-      color: primarySwatch[200].withAlpha(160),
+      color: Colors.white.withAlpha(160),
       child: ListView(
         children: <Widget>[
           //              Row(
