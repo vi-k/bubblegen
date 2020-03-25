@@ -531,7 +531,6 @@ class RenderBubble extends RenderProxyBox {
   CustomBubble get bubble => _bubble;
 
   set bubble(CustomBubble bubble) {
-    print('set bubble');
     assert(bubble != null);
     if (_bubble.scale != bubble.scale || _bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
       markNeedsLayout();
@@ -581,7 +580,7 @@ class RenderBubble extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    print('paint $this');
+//    print('paint $this');
     if (child == null) return;
 
     var pi = BubblePaintInfo();

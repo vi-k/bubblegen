@@ -1,4 +1,4 @@
-//import 'dart:math' as math;
+import 'dart:math' as math;
 //import 'dart:ui' as ui;
 
 import 'package:bubble_demo/bubble.dart';
@@ -10,9 +10,8 @@ import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
 
-//final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
-//final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
-final primarySwatch = Colors.blue;
+final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
+//final primarySwatch = Colors.blue;
 MaterialColor cursorSwatch;
 
 MaterialColor createSwatch(Color color) {
@@ -662,8 +661,11 @@ class Value extends StatefulWidget {
 
 class _ValueState extends State<Value> {
   double _value;
+  double _savedValue;
+  Offset _savedPos;
   TextEditingController _controller;
   FocusNode _focusNode;
+  var _focused = false;
   String _errorText;
   static const _buttonWidth = 36.0;
   static const _buttonPadding = 4.0;
@@ -689,21 +691,23 @@ class _ValueState extends State<Value> {
     return double.parse(value.toStringAsFixed(fractionDigits));
   }
 
-  void change(double diff) {
-    final floorValue = floor(_value, widget.fractionDigits);
+  void step(int steps, {double value}) {
+    if (value == null) value = _value;
 
     // Если значение не выровнено по границе шага, то выравниваем в соответствующую сторону
-    var value = _value;
-    if (floorValue == value)
-      value = floor(value + diff, widget.fractionDigits);
-    else if (diff < 0)
-      value = floorValue;
-    else if (diff > 0) value = floor(floorValue + diff, widget.fractionDigits);
+    final floorValue = floor(value, widget.fractionDigits);
+    var newValue = value;
+    if (newValue == floorValue) {
+      newValue = floor(newValue + steps * widget.step, widget.fractionDigits);
+    } else if (steps < 0) {
+      newValue = floorValue + (steps + 1) * widget.step;
+    } else if (steps > 0) {
+      newValue = floor(floorValue + steps * widget.step, widget.fractionDigits);
+    }
 
-    setNewValue(value, true);
-
-    _focusNode.requestFocus();
-    _focusNode.unfocus();
+    setNewValue(newValue, true);
+//    _focusNode.requestFocus();
+//    _focusNode.unfocus();
   }
 
   void setNewValue(double value, bool correctTextField) {
@@ -769,40 +773,73 @@ class _ValueState extends State<Value> {
 
     final input = FocusableActionDetector(
       onFocusChange: (focused) {
+        print('onFocusChange $this: $focused');
+        setState(() {
+          _focused = focused;
+        });
         if (!focused) setNewValue(convertToValue(_controller.text), false);
       },
       child: Stack(
         children: <Widget>[
-          TextField(
-            readOnly: widget.onConvertToText != null,
-            controller: _controller,
-            focusNode: _focusNode,
-            textAlign: widget.textAlign,
-            decoration: InputDecoration(
-              fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
-              filled: true,
-              errorText: _errorText,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
-              prefix: SizedBox(width: _buttonWidth + _buttonPadding,),
-              suffix: Padding(
-                padding: EdgeInsets.only(right: _buttonPadding +_buttonWidth + _buttonPadding),
-                child: Text(widget.units ?? ''),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onVerticalDragStart: () {
+              print('onVerticalDragStart: $this focused=$_focused');
+              if (_focused) return
+                (details) {
+                  print('focused: $_focused');
+                  print('dragStart: ${details.localPosition} $_savedPos');
+                  _savedPos = details.localPosition;
+                  _savedValue = _value;
+                };
+              return null;
+            }()
+              ,
+            onVerticalDragUpdate: () {
+              print('onVerticalDragUpdate: $this focused=$_focused');
+              if (_focused) return
+                (details) {
+                  print('focused: $_focused');
+                  print('dragUpdate: ${details.localPosition} $_savedPos');
+                  var offset = details.localPosition - _savedPos;
+                  var steps = (offset.distance / 4.0).floor();
+                  if (offset.dy >= 0) steps = -steps;
+                  step(steps, value: _savedValue);
+                };
+              return null;
+            }()
+            ,
+            child: TextField(
+              readOnly: widget.onConvertToText != null,
+              controller: _controller,
+              focusNode: _focusNode,
+              textAlign: widget.textAlign,
+              decoration: InputDecoration(
+                fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
+                filled: true,
+                errorText: _errorText,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
+                prefix: SizedBox(width: _buttonWidth + _buttonPadding,),
+                suffix: Padding(
+                  padding: EdgeInsets.only(right: _buttonPadding +_buttonWidth + _buttonPadding),
+                  child: Text(widget.units ?? ''),
+                ),
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
+                        width: 2.0
+                    )
+                ),
               ),
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
-                      width: 2.0
-                  )
-              ),
+              keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
+              onChanged: (str) {
+                setNewValue(convertToValue(str), false);
+              },
+              onSubmitted: (str) {
+                setNewValue(convertToValue(str), false);
+              },
             ),
-            keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
-            onChanged: (str) {
-              setNewValue(convertToValue(str), false);
-            },
-            onSubmitted: (str) {
-              setNewValue(convertToValue(str), false);
-            },
           ),
           Positioned(
             left: _buttonPadding,
@@ -810,38 +847,15 @@ class _ValueState extends State<Value> {
               width: _buttonWidth,
               child: FlatButton(
                 padding: EdgeInsets.zero,
-                color: primarySwatch[200],
+//                color: primarySwatch[200],
                 child: Text(widget.onConvertToText == null ? '–' : '<', style: TextStyle(fontSize: 20.0)),
-                onPressed: () => change(-widget.step),
+                onPressed: () => step(-1),
               ),
             ),
           ),
-          Positioned(
-            right: _buttonPadding,
-            child: SizedBox(
-              width: _buttonWidth,
-              child: GestureDetector(
-                // behavior: HitTestBehavior.translucent,
-                // onTap: () {
-                //   print('!!!!!!!!!!!!!!!!!11 onTap()');
-                // },
-                // onVerticalDragStart: (details) {
-                //   _errorText = 'dragStart';
-                // },
-                // onVerticalDragEnd: (details) {
-                //   _errorText = 'dragEnd';
-                // },
-                // onVerticalDragUpdate: (details) {
-                //   _errorText = 'dragUpdate';
-                // },
-                child: FlatButton(
-                  padding: EdgeInsets.zero,
-                  color: primarySwatch[200],
-                  child: Text(widget.onConvertToText == null ? '+' : '>', style: TextStyle(fontSize: 20.0)),
-                  onPressed: () => change(widget.step),
-                ),
-              ),
-            ),
+          Align(
+            alignment: Alignment.topRight,
+            child: Container(color: Colors.blue, child: Text('a')),
           ),
         ],
       ),
