@@ -670,7 +670,7 @@ class _ValueState extends State<Value> {
   String _errorText;
   static const _fieldHeight = 48.0;
   static const _buttonWidth = 40.0;
-  static const _contentPadding = 0.0;
+  static const _contentPadding = 4.0;
   static const _stepDistance = 8.0;
 
   @override
@@ -795,9 +795,9 @@ class _ValueState extends State<Value> {
       child: Material(
         color: _errorText != null
           ? Theme.of(context).errorColor.withAlpha(192)
-          : _focused
+          : _focusNode.hasFocus
             ? Theme.of(context).accentColor.withAlpha(192)
-            : Theme.of(context).primaryColor,
+            : Theme.of(context).primaryColor.withAlpha(192),
 //        color: Theme.of(context).primaryColor,
 //                color: Colors.transparent,
         clipBehavior: Clip.antiAlias,
@@ -809,13 +809,13 @@ class _ValueState extends State<Value> {
         ),
         child: InkWell(
           onTap: () => step(left ? -1 : 1),
-//          highlightColor: Theme.of(context).accentColor,
+          highlightColor: Theme.of(context).accentColor,
           child: Container(
             height: _fieldHeight,
             width: _buttonWidth,
             child: Center(
               child: Text(
-                widget.onConvertToText == null ? (left ? '-' : '+') : left ? '<' : '>',
+                widget.onConvertToText == null ? (left ? '–' : '+') : left ? '<' : '>',
                 style: const TextStyle(fontSize: 20.0)
               )
             )
@@ -848,14 +848,13 @@ class _ValueState extends State<Value> {
           TextField(
             readOnly: widget.onConvertToText != null,
             controller: _controller,
-//              focusNode: _focusNode,
             textAlign: widget.textAlign,
             decoration: InputDecoration(
               fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
               filled: true,
               errorText: _errorText,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
-              prefix: SizedBox(width: _buttonWidth + _contentPadding,),
+              contentPadding: EdgeInsets.zero,
+              prefix: SizedBox(width: _buttonWidth),
               suffix: Padding(
                 padding: EdgeInsets.only(right: _contentPadding + _buttonWidth),
                 child: Text(widget.units ?? ''),
@@ -863,7 +862,7 @@ class _ValueState extends State<Value> {
               border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                        color: _errorText == null ? Theme.of(context).accentColor : Theme.of(context).errorColor,
+                        color: _errorText != null ? Theme.of(context).errorColor : Theme.of(context).accentColor,
                         width: 2.0
                     )
                 ),
