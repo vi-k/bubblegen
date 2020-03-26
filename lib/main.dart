@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+//import 'dart:math' as math;
 //import 'dart:ui' as ui;
 
 import 'package:bubble_demo/bubble.dart';
@@ -41,9 +41,10 @@ class MyApp extends StatelessWidget {
       title: 'Bubble Demo',
       theme: ThemeData(
         primarySwatch: primarySwatch,
+//        accentColor: Colors.blue,
         cursorColor: cursorSwatch[500],
-        textSelectionColor: cursorSwatch[200],
-        textSelectionHandleColor: cursorSwatch[400],
+//        textSelectionColor: cursorSwatch[200],
+//        textSelectionHandleColor: cursorSwatch[400],
       ),
       home: MyHomePage(title: 'Bubble Demo'),
     );
@@ -667,8 +668,10 @@ class _ValueState extends State<Value> {
   FocusNode _focusNode;
   var _focused = false;
   String _errorText;
-  static const _buttonWidth = 36.0;
-  static const _buttonPadding = 4.0;
+  static const _fieldHeight = 48.0;
+  static const _buttonWidth = 40.0;
+  static const _contentPadding = 0.0;
+  static const _stepDistance = 8.0;
 
   @override
   void initState() {
@@ -762,6 +765,62 @@ class _ValueState extends State<Value> {
     return double.tryParse(value);
   }
 
+  Widget getButton({bool left}) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragStart: () {
+        print('onVerticalDragStart: $this focused=$_focused');
+        if (_focused) return
+              (details) {
+            print('focused: $_focused');
+            print('dragStart: ${details.localPosition} $_savedPos');
+            _savedPos = details.localPosition;
+            _savedValue = _value;
+          };
+        return null;
+      }(),
+      onVerticalDragUpdate: () {
+        print('onVerticalDragUpdate: $this focused=$_focused');
+        if (_focused) return
+              (details) {
+            print('focused: $_focused');
+            print('dragUpdate: ${details.localPosition} $_savedPos');
+            var offset = details.localPosition - _savedPos;
+            var steps = (offset.distance / _stepDistance).floor();
+            if (offset.dy >= 0) steps = -steps;
+            step(steps, value: _savedValue);
+          };
+        return null;
+      }(),
+      child: Material(
+        color: _errorText == null ? Theme.of(context).primaryColor : Theme.of(context).errorColor.withAlpha(192),
+//        color: Theme.of(context).primaryColor,
+//                color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+//            side: BorderSide(color: _focused ? Theme.of(context).cursorColor : Colors.grey[600]),
+          borderRadius: left
+            ? const BorderRadius.only(topLeft: const Radius.circular(4.0), bottomLeft: const Radius.circular(4.0))
+            : const BorderRadius.only(topRight: const Radius.circular(4.0), bottomRight: const Radius.circular(4.0))
+        ),
+        child: InkWell(
+          onTap: () => step(left ? -1 : 1),
+//          highlightColor: Theme.of(context).accentColor,
+          child: Container(
+            height: _fieldHeight,
+            width: _buttonWidth,
+            child: Center(
+              child: Text(
+                widget.onConvertToText == null ? (left ? '-' : '+') : left ? '<' : '>',
+                style: const TextStyle(fontSize: 20.0)
+              )
+            )
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('build $this');
@@ -771,7 +830,8 @@ class _ValueState extends State<Value> {
       _controller.text = convertToText(_value);
     }
 
-    final input = FocusableActionDetector(
+    final input = Focus(
+      focusNode: _focusNode,
       onFocusChange: (focused) {
         print('onFocusChange $this: $focused');
         setState(() {
@@ -802,7 +862,7 @@ class _ValueState extends State<Value> {
                   print('focused: $_focused');
                   print('dragUpdate: ${details.localPosition} $_savedPos');
                   var offset = details.localPosition - _savedPos;
-                  var steps = (offset.distance / 4.0).floor();
+                  var steps = (offset.distance / _stepDistance).floor();
                   if (offset.dy >= 0) steps = -steps;
                   step(steps, value: _savedValue);
                 };
@@ -812,25 +872,25 @@ class _ValueState extends State<Value> {
             child: TextField(
               readOnly: widget.onConvertToText != null,
               controller: _controller,
-              focusNode: _focusNode,
+//              focusNode: _focusNode,
               textAlign: widget.textAlign,
               decoration: InputDecoration(
                 fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
                 filled: true,
                 errorText: _errorText,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
-                prefix: SizedBox(width: _buttonWidth + _buttonPadding,),
+                prefix: SizedBox(width: _buttonWidth + _contentPadding,),
                 suffix: Padding(
-                  padding: EdgeInsets.only(right: _buttonPadding +_buttonWidth + _buttonPadding),
+                  padding: EdgeInsets.only(right: _contentPadding + _buttonWidth),
                   child: Text(widget.units ?? ''),
                 ),
                 border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
-                        width: 2.0
-                    )
-                ),
+//                focusedBorder: OutlineInputBorder(
+//                    borderSide: BorderSide(
+//                        color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
+//                        width: 2.0
+//                    )
+//                ),
               ),
               keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
               onChanged: (str) {
@@ -841,21 +901,13 @@ class _ValueState extends State<Value> {
               },
             ),
           ),
-          Positioned(
-            left: _buttonPadding,
-            child: SizedBox(
-              width: _buttonWidth,
-              child: FlatButton(
-                padding: EdgeInsets.zero,
-//                color: primarySwatch[200],
-                child: Text(widget.onConvertToText == null ? '–' : '<', style: TextStyle(fontSize: 20.0)),
-                onPressed: () => step(-1),
-              ),
-            ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: getButton(left: true),
           ),
           Align(
             alignment: Alignment.topRight,
-            child: Container(color: Colors.blue, child: Text('a')),
+            child: getButton(left: false),
           ),
         ],
       ),
@@ -885,8 +937,8 @@ class _ValueState extends State<Value> {
               Visibility(
                 visible: widget.caption != null,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: _buttonPadding, right: _buttonPadding, top: 6.0, bottom: 2.0),
-                  child: Text(widget.caption + ' $_value'),
+                  padding: const EdgeInsets.only(left: _contentPadding, right: _contentPadding, top: 6.0, bottom: 2.0),
+                  child: Text(widget.caption),
                 ),
               ),
               input,
@@ -1523,7 +1575,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               units: '%',
               min: 0.0,
               max: 100.0,
-              step: 10.0,
+              step: 1.0,
               onChanged: (double value) {
                 setState(() {
                   _nipOffset = NipOffset(relative: value / 100.0, absolute: _nipOffset.absolute);
