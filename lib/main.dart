@@ -3,6 +3,7 @@
 
 import 'package:bubble_demo/bubble.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -666,7 +667,7 @@ class _ValueState extends State<Value> {
   Offset _savedPos;
   TextEditingController _controller;
   FocusNode _focusNode;
-  var _focused = false;
+//  var _focused = false;
   String _errorText;
   static const _fieldHeight = 48.0;
   static const _buttonWidth = 40.0;
@@ -709,15 +710,13 @@ class _ValueState extends State<Value> {
     }
 
     setNewValue(newValue, true);
-//    _focusNode.requestFocus();
-//    _focusNode.unfocus();
+    if (!_focusNode.hasFocus) _focusNode.requestFocus();
   }
 
   void setNewValue(double value, bool correctTextField) {
     String errorText;
 
     var correctedValue = value;
-    var setValue = true;
 
     if (correctedValue == null) {
       correctedValue = _value;
@@ -733,7 +732,6 @@ class _ValueState extends State<Value> {
       if (correctedValue2 != correctedValue) {
         correctedValue = correctedValue2;
         errorText = 'value incorrect';
-        setValue = false;
       }
     }
 
@@ -746,7 +744,7 @@ class _ValueState extends State<Value> {
       _value = widget.onConvertToText == null ? convertToValue(str) : correctedValue;
       widget.onChanged(_value);
       errorText = null;
-    } else if (correctedValue != _value && setValue) {
+    } else if (correctedValue != _value && errorText == null) {
       _value = correctedValue;
       widget.onChanged(_value);
     }
@@ -768,28 +766,33 @@ class _ValueState extends State<Value> {
   Widget getButton({bool left}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
+      dragStartBehavior: DragStartBehavior.down,
       onVerticalDragStart: () {
-        print('onVerticalDragStart: $this focused=$_focused');
-        if (_focused) return
+//        print('onVerticalDragStart: $this focused=$_focused');
+        if (_focusNode.hasFocus) return
               (details) {
-            print('focused: $_focused');
-            print('dragStart: ${details.localPosition} $_savedPos');
             _savedPos = details.localPosition;
             _savedValue = _value;
           };
         return null;
       }(),
       onVerticalDragUpdate: () {
-        print('onVerticalDragUpdate: $this focused=$_focused');
-        if (_focused) return
+//        print('onVerticalDragUpdate: $this focused=$_focused');
+        if (_focusNode.hasFocus) return
               (details) {
-            print('focused: $_focused');
-            print('dragUpdate: ${details.localPosition} $_savedPos');
             var offset = details.localPosition - _savedPos;
             var steps = (offset.distance / _stepDistance).floor();
             if (offset.dy >= 0) steps = -steps;
             step(steps, value: _savedValue);
           };
+        return null;
+      }(),
+      onVerticalDragCancel: () {
+//        print('onVerticalDragCancel: $this focused=$_focused');
+        return null;
+      }(),
+      onVerticalDragEnd: () {
+//        print('onVerticalDragEnd: $this focused=$_focused');
         return null;
       }(),
       child: Material(
@@ -837,11 +840,7 @@ class _ValueState extends State<Value> {
     final input = Focus(
       focusNode: _focusNode,
       onFocusChange: (focused) {
-        print('onFocusChange $this: $focused');
-        setState(() {
-          _focused = focused;
-        });
-        if (!focused) setNewValue(convertToValue(_controller.text), false);
+        setState(() {});
       },
       child: Stack(
         children: <Widget>[
