@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       title: 'Bubble Demo',
       theme: ThemeData(
         primarySwatch: primarySwatch,
-//        accentColor: Colors.blue,
+        accentColor: Colors.blue,
         cursorColor: cursorSwatch[500],
 //        textSelectionColor: cursorSwatch[200],
 //        textSelectionHandleColor: cursorSwatch[400],
@@ -793,12 +793,16 @@ class _ValueState extends State<Value> {
         return null;
       }(),
       child: Material(
-        color: _errorText == null ? Theme.of(context).primaryColor : Theme.of(context).errorColor.withAlpha(192),
+        color: _errorText != null
+          ? Theme.of(context).errorColor.withAlpha(192)
+          : _focused
+            ? Theme.of(context).accentColor.withAlpha(192)
+            : Theme.of(context).primaryColor,
 //        color: Theme.of(context).primaryColor,
 //                color: Colors.transparent,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-//            side: BorderSide(color: _focused ? Theme.of(context).cursorColor : Colors.grey[600]),
+//          side: BorderSide(color: _focused ? Theme.of(context).cursorColor : Colors.grey[600]),
           borderRadius: left
             ? const BorderRadius.only(topLeft: const Radius.circular(4.0), bottomLeft: const Radius.circular(4.0))
             : const BorderRadius.only(topRight: const Radius.circular(4.0), bottomRight: const Radius.circular(4.0))
@@ -841,65 +845,36 @@ class _ValueState extends State<Value> {
       },
       child: Stack(
         children: <Widget>[
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onVerticalDragStart: () {
-              print('onVerticalDragStart: $this focused=$_focused');
-              if (_focused) return
-                (details) {
-                  print('focused: $_focused');
-                  print('dragStart: ${details.localPosition} $_savedPos');
-                  _savedPos = details.localPosition;
-                  _savedValue = _value;
-                };
-              return null;
-            }()
-              ,
-            onVerticalDragUpdate: () {
-              print('onVerticalDragUpdate: $this focused=$_focused');
-              if (_focused) return
-                (details) {
-                  print('focused: $_focused');
-                  print('dragUpdate: ${details.localPosition} $_savedPos');
-                  var offset = details.localPosition - _savedPos;
-                  var steps = (offset.distance / _stepDistance).floor();
-                  if (offset.dy >= 0) steps = -steps;
-                  step(steps, value: _savedValue);
-                };
-              return null;
-            }()
-            ,
-            child: TextField(
-              readOnly: widget.onConvertToText != null,
-              controller: _controller,
+          TextField(
+            readOnly: widget.onConvertToText != null,
+            controller: _controller,
 //              focusNode: _focusNode,
-              textAlign: widget.textAlign,
-              decoration: InputDecoration(
-                fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
-                filled: true,
-                errorText: _errorText,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
-                prefix: SizedBox(width: _buttonWidth + _contentPadding,),
-                suffix: Padding(
-                  padding: EdgeInsets.only(right: _contentPadding + _buttonWidth),
-                  child: Text(widget.units ?? ''),
-                ),
-                border: OutlineInputBorder(),
-//                focusedBorder: OutlineInputBorder(
-//                    borderSide: BorderSide(
-//                        color: _errorText == null ? Theme.of(context).cursorColor : Theme.of(context).errorColor,
-//                        width: 2.0
-//                    )
-//                ),
+            textAlign: widget.textAlign,
+            decoration: InputDecoration(
+              fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
+              filled: true,
+              errorText: _errorText,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
+              prefix: SizedBox(width: _buttonWidth + _contentPadding,),
+              suffix: Padding(
+                padding: EdgeInsets.only(right: _contentPadding + _buttonWidth),
+                child: Text(widget.units ?? ''),
               ),
-              keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
-              onChanged: (str) {
-                setNewValue(convertToValue(str), false);
-              },
-              onSubmitted: (str) {
-                setNewValue(convertToValue(str), false);
-              },
+              border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: _errorText == null ? Theme.of(context).accentColor : Theme.of(context).errorColor,
+                        width: 2.0
+                    )
+                ),
             ),
+            keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
+            onChanged: (str) {
+              setNewValue(convertToValue(str), false);
+            },
+            onSubmitted: (str) {
+              setNewValue(convertToValue(str), false);
+            },
           ),
           Align(
             alignment: Alignment.topLeft,
