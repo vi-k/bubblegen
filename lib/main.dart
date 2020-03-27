@@ -661,18 +661,21 @@ class Value extends StatefulWidget {
   _ValueState createState() => _ValueState();
 }
 
+enum _ValueButton { no, left, right}
+
 class _ValueState extends State<Value> {
+  static const _fieldHeight = 48.0; // Высота поля
+  static const _buttonWidth = 40.0; // Ширина кнопки
+  static const _contentPadding = 4.0; // Отступы от края
+  static const _swipeStep = 8.0; // Шаг свайпа, за который происходит измение значения на один шаг
+
   double _value;
-  double _savedValue;
-  Offset _savedPos;
+  double _savedValue; // Значение, сохранённое для свайпа
+  Offset _savedPos; // Начальная позиция свайпа
+  _ValueButton _swipeButton = _ValueButton.no; // Активная кнопка свайпа
   TextEditingController _controller;
   FocusNode _focusNode;
-//  var _focused = false;
   String _errorText;
-  static const _fieldHeight = 48.0;
-  static const _buttonWidth = 40.0;
-  static const _contentPadding = 4.0;
-  static const _stepDistance = 8.0;
 
   @override
   void initState() {
@@ -699,17 +702,18 @@ class _ValueState extends State<Value> {
     if (value == null) value = _value;
 
     // Если значение не выровнено по границе шага, то выравниваем в соответствующую сторону
-    final floorValue = floor(value, widget.fractionDigits);
-    var newValue = value;
-    if (newValue == floorValue) {
-      newValue = floor(newValue + steps * widget.step, widget.fractionDigits);
-    } else if (steps < 0) {
-      newValue = floorValue + (steps + 1) * widget.step;
-    } else if (steps > 0) {
-      newValue = floor(floorValue + steps * widget.step, widget.fractionDigits);
+    if (_errorText == null) {
+      final floorValue = floor(value, widget.fractionDigits);
+      if (value == floorValue) {
+        value = floor(value + steps * widget.step, widget.fractionDigits);
+      } else if (steps < 0) {
+        value = floorValue + (steps + 1) * widget.step;
+      } else if (steps > 0) {
+        value = floor(floorValue + steps * widget.step, widget.fractionDigits);
+      }
     }
 
-    setNewValue(newValue, true);
+    setNewValue(value, true);
     if (!_focusNode.hasFocus) _focusNode.requestFocus();
   }
 
@@ -763,62 +767,56 @@ class _ValueState extends State<Value> {
     return double.tryParse(value);
   }
 
-  Widget getButton({bool left}) {
+  Widget getButton(_ValueButton button) {
+    assert(button == _ValueButton.left || button == _ValueButton.right);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       dragStartBehavior: DragStartBehavior.down,
-      onVerticalDragStart: () {
+      onVerticalDragStart: !_focusNode.hasFocus ? null : (details) {
 //        print('onVerticalDragStart: $this focused=$_focused');
-        if (_focusNode.hasFocus) return
-              (details) {
-            _savedPos = details.localPosition;
-            _savedValue = _value;
-          };
-        return null;
-      }(),
-      onVerticalDragUpdate: () {
+        _savedPos = details.localPosition;
+        _savedValue = _value;
+        setState(() => _swipeButton = button);
+      },
+      onVerticalDragUpdate: !_focusNode.hasFocus ? null : (details) {
 //        print('onVerticalDragUpdate: $this focused=$_focused');
-        if (_focusNode.hasFocus) return
-              (details) {
-            var offset = details.localPosition - _savedPos;
-            var steps = (offset.distance / _stepDistance).floor();
-            if (offset.dy >= 0) steps = -steps;
-            step(steps, value: _savedValue);
-          };
-        return null;
-      }(),
-      onVerticalDragCancel: () {
+          var offset = details.localPosition - _savedPos;
+          var steps = -(offset.dy / _swipeStep).floor();
+          if (button == _ValueButton.left && steps > 0 || button == _ValueButton.right && steps < 0) steps = 0;
+          step(steps, value: _savedValue);
+      },
+      onVerticalDragCancel: !_focusNode.hasFocus ? null : () {
 //        print('onVerticalDragCancel: $this focused=$_focused');
-        return null;
-      }(),
-      onVerticalDragEnd: () {
-//        print('onVerticalDragEnd: $this focused=$_focused');
-        return null;
-      }(),
+          setState(() => _swipeButton = _ValueButton.no);
+      },
+      onVerticalDragEnd: !_focusNode.hasFocus ? null : (details) {
+//        print('onVerticalDragEnd: $this');
+          setState(() => _swipeButton = _ValueButton.no);
+      },
       child: Material(
         color: _errorText != null
           ? Theme.of(context).errorColor.withAlpha(192)
-          : _focusNode.hasFocus
-            ? Theme.of(context).accentColor.withAlpha(192)
-            : Theme.of(context).primaryColor.withAlpha(192),
-//        color: Theme.of(context).primaryColor,
-//                color: Colors.transparent,
+          : _swipeButton == button
+            ? Theme.of(context).accentColor
+            : _focusNode.hasFocus
+              ? Theme.of(context).accentColor.withAlpha(192)
+              : Theme.of(context).primaryColor.withAlpha(192),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-//          side: BorderSide(color: _focused ? Theme.of(context).cursorColor : Colors.grey[600]),
-          borderRadius: left
+          borderRadius: button == _ValueButton.left
             ? const BorderRadius.only(topLeft: const Radius.circular(4.0), bottomLeft: const Radius.circular(4.0))
             : const BorderRadius.only(topRight: const Radius.circular(4.0), bottomRight: const Radius.circular(4.0))
         ),
         child: InkWell(
-          onTap: () => step(left ? -1 : 1),
+          onTap: () => step(button == _ValueButton.left ? -1 : 1),
           highlightColor: Theme.of(context).accentColor,
           child: Container(
             height: _fieldHeight,
             width: _buttonWidth,
             child: Center(
               child: Text(
-                widget.onConvertToText == null ? (left ? '–' : '+') : left ? '<' : '>',
+                widget.onConvertToText == null ? (button == _ValueButton.left ? '–' : '+') : (button == _ValueButton.left ? '<' : '>'),
                 style: const TextStyle(fontSize: 20.0)
               )
             )
@@ -832,10 +830,7 @@ class _ValueState extends State<Value> {
   Widget build(BuildContext context) {
     // print('build $this');
 
-    if (_value != widget.value) {
-      _value = widget.value;
-      _controller.text = convertToText(_value);
-    }
+    if (_value != widget.value) setNewValue(widget.value, true);
 
     final input = Focus(
       focusNode: _focusNode,
@@ -849,7 +844,7 @@ class _ValueState extends State<Value> {
             controller: _controller,
             textAlign: widget.textAlign,
             decoration: InputDecoration(
-              fillColor: widget.onConvertToText != null ? Colors.yellow[100] : Colors.white,
+              fillColor: widget.onConvertToText != null ? Colors.grey[300] : Colors.white,
               filled: true,
               errorText: _errorText,
               contentPadding: EdgeInsets.zero,
@@ -876,11 +871,11 @@ class _ValueState extends State<Value> {
           ),
           Align(
             alignment: Alignment.topLeft,
-            child: getButton(left: true),
+            child: getButton(_ValueButton.left),
           ),
           Align(
             alignment: Alignment.topRight,
-            child: getButton(left: false),
+            child: getButton(_ValueButton.right),
           ),
         ],
       ),
@@ -1322,46 +1317,46 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //              ),
 //            ),
 //          ),
-            PhysicalModel(
-              color: primarySwatch[200],
-              elevation: 8.0,
-              child: Container(
-                padding: EdgeInsets.all(4.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        const Text('Draft'),
-                        Switch(
-                          value: _drawDraft,
-                          onChanged: (bool value) {
-                            setState(() {
-                              _drawDraft = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    Value(
-                      caption: 'Scale:',
-                      horizontal: true,
-                      inputWidth: _settingsWidth - 8.0,
-                      value: _scale,
-                      units: 'x',
-                      min: 1.0,
-                      max: 16.0,
-                      step: 1.0,
-                      onChanged: (double value) {
-                        setState(() {
-                          _scale = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
+//            PhysicalModel(
+//              color: primarySwatch[200],
+//              elevation: 8.0,
+//              child: Container(
+//                padding: EdgeInsets.all(4.0),
+//                child: Row(
+//                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                  children: <Widget>[
+//                    Row(
+//                      children: <Widget>[
+//                        const Text('Draft'),
+//                        Switch(
+//                          value: _drawDraft,
+//                          onChanged: (bool value) {
+//                            setState(() {
+//                              _drawDraft = value;
+//                            });
+//                          },
+//                        ),
+//                      ],
+//                    ),
+//                    Value(
+//                      caption: 'Scale:',
+//                      horizontal: true,
+//                      inputWidth: _settingsWidth - 8.0,
+//                      value: _scale,
+//                      units: 'x',
+//                      min: 1.0,
+//                      max: 16.0,
+//                      step: 1.0,
+//                      onChanged: (double value) {
+//                        setState(() {
+//                          _scale = value;
+//                        });
+//                      },
+//                    ),
+//                  ],
+//                ),
+//              ),
+//            ),
           ],
         ),
       ),
@@ -1397,6 +1392,41 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             'View',
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Value(
+              caption: 'Draft:',
+              value: _drawDraft ? 1.0 : 0.0,
+              min: 0.0,
+              max: 1.0,
+              step: 1.0,
+              textAlign: TextAlign.center,
+              onChanged: (double value) {
+                setState(() {
+                  _drawDraft = value == 1.0;
+                });
+              },
+              onConvertToText: (value) {
+                return value == 1.0 ? 'show' : 'hide';
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Value(
+              caption: 'Scale:',
+              value: _scale,
+              units: 'x',
+              min: 1.0,
+              max: 32.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _scale = value;
+                });
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(4.0),
@@ -1494,7 +1524,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 value: _nipSide.index.toDouble() * 2.0 + (_inverse ? 1.0 : 0.0),
                 min: NipSide.minIndex.toDouble(),
                 max: NipSide.maxIndex.toDouble() * 2.0 + 1.0,
-                step: 1,
+                step: 1.0,
                 textAlign: TextAlign.center,
                 onChanged: (double value) {
                   setState(() {
@@ -1583,7 +1613,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 value: _topLine.posType.index.toDouble(),
                 min: 0.0,
                 max: (NipLinePosType.values.length - 1).toDouble(),
-                step: 1,
+                step: 1.0,
                 textAlign: TextAlign.center,
                 onChanged: (double value) {
                   setState(() {
@@ -1691,7 +1721,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 value: _bottomLine.posType.index.toDouble(),
                 min: 0.0,
                 max: (NipLinePosType.values.length - 1).toDouble(),
-                step: 1,
+                step: 1.0,
                 textAlign: TextAlign.center,
                 onChanged: (double value) {
                   setState(() {
