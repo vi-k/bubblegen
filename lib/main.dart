@@ -714,6 +714,7 @@ class _ValueState extends State<Value> {
     }
 
     setNewValue(value, true);
+    
     if (!_focusNode.hasFocus) _focusNode.requestFocus();
   }
 
@@ -773,6 +774,15 @@ class _ValueState extends State<Value> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       dragStartBehavior: DragStartBehavior.down,
+      onLongPress: () {
+        _focusNode.requestFocus();
+//        _swipeButton = button;
+      },
+//      onLongPressEnd: (d) {
+//        setState(() {
+//          _swipeButton = _ValueButton.no;
+//        });
+//      },
       onVerticalDragStart: !_focusNode.hasFocus ? null : (details) {
 //        print('onVerticalDragStart: $this focused=$_focused');
         _savedPos = details.localPosition;
@@ -817,7 +827,9 @@ class _ValueState extends State<Value> {
             child: Center(
               child: Text(
                 widget.onConvertToText == null ? (button == _ValueButton.left ? '–' : '+') : (button == _ValueButton.left ? '<' : '>'),
-                style: const TextStyle(fontSize: 20.0)
+                style: TextStyle(fontSize: 20.0,
+                    color: Colors.black.withAlpha(_value != (button == _ValueButton.left ? widget.min : widget.max) ? 255 : 48)
+                )
               )
             )
           ),
