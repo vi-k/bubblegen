@@ -1,6 +1,7 @@
 //import 'dart:math' as math;
 //import 'dart:ui' as ui;
 
+import 'package:bubblegen/BubbleDemo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -705,7 +706,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           controller: _tabController,
           children: <Widget>[
             Generator(),
-            const Text('Test #1'),
+            BubbleDemo(),
+//            const Text('Test #1'),
             const Text('Test #2'),
           ],
         ),
