@@ -1,11 +1,11 @@
 {
-    "name": "bubble_demo",
-    "short_name": "bubble_demo",
+    "name": "bubblegen",
+    "short_name": "bubblegen",
     "start_url": ".",
     "display": "minimal-ui",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "A Bubble generator.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

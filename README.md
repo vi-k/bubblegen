@@ -1,6 +1,6 @@
-# bubble_demo
+# bubblegen
 
-Demo for a flutter widget Bubble.
+A Bubble generator.
 
 ## Getting Started
 
