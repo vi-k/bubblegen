@@ -1,0 +1,741 @@
+import 'package:flutter/material.dart';
+
+import 'NumericField.dart';
+import 'bubble.dart';
+import 'main.dart';
+
+class Generator extends StatefulWidget {
+  Generator({Key key}) : super(key: key);
+
+  @override
+  _GeneratorState createState() => _GeneratorState();
+}
+
+class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+  static final _staticPadding = 20.0;
+  var _additionalPadding = 0.0;
+  var _showSettings = false;
+  static final _settingsWidth = 180.0;
+  AnimationController _settingsController;
+
+  var _height = 50.0;
+  var _width = 50.0;
+  var _elevation = 0.5;
+  var _scale = 6.0;
+  var _drawDraft = true;
+
+  // Whatsapp
+  var _radius = 6.0;
+  var _nipSide = NipSide.left;
+  var _inverse = false;
+  var _nipRadius = 1.5;
+  var _nipSize = 7.0;
+  var _nipOffset = NipOffset(absolute: 0.0);
+  var _topLine = NipLine.line(0.0);
+  var _topLineValues = [0.0, 0.0, 0.0, -90.0];
+  var _bottomLine = NipLine.line(53.0);
+  var _bottomLineValues = [53.0, 6.0, 3.0, -180.0];
+
+  // Telegram
+//  var _boxRadius = 12.0;
+//  var _nipWidth = 10.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
+//  var _startTopAngle = 0.0;
+//  var _finishTopPos = 0.0;
+//  var _finishTopAngle = 180.0;
+//  var _startBottomAngle = -10.0;
+//  var _finishBottomPos = 20.0;
+//  var _finishBottomAngle = 90.0;
+
+  // Viber
+//  var _radius = 20.0;
+//  var _nipSide = NipSide.left;
+//  var _nipRadius = 0.0;
+//  var _nipSize = 0.0;
+//  var _nipOffset = NipOffset();
+//  var _topLine = NipLine.lineToCorner(-90);
+//  var _bottomLine = NipLine.lineToCorner(-180);
+
+  // Sid chat
+//  var _boxRadius = 40.0;
+//  var _nipWidth = 6.0;
+//  var _nipRadius = 1.0;
+//  var _nipYOffset = 0.0;
+//  var _startTopAngle = -65.0;
+//  var _finishTopPos = -40.0;
+//  var _finishTopAngle = 192.0;
+//  var _startBottomAngle = -90.0;
+//  var _finishBottomPos = -65.0;
+//  var _finishBottomAngle = 140.0;
+
+  @override
+  void initState() {
+    print('initState: $this');
+
+    _settingsController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      reverseDuration: const Duration(milliseconds: 100),
+      animationBehavior: AnimationBehavior.normal,
+      vsync: this,
+    );
+
+    super.initState();
+  }
+
+  void toggleSettings() {
+    _showSettings = !_showSettings;
+    (_showSettings ? _settingsController.forward : _settingsController.reverse)();
+  }
+
+  EdgeInsets getAddingPadding(double scale) {
+    var padding = _additionalPadding * scale;
+    return _nipSide.isHorizontal
+        ? _inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
+        : _inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
+  }
+
+  Widget getSettings() {
+    return Material(
+      elevation: 2.0,
+//        color: Colors.lime.shade100.withAlpha(224),
+      color: Colors.white.withAlpha(160),
+      child: ListView(
+        children: <Widget>[
+          const Text(
+            'View',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: NumericField(
+              caption: 'Draft:',
+              value: _drawDraft ? 1.0 : 0.0,
+              min: 0.0,
+              max: 1.0,
+              step: 1.0,
+              textAlign: TextAlign.center,
+              onChanged: (double value) {
+                setState(() {
+                  _drawDraft = value == 1.0;
+                });
+              },
+              onConvertToText: (value) {
+                return value == 1.0 ? 'show' : 'hide';
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: NumericField(
+              caption: 'Scale:',
+              value: _scale,
+              units: 'x',
+              min: 1.0,
+              max: 32.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _scale = value;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: NumericField(
+              caption: 'Additional padding:',
+              value: _additionalPadding,
+              units: 'dp',
+              min: 0.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _additionalPadding = value;
+                });
+              },
+            ),
+          ),
+          const Divider(),
+          const Text(
+            'Box',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+//          Padding(
+//            padding: const EdgeInsets.all(4.0),
+//            child: Value(
+//              caption: 'Height:',
+//              value: _height,
+//              units: 'dp',
+//              min: 10.0,
+//              //max: 200,
+//              step: 1.0,
+//              onChanged: (double value) {
+//                setState(() {
+//                  _height = value;
+//                });
+//              },
+//            ),
+//          ),
+//          Padding(
+//            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+//            child: Value(
+//              caption: 'Width:',
+//              value: _width,
+//              units: 'dp',
+//              min: 10.0,
+//              step: 1.0,
+//              onChanged: (double value) {
+//                setState(() {
+//                  _width = value;
+//                });
+//              },
+//            ),
+//          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'Corner\'s radius:',
+              value: _radius,
+              units: 'dp',
+              min: 0.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _radius = value;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'Elevation:',
+              value: _elevation,
+              units: 'dp',
+              min: 0.0,
+              step: 0.1,
+              fractionDigits: 1,
+              onChanged: (double value) {
+                setState(() {
+                  _elevation = value;
+                });
+              },
+            ),
+          ),
+          const Divider(),
+          const Text(
+            'Nip',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+                caption: 'Side:',
+                value: _nipSide.index.toDouble() * 2.0 + (_inverse ? 1.0 : 0.0),
+                min: NipSide.minIndex.toDouble(),
+                max: NipSide.maxIndex.toDouble() * 2.0 + 1.0,
+                step: 1.0,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    _nipSide = NipSide.byIndex(index >> 1);
+                    _inverse = index % 2 == 1;
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.round();
+                  var nipSide = NipSide.byIndex(index >> 1);
+                  return nipSide.toString(onlyValue: true) + (index % 2 == 0 ? '' : nipSide.isHorizontal ? '↑' : '←');
+                }),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'Radius:',
+              value: _nipRadius,
+              units: 'dp',
+              min: 0.0,
+              step: 0.1,
+              fractionDigits: 1,
+              onChanged: (double value) {
+                setState(() {
+                  _nipRadius = value;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'Size:',
+              value: _nipSize,
+              units: 'dp',
+              min: 0.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _nipSize = value;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'Relative offset:',
+              value: _nipOffset.relative * 100.0,
+              units: '%',
+              min: 0.0,
+              max: 100.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _nipOffset = NipOffset(relative: value / 100.0, absolute: _nipOffset.absolute);
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'Absolute offset:',
+              value: _nipOffset.absolute,
+              units: 'dp',
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  _nipOffset = NipOffset(relative: _nipOffset.relative, absolute: value);
+                });
+              },
+            ),
+          ),
+          const Divider(),
+          const Text(
+            'Top line',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+                caption: 'Type of position:',
+                value: _topLine.posType.index.toDouble(),
+                min: 0.0,
+                max: (NipLinePosType.values.length - 1).toDouble(),
+                step: 1.0,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.values[index], _topLineValues[index]);
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.floor();
+                  return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
+                }),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.angle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Angle of line:',
+                value: _topLineValues[NipLinePosType.angle.index],
+                units: '°',
+                min: -90.0,
+                max: 90.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.angle.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.angle, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.pos,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Position on the side:',
+                value: _topLineValues[NipLinePosType.pos.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.pos.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.pos, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.offset,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Offset from the nip:',
+                value: _topLineValues[NipLinePosType.offset.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.offset.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.offset, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _topLine.posType == NipLinePosType.corners,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Position on the corners:',
+                value: _topLineValues[NipLinePosType.corners.index],
+                units: '°',
+                step: 1.0,
+                onBeforeChanging: (double value) {
+                  if (value < -180.0)
+                    value = 180.0;
+                  else if (value > 180.0)
+                    value = -180.0;
+                  else if (value > -90.0 && value <= 0.0)
+                    value = -90.0;
+                  else if (value > 0.0 && value < 90.0) value = 90.0;
+                  return value;
+                },
+                onChanged: (double value) {
+                  setState(() {
+                    _topLineValues[NipLinePosType.corners.index] = value;
+                    _topLine = NipLine(_topLine.lineType, NipLinePosType.corners, value);
+                  });
+                },
+              ),
+            ),
+          ),
+
+          const Divider(),
+          const Text(
+            'Bottom line',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+                caption: 'Type of position:',
+                value: _bottomLine.posType.index.toDouble(),
+                min: 0.0,
+                max: (NipLinePosType.values.length - 1).toDouble(),
+                step: 1.0,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.values[index], _bottomLineValues[index]);
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.floor();
+                  return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
+                }),
+          ),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.angle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Angle of line:',
+                value: _bottomLineValues[NipLinePosType.angle.index],
+                units: '°',
+                min: -90.0,
+                max: 90.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.angle.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.angle, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.pos,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Position on the side:',
+                value: _bottomLineValues[NipLinePosType.pos.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.pos.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.pos, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.offset,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Offset from the nip:',
+                value: _bottomLineValues[NipLinePosType.offset.index],
+                units: 'dp',
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.offset.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.offset, value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _bottomLine.posType == NipLinePosType.corners,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'Position on the corners:',
+                value: _bottomLineValues[NipLinePosType.corners.index],
+                units: '°',
+                step: 1.0,
+                onBeforeChanging: (double value) {
+                  if (value < -180.0)
+                    value = 180.0;
+                  else if (value > 180.0)
+                    value = -180.0;
+                  else if (value > -90.0 && value <= 0.0)
+                    value = -90.0;
+                  else if (value > 0.0 && value < 90.0) value = 90.0;
+                  return value;
+                },
+                onChanged: (double value) {
+                  setState(() {
+                    _bottomLineValues[NipLinePosType.corners.index] = value;
+                    _bottomLine = NipLine(_bottomLine.lineType, NipLinePosType.corners, value);
+                  });
+                },
+              ),
+            ),
+          ),
+
+//          const Divider(),
+//          NipLinePos(
+//            caption: 'Top line',
+//            nipLine: _topLine,
+//            onChanged: (nipLine) => setState(() {
+//              _topLine = nipLine;
+//            }),
+//          ),
+//          const Divider(),
+//          NipLinePos(
+//            caption: 'Bottom line',
+//            nipLine: _bottomLine,
+//            onChanged: (nipLine) => setState(() {
+//              _bottomLine = nipLine;
+//            }),
+//          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    print('build $this');
+
+    final animation = Tween(begin: _settingsWidth, end: 0.0).animate(_settingsController);
+
+    return Column(
+      children: <Widget>[
+        PhysicalModel(
+          color: primarySwatch[200],
+          elevation: 4.0,
+          child: Container(
+            padding: EdgeInsets.all(_staticPadding / 2.0),
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: getAddingPadding(1.0),
+                  child: Align(
+                    alignment:
+                        _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
+//                    child: const Text('test'),
+                    child: Bubble(
+                      radius:
+                          BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                      nipSide: _nipSide,
+                      inverse: _inverse,
+                      nipRadius: _nipRadius,
+                      nipSize: _nipSize,
+                      nipOffset: _nipOffset,
+                      topLine: _topLine,
+                      bottomLine: _bottomLine,
+                      color: Colors.white,
+                      elevation: _elevation,
+                      child: Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('Lorem ipsum dolor sit amet'),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: _staticPadding / 2.0) + getAddingPadding(1.0),
+                  child: Align(
+                    alignment:
+                        _nipSide.isLeft || _nipSide.isVertical && !_inverse ? Alignment.topLeft : Alignment.topRight,
+//                    child: const Text('test'),
+                    child: Bubble(
+                      radius:
+                          BubbleRadius(topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                      nipSide: _nipSide,
+                      inverse: _inverse,
+                      nipRadius: _nipRadius,
+                      nipSize: _nipSize,
+                      nipOffset: _nipOffset,
+                      topLine: _topLine,
+                      bottomLine: _bottomLine,
+                      color: Colors.white,
+                      elevation: _elevation,
+                      child: Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Stack(
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => toggleSettings(),
+                      child: Padding(
+                        padding: EdgeInsets.all(_staticPadding) + getAddingPadding(_scale),
+                        // child: const Text('TEST'),
+                        child: Bubble(
+                          scale: _scale,
+                          radius: BubbleRadius(
+                              topLeft: _radius, topRight: _radius, bottomLeft: _radius, bottomRight: _radius),
+                          nipSide: _nipSide,
+                          inverse: _inverse,
+                          nipRadius: _nipRadius,
+                          nipSize: _nipSize,
+                          nipOffset: _nipOffset,
+                          topLine: _topLine,
+                          bottomLine: _bottomLine,
+                          color: Colors.lightBlue,
+                          elevation: _elevation,
+                          drawDraft: _drawDraft,
+                          child: SizedBox(
+                            height: _height,
+                            width: _width,
+                            //                          child: Text('a a a a a')
+                          ),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        height: double.infinity,
+                        width: _settingsWidth,
+                        child: AnimatedBuilder(
+                          animation: animation,
+                          child: getSettings(),
+                          builder: (BuildContext context, Widget child) {
+                            return Visibility(
+                              visible: animation.value != _settingsWidth,
+                              child: Transform.translate(
+                                offset: Offset(animation.value, 0.0),
+                                child: child,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+//            PhysicalModel(
+//              color: primarySwatch[200],
+//              elevation: 8.0,
+//              child: Container(
+//                padding: EdgeInsets.all(4.0),
+//                child: Row(
+//                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                  children: <Widget>[
+//                    Row(
+//                      children: <Widget>[
+//                        const Text('Draft'),
+//                        Switch(
+//                          value: _drawDraft,
+//                          onChanged: (bool value) {
+//                            setState(() {
+//                              _drawDraft = value;
+//                            });
+//                          },
+//                        ),
+//                      ],
+//                    ),
+//                    Value(
+//                      caption: 'Scale:',
+//                      horizontal: true,
+//                      inputWidth: _settingsWidth - 8.0,
+//                      value: _scale,
+//                      units: 'x',
+//                      min: 1.0,
+//                      max: 16.0,
+//                      step: 1.0,
+//                      onChanged: (double value) {
+//                        setState(() {
+//                          _scale = value;
+//                        });
+//                      },
+//                    ),
+//                  ],
+//                ),
+//              ),
+//            ),
+      ],
+    );
+  }
+}
