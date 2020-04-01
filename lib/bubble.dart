@@ -458,33 +458,31 @@ class BubblePaintInfo {
   DraftInfo draft;
 }
 
-class CustomBubble extends SingleChildRenderObjectWidget {
-  CustomBubble({
-    this.child,
-    radius,
-    nipSide,
-    inverse,
-    nipRadius,
-    nipSize,
-    nipOffset,
-    color,
-    elevation,
-    shadowColor,
-    scale,
-    drawDraft,
-  })  : radius = radius ?? BubbleRadius.all(0.0),
-        nipSide = nipSide ?? NipSide.left,
-        inverse = inverse ?? false,
-        nipRadius = nipRadius ?? 0.0,
-        nipSize = nipSize ?? 0,
-        nipOffset = nipOffset ?? NipOffset(),
-        color = color ?? Colors.red,
-        elevation = elevation ?? 1.0,
-        scale = scale ?? 1.0,
-        shadowColor = shadowColor ?? Colors.black,
-        drawDraft = drawDraft ?? false;
+class BubbleStyle {
+  const BubbleStyle({
+    this.radius = const BubbleRadius.all(4.0),
+    this.nipSide = NipSide.left,
+    this.inverse = false,
+    this.nipRadius = 0.5,
+    this.nipSize = 7.0,
+    this.nipOffset = const NipOffset(),
+    this.color = Colors.white,
+    this.elevation = 0.5,
+    this.shadowColor = Colors.black,
+    this.strokeColor = Colors.orange,
+    this.strokeWidth = 0.0,
+  })  : assert(radius != null),
+        assert(nipSide != null),
+        assert(inverse != null),
+        assert(nipRadius != null),
+        assert(nipSize != null),
+        assert(nipOffset != null),
+        assert(color != null),
+        assert(elevation != null),
+        assert(shadowColor != null),
+        assert(strokeColor != null),
+        assert(strokeWidth != null);
 
-  final Widget child;
   final BubbleRadius radius;
   final NipSide nipSide;
   final bool inverse;
@@ -494,6 +492,55 @@ class CustomBubble extends SingleChildRenderObjectWidget {
   final Color color;
   final double elevation;
   final Color shadowColor;
+  final Color strokeColor;
+  final double strokeWidth;
+
+  BubbleStyle copyWith({
+      BubbleRadius radius,
+      NipSide nipSide,
+      bool inverse,
+      double nipRadius,
+      double nipSize,
+      NipOffset nipOffset,
+      Color color,
+      double elevation,
+      Color shadowColor,
+      Color strokeColor,
+      double strokeWidth,
+  }) {
+    return BubbleStyle(
+      radius: radius ?? this.radius,
+      nipSide: nipSide ?? this.nipSide,
+      inverse: inverse ?? this.inverse,
+      nipRadius: nipRadius ?? this.nipRadius,
+      nipSize: nipSize ?? this.nipSize,
+      nipOffset: nipOffset ?? this.nipOffset,
+      color: color ?? this.color,
+      elevation: elevation ?? this.elevation,
+      shadowColor: shadowColor ?? this.shadowColor,
+      strokeColor: strokeColor ?? this.strokeColor,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'BubbleStyle(radius: $radius, nipSide: $nipSide, inverse: $inverse, nipRadius: $nipRadius, nipSize: $nipSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor)';
+  }
+}
+
+class CustomBubble extends SingleChildRenderObjectWidget {
+  const CustomBubble({
+    this.child,
+    this.style = const BubbleStyle(),
+    this.scale = 1.0,
+    this.drawDraft = false,
+  })  : assert(style != null),
+        assert(scale != null),
+        assert(drawDraft != null);
+
+  final BubbleStyle style;
+  final Widget child;
   final double scale;
   final bool drawDraft;
 
@@ -514,7 +561,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'CustomBubble($radius, $nipSide, nipRadius: $nipRadius, nipSize: $nipSize, $nipOffset, scale: $scale, drawDraft: $drawDraft)';
+    return 'CustomBubble(style: $style, scale: $scale, drawDraft: $drawDraft)';
   }
 }
 
@@ -532,7 +579,9 @@ class RenderBubble extends RenderProxyBox {
 
   set bubble(CustomBubble bubble) {
     assert(bubble != null);
-    if (_bubble.scale != bubble.scale || _bubble.nipSide != bubble.nipSide || _bubble.nipSize != bubble.nipSize) {
+    if (_bubble.scale != bubble.scale
+        || _bubble.style.nipSide != bubble.style.nipSide
+        || _bubble.style.nipSize != bubble.style.nipSize) {
       markNeedsLayout();
     }
     markNeedsPaint();
@@ -547,17 +596,17 @@ class RenderBubble extends RenderProxyBox {
       // Вычисляем размер child
       BoxConstraints childConstraints;
       Offset changes;
-      if (bubble.nipSide == NipSide.left || bubble.nipSide == NipSide.right) {
-        changes = Offset(bubble.nipSize, 0);
-        final maxWidth = constraints.maxWidth - bubble.nipSize * bubble.scale;
+      if (bubble.style.nipSide.isHorizontal) {
+        changes = Offset(bubble.style.nipSize, 0);
+        final maxWidth = constraints.maxWidth - bubble.style.nipSize * bubble.scale;
         final minWidth = math.min(constraints.minWidth, maxWidth);
         childConstraints = constraints.copyWith(
           maxWidth: maxWidth,
           minWidth: minWidth,
         );
-      } else if (bubble.nipSide == NipSide.top || bubble.nipSide == NipSide.bottom) {
-        changes = Offset(0, bubble.nipSize);
-        final maxHeight = constraints.maxHeight - bubble.nipSize * bubble.scale;
+      } else if (bubble.style.nipSide.isVertical) {
+        changes = Offset(0, bubble.style.nipSize);
+        final maxHeight = constraints.maxHeight - bubble.style.nipSize * bubble.scale;
         final minHeight = math.min(constraints.minHeight, maxHeight);
         childConstraints = constraints.copyWith(
           maxHeight: maxHeight,
@@ -591,15 +640,15 @@ class RenderBubble extends RenderProxyBox {
 //    print('size: $size');
 //    print('original size: ${size / pi.scale}');
 
-    if (bubble.nipSide == NipSide.left || bubble.nipSide == NipSide.right) {
+    if (bubble.style.nipSide.isHorizontal) {
       pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
-      pi.box = Rect.fromLTWH(bubble.nipSize, 0, size.width / bubble.scale - bubble.nipSize, size.height / bubble.scale);
-      if (bubble.nipSide == NipSide.left) childOffset = offset.translate(bubble.nipSize * bubble.scale, 0);
+      pi.box = Rect.fromLTWH(bubble.style.nipSize, 0, size.width / bubble.scale - bubble.style.nipSize, size.height / bubble.scale);
+      if (bubble.style.nipSide.isLeft) childOffset = offset.translate(bubble.style.nipSize * bubble.scale, 0);
     } else {
       pi.rect = Rect.fromLTWH(0, 0, size.height / bubble.scale, size.width / bubble.scale);
       pi.box = Rect.fromLTWH(
-          bubble.nipSize, 0, size.height / bubble.scale - bubble.nipSize, size.width / bubble.scale);
-      if (bubble.nipSide == NipSide.top) childOffset = offset.translate(0, bubble.nipSize * bubble.scale);
+          bubble.style.nipSize, 0, size.height / bubble.scale - bubble.style.nipSize, size.width / bubble.scale);
+      if (bubble.style.nipSide.isTop) childOffset = offset.translate(0, bubble.style.nipSize * bubble.scale);
     }
 
 //    print('childOffset: $childOffset');
@@ -610,38 +659,42 @@ class RenderBubble extends RenderProxyBox {
     // Если радиусы больше сторон бокса, рассчитываем коэффициент, чтобы равномерно уменьшить все радиусы
     //
     double k = 1.0;
-    if (bubble.radius.topLeft + bubble.radius.topRight > pi.box.width) {
-      var tK = pi.box.width / (bubble.radius.topLeft + bubble.radius.topRight);
+
+    if (bubble.style.radius.topLeft + bubble.style.radius.topRight > pi.box.width) {
+      var tK = pi.box.width / (bubble.style.radius.topLeft + bubble.style.radius.topRight);
       if (tK < k) k = tK;
     }
-    if (bubble.radius.bottomLeft + bubble.radius.bottomRight > pi.box.width) {
-      var bK = pi.box.width / (bubble.radius.bottomLeft + bubble.radius.bottomRight);
+
+    if (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight > pi.box.width) {
+      var bK = pi.box.width / (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight);
       if (bK < k) k = bK;
     }
-    if (bubble.radius.topLeft + bubble.radius.bottomLeft > pi.box.height) {
-      var lK = pi.box.height / (bubble.radius.topLeft + bubble.radius.bottomLeft);
+
+    if (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft > pi.box.height) {
+      var lK = pi.box.height / (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft);
       if (lK < k) k = lK;
     }
-    if (bubble.radius.topRight + bubble.radius.bottomRight > pi.box.height) {
-      var rK = pi.box.height / (bubble.radius.topRight + bubble.radius.bottomRight);
+
+    if (bubble.style.radius.topRight + bubble.style.radius.bottomRight > pi.box.height) {
+      var rK = pi.box.height / (bubble.style.radius.topRight + bubble.style.radius.bottomRight);
       if (rK < k) k = rK;
     }
 
     pi.nipCircle = Circle(
-        Point(pi.box.left - bubble.nipSize + bubble.nipRadius,
-            pi.box.top + bubble.nipOffset.pos(bubble.nipRadius, pi.box.height) + bubble.nipRadius),
-        bubble.nipRadius);
+        Point(pi.box.left - bubble.style.nipSize + bubble.style.nipRadius,
+            pi.box.top + bubble.style.nipOffset.pos(bubble.style.nipRadius, pi.box.height) + bubble.style.nipRadius),
+        bubble.style.nipRadius);
 
-    var r = bubble.radius.topLeft * k;
+    var r = bubble.style.radius.topLeft * k;
     pi.ltCircle = Circle(Point(pi.box.left + r, pi.box.top + r), r);
 
-    r = bubble.radius.bottomLeft * k;
+    r = bubble.style.radius.bottomLeft * k;
     pi.lbCircle = Circle(Point(pi.box.left + r, pi.box.bottom - r), r);
 
-    r = bubble.radius.topRight * k;
+    r = bubble.style.radius.topRight * k;
     pi.rtCircle = Circle(Point(pi.box.right - r, pi.box.top + r), r);
 
-    r = bubble.radius.bottomRight * k;
+    r = bubble.style.radius.bottomRight * k;
     pi.rbCircle = Circle(Point(pi.box.right - r, pi.box.bottom - r), r);
 
     pi.draft = bubble.drawDraft ? DraftInfo() : null;
@@ -649,6 +702,7 @@ class RenderBubble extends RenderProxyBox {
     var path = Path();
     bubble.createNip(path, pi);
     path.close();
+
     path.addOval(
         Rect.fromCenter(center: pi.nipCircle.center, width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
 
@@ -658,34 +712,46 @@ class RenderBubble extends RenderProxyBox {
         bottomLeft: Radius.circular(pi.lbCircle.radius),
         bottomRight: Radius.circular(pi.rbCircle.radius)));
 
+    // Без этого части останутся разрозненными
+    path = Path.combine(PathOperation.union, path, Path());
+
     context.canvas.save();
     context.canvas.translate(offset.dx, offset.dy);
 
-    if (bubble.nipSide.isRight) {
+    if (bubble.style.nipSide.isRight) {
       context.canvas.translate(size.width, 0);
       context.canvas.scale(-1, 1);
-    } else if (bubble.nipSide.isTop) {
+    } else if (bubble.style.nipSide.isTop) {
       context.canvas.scale(-1, 1);
       context.canvas.rotate(math.pi * 90 / 180);
-    } else if (bubble.nipSide.isBottom) {
+    } else if (bubble.style.nipSide.isBottom) {
       context.canvas.translate(0, size.height);
       context.canvas.scale(-1, -1);
       context.canvas.rotate(math.pi * 90 / 180);
     }
 
-    if (bubble.inverse) {
-      context.canvas.translate(0, bubble.nipSide.isHorizontal ? size.height : size.width);
+    if (bubble.style.inverse) {
+      context.canvas.translate(0, bubble.style.nipSide.isHorizontal ? size.height : size.width);
       context.canvas.scale(1, -1);
     }
 
     context.canvas.scale(bubble.scale);
 
     var paint = Paint();
-    paint.color = bubble.color;
+    paint.color = bubble.style.color;
     paint.style = PaintingStyle.fill;
     if (pi.draft != null) pi.draft.paintBackground(context.canvas, pi);
-    context.canvas.drawShadow(path, bubble.shadowColor, bubble.elevation * bubble.scale, false);
+    context.canvas.drawShadow(path, bubble.style.shadowColor, bubble.style.elevation * bubble.scale, false);
     context.canvas.drawPath(path, paint);
+
+    // Обводка
+    if (bubble.style.strokeWidth != 0.0) {
+      paint.style = PaintingStyle.stroke;
+      paint.color = bubble.style.strokeColor;
+      paint.strokeWidth = bubble.style.strokeWidth;
+      context.canvas.drawPath(path, paint);
+    }
+
     if (pi.draft != null) pi.draft.paint(context.canvas, pi);
 
     context.canvas.restore();
@@ -700,33 +766,17 @@ class RenderBubble extends RenderProxyBox {
 
 class Bubble extends CustomBubble {
   Bubble({
-    child,
-    radius,
-    nipSide,
-    inverse,
-    nipRadius,
-    nipSize,
-    nipOffset,
-    color,
-    elevation,
-    shadowColor,
-    scale,
-    drawDraft,
+    Widget child,
+    BubbleStyle style,
+    double scale = 1.0,
+    bool drawDraft = false,
     @required this.topLine,
     @required this.bottomLine,
   })  : assert(topLine != null),
         assert(bottomLine != null),
         super(
           child: child,
-          radius: radius,
-          nipSide: nipSide,
-          inverse: inverse,
-          nipRadius: nipRadius,
-          nipSize: nipSize,
-          nipOffset: nipOffset,
-          color: color,
-          elevation: elevation,
-          shadowColor: shadowColor,
+          style: style,
           scale: scale,
           drawDraft: drawDraft,
         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'Generator.dart';
 import 'bubble.dart';
 
 class BubbleDemo extends StatefulWidget {
@@ -10,7 +11,6 @@ class BubbleDemo extends StatefulWidget {
 }
 
 class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-  // Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
   static const _words = ['Lorem', ' ipsum', ' dolor', ' sit', ' amet', ', consectetur', ' adipiscing', ' elit', ', sed', ' do eiusmod', ' tempor', ' incididunt', ' ut', ' labore', ' et', ' dolore', ' magna', ' aliqua.'];
 
   @override
@@ -25,6 +25,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     return Container(
       color: Colors.grey[300],
       child: ListView.builder(
+        shrinkWrap: true,
         itemBuilder: (BuildContext context, int index) {
           var text = StringBuffer();
 
@@ -33,24 +34,33 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
           }
 
           return Padding(
-            padding: EdgeInsets.only(top: 12.0, left: index % 2 == 0 ? 8.0 : 64.0, right: index % 2 == 0 ? 64.0 : 8.0),
-            child: Align(
-              alignment: index % 2 == 0 ? Alignment.topLeft : Alignment.topRight,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: 96.0),
+            padding: EdgeInsets.only(top: 6.0, bottom: 6.0, left: index % 2 == 0 ? 8.0 : 64.0, right: index % 2 == 0 ? 64.0 : 8.0),
+            child: Padding(
+              padding: Generator.style.inverse ? EdgeInsets.only(bottom: Generator.style.additionalPadding) : EdgeInsets.only(top: Generator.style.additionalPadding),
+              child: Align(
+                alignment: index % 2 == 0 ? Alignment.topLeft : Alignment.topRight,
                 child: Bubble(
-                  radius: BubbleRadius.all(8.0),
-                  nipSide: index % 2 == 0 ? NipSide.left : NipSide.right,
-                  nipRadius: 0.5,
-                  nipSize: 7.0,
-//            nipOffset: NipOffset,
-                  color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
-                  elevation: 0.5,
-                  topLine: NipLine.line(0.0),
-                  bottomLine: NipLine.line(53.0),
+                  style: Generator.style.style.copyWith(
+                    nipSide: index % 2 == 0 ? NipSide.left : NipSide.right,
+                    color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
+                  ),
+                  topLine: Generator.style.topLine,
+                  bottomLine: Generator.style.bottomLine,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${text.toString()} (#${index + 1})'),
+//                      child: Text('${text.toString()} (#${index + 1})'),
+                    child: RichText(
+                      text: TextSpan(
+                        text: text.toString(),
+                        style: DefaultTextStyle.of(context).style,
+                        children: [
+                          TextSpan(
+                            text: '   #${index + 1}',
+                            style: DefaultTextStyle.of(context).style.copyWith(fontSize: 10.0, fontStyle: FontStyle.italic)
+                          )
+                        ]
+                      ),
+                    ),
                   ),
                 ),
               ),

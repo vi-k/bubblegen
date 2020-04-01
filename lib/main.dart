@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 
 import 'Generator.dart';
 
+GeneratorBubbleStyle gBubbleStyle = GeneratorBubbleStyle();
+
 void main() => runApp(MyApp());
 
 final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
@@ -662,6 +664,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     print('initState $this');
 
     _tabController = new TabController(vsync: this, length: 3);
+    _tabController.addListener(() {
+//      print('tabs change: ${_tabController.index} indexIsChanging: ${_tabController.indexIsChanging}');
+      if (_tabController.indexIsChanging) setState(() {});
+    });
 
     super.initState();
   }
@@ -696,8 +702,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           controller: _tabController,
           tabs: [
             const Tab(text: 'Generator'),
-            const Tab(text: 'Test #1'),
-            const Tab(text: 'Test #2'),
+            const Tab(text: 'Bubble\ndemo'),
+            const Tab(text: 'CustomBubble\ndemo'),
           ],
         ),
       ),
@@ -707,7 +713,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           children: <Widget>[
             Generator(),
             BubbleDemo(),
-//            const Text('Test #1'),
             const Text('Test #2'),
           ],
         ),
