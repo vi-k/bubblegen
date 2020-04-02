@@ -25,6 +25,7 @@ class RenderProfiler extends RenderProxyBox {
         _profiler = profiler,
         super(child);
 
+  static const margin = 8.0;
   static const padding = 8.0;
   static const radius = 4.0;
 
@@ -38,18 +39,26 @@ class RenderProfiler extends RenderProxyBox {
     _profiler = profiler;
   }
 
+  // @override
+  // void performResize() {
+  //   final textPainter = TextPainter(
+  //       text: TextSpan(
+  //           text: '999.9 fps',
+  //           style: TextStyle(color: Colors.black)
+  //       ),
+  //       textAlign: TextAlign.left,
+  //       textDirection: TextDirection.ltr
+  //   );
+  //   textPainter.layout();
+  //   size = textPainter.size + Offset(2.0 * padding, 2.0 * padding);
+  // }
+
   @override
-  void performResize() {
-    final textPainter = TextPainter(
-        text: TextSpan(
-            text: '999.9 fps',
-            style: TextStyle(color: Colors.black)
-        ),
-        textAlign: TextAlign.left,
-        textDirection: TextDirection.ltr
-    );
-    textPainter.layout();
-    size = textPainter.size + Offset(2.0 * padding, 2.0 * padding);
+  void performLayout() {
+    // print('performLayout');
+    // Забираем всё пространство родителя
+    //performResize();
+    size = Size(constraints.maxWidth, constraints.maxHeight);
   }
 
   @override
@@ -59,10 +68,10 @@ class RenderProfiler extends RenderProxyBox {
     _frames.add(timestamp);
     _frames.removeWhere((time) => time <= startTimestamp);
 
-//    final fieldPaint = Paint()
-//      ..color = Colors.blue
-//      ..style = PaintingStyle.fill;
-//    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
+   final fieldPaint = Paint()
+     ..color = Colors.orange.withAlpha(32)
+     ..style = PaintingStyle.fill;
+   context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
 
     final textPainter = TextPainter(
         text: TextSpan(
@@ -75,7 +84,7 @@ class RenderProfiler extends RenderProxyBox {
     textPainter.layout();
 
     final textSize = textPainter.size;
-    final textOffset = Offset(offset.dx + size.width - textSize.width - padding, offset.dy + padding);
+    final textOffset = Offset(offset.dx + size.width - textSize.width - padding - margin, offset.dy + margin + padding);
 
     final path = Path();
     path.addRRect(RRect.fromLTRBR(

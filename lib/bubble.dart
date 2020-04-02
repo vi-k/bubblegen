@@ -629,7 +629,7 @@ class RenderBubble extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-//    print('paint $this');
+    // print('paint $this');
     if (child == null) return;
 
     var pi = BubblePaintInfo();

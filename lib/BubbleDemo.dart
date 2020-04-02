@@ -31,6 +31,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
           ListView.builder(
             shrinkWrap: true,
             itemBuilder: (BuildContext context, int index) {
+              // print('itemBuilder: #$index');
               var text = StringBuffer();
 
               for (var i = 0; i < index % (_words.length - 1) + 1; i++) {
@@ -96,13 +97,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
               );
             },
           ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Profiler(),
-            ),
-          ),
+          Profiler(),
         ],
       ),
     );
