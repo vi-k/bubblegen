@@ -17,16 +17,17 @@ MaterialColor cursorSwatch;
 
 MaterialColor createSwatch(Color color) {
   return MaterialColor(color.value, {
-    50: Color.alphaBlend(color.withOpacity(0.12), Colors.white), // Почти совпадают с Colors.blue
+    // Почти совпадают с Colors.blue
+    50: Color.alphaBlend(color.withOpacity(0.12), Colors.white),
     100: Color.alphaBlend(color.withOpacity(0.30), Colors.white),
     200: Color.alphaBlend(color.withOpacity(0.50), Colors.white),
     300: Color.alphaBlend(color.withOpacity(0.70), Colors.white),
     400: Color.alphaBlend(color.withOpacity(0.85), Colors.white),
     500: color,
-    600: Color.alphaBlend(
-        color.withOpacity(0.91), Colors.black), // Синяя составляющая расходится с Colors.blue, равнялся по зелёному
-    700: Color.alphaBlend(
-        color.withOpacity(0.79), Colors.black), // Тогда они расходятся по цвету, но совпдают по яркости
+    // Дальше синяя составляющая расходится с Colors.blue, равняюсь по зелёному
+    // Тогда они расходятся по цвету, но совпадают по яркости
+    600: Color.alphaBlend(color.withOpacity(0.91), Colors.black),
+    700: Color.alphaBlend(color.withOpacity(0.79), Colors.black),
     800: Color.alphaBlend(color.withOpacity(0.68), Colors.black),
     900: Color.alphaBlend(color.withOpacity(0.48), Colors.black),
   });
