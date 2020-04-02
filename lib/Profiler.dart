@@ -65,17 +65,18 @@ class RenderProfiler extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     var timestamp = DateTime.now().microsecondsSinceEpoch;
     var startTimestamp = timestamp - 1000000;
+    _frames.removeWhere((time) => time < startTimestamp);
     _frames.add(timestamp);
-    _frames.removeWhere((time) => time <= startTimestamp);
+    final fps = _frames.length - 1;
 
-   final fieldPaint = Paint()
-     ..color = Colors.orange.withAlpha(32)
-     ..style = PaintingStyle.fill;
-   context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
+    final fieldPaint = Paint()
+      ..color = Colors.orange.withAlpha(32)
+      ..style = PaintingStyle.fill;
+    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
 
     final textPainter = TextPainter(
         text: TextSpan(
-            text: '${_frames.length} fps',
+            text: '$fps fps',
             style: TextStyle(color: Colors.black)
         ),
         textAlign: TextAlign.left,
