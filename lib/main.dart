@@ -666,8 +666,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     _tabController = new TabController(vsync: this, length: 3);
     _tabController.addListener(() {
-//      print('tabs change: ${_tabController.index} indexIsChanging: ${_tabController.indexIsChanging}');
-      if (_tabController.indexIsChanging) setState(() {});
+      if (!_tabController.indexIsChanging) setState(() {});
     });
 
     super.initState();

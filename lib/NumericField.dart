@@ -215,7 +215,7 @@ class _NumericFieldState extends State<NumericField> {
   Widget build(BuildContext context) {
     // print('build $this');
 
-    if (_value != widget.value) setNewValue(widget.value, true);
+//    if (_value != widget.value) _value = widget.value;
 
     final input = Focus(
       focusNode: _focusNode,
