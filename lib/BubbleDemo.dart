@@ -105,7 +105,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(
-                              TimeOfDay(hour: index ~/ 60, minute: index % 60).format(context),
+                              TimeOfDay(hour: index ~/ 60 % 24, minute: index % 60).format(context),
                               style: DefaultTextStyle.of(context).style.copyWith(
                                 color: Colors.black.withAlpha(64),
                                 fontSize: 10.0,
