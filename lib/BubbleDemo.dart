@@ -40,20 +40,20 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
 
               return Padding(
                 padding: EdgeInsets.only(
-                  top: 6.0 + (Generator.style.inverse ? 0.0 : Generator.style.additionalPadding),
-                  bottom: 6.0 + (Generator.style.inverse ? Generator.style.additionalPadding : 0.0),
+                  top: 6.0 + (Generator.settings.inverse ? 0.0 : Generator.settings.additionalPadding),
+                  bottom: 6.0 + (Generator.settings.inverse ? Generator.settings.additionalPadding : 0.0),
                   left: index % 2 == 0 ? 8.0 : 64.0,
                   right: index % 2 == 0 ? 64.0 : 8.0,
                 ),
                 child: Align(
                   alignment: index % 2 == 0 ? Alignment.topLeft : Alignment.topRight,
                   child: Bubble(
-                    style: Generator.style.style.copyWith(
+                    style: Generator.settings.style.copyWith(
                       nipSide: index % 2 == 0 ? NipSide.left : NipSide.right,
                       color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
                     ),
-                    topLine: Generator.style.topLine,
-                    bottomLine: Generator.style.bottomLine,
+                    topLine: Generator.settings.topLine,
+                    bottomLine: Generator.settings.bottomLine,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
 //                      child: Text('${text.toString()} (#${index + 1})'),

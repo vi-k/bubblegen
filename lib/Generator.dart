@@ -62,7 +62,7 @@ class GeneratorBubbleStyle {
 class Generator extends StatefulWidget {
   Generator({Key key}) : super(key: key);
 
-  static final style = GeneratorBubbleStyle();
+  static final settings = GeneratorBubbleStyle();
 
   @override
   _GeneratorState createState() => _GeneratorState();
@@ -127,18 +127,18 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
   void initState() {
     print('initState: $this');
 
-    Generator.style.width = 50.0;
-    Generator.style.height = 50.0;
-    Generator.style.additionalPadding = 0.0;
+    Generator.settings.width = 50.0;
+    Generator.settings.height = 50.0;
+    Generator.settings.additionalPadding = 0.0;
 
-    Generator.style.radius = 6.0;
-    Generator.style.nipSide = NipSide.left;
-    Generator.style.inverse = false;
-    Generator.style.nipRadius = 1.5;
-    Generator.style.nipSize = 7.0;
-    Generator.style.nipOffset = NipOffset();
-    Generator.style.topLine = NipLine.line(0.0);
-    Generator.style.bottomLine = NipLine.line(53.0);
+    Generator.settings.radius = 6.0;
+    Generator.settings.nipSide = NipSide.left;
+    Generator.settings.inverse = false;
+    Generator.settings.nipRadius = 1.5;
+    Generator.settings.nipSize = 7.0;
+    Generator.settings.nipOffset = NipOffset();
+    Generator.settings.topLine = NipLine.line(0.0);
+    Generator.settings.bottomLine = NipLine.line(53.0);
 
     _settingsController = AnimationController(
       duration: const Duration(milliseconds: 200),
@@ -156,10 +156,10 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
   }
 
   EdgeInsets getAddingPadding(double scale) {
-    var padding = Generator.style.additionalPadding * scale;
-    return Generator.style.nipSide.isHorizontal
-        ? Generator.style.inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
-        : Generator.style.inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
+    var padding = Generator.settings.additionalPadding * scale;
+    return Generator.settings.nipSide.isHorizontal
+        ? Generator.settings.inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
+        : Generator.settings.inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
   }
 
   Widget getSettings() {
@@ -213,13 +213,13 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.all(4.0),
             child: NumericField(
               caption: 'Additional padding:',
-              value: Generator.style.additionalPadding,
+              value: Generator.settings.additionalPadding,
               units: 'dp',
               min: 0.0,
               step: 1.0,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.additionalPadding = value;
+                  Generator.settings.additionalPadding = value;
                 });
               },
             ),
@@ -265,13 +265,13 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Corner\'s radius:',
-              value: Generator.style.radius,
+              value: Generator.settings.radius,
               units: 'dp',
               min: 0.0,
               step: 1.0,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.radius = value;
+                  Generator.settings.radius = value;
                 });
               },
             ),
@@ -280,14 +280,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Elevation:',
-              value: Generator.style.elevation,
+              value: Generator.settings.elevation,
               units: 'dp',
               min: 0.0,
               step: 0.1,
               fractionDigits: 1,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.elevation = value;
+                  Generator.settings.elevation = value;
                 });
               },
             ),
@@ -296,14 +296,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Stroke width:',
-              value: Generator.style.strokeWidth,
+              value: Generator.settings.strokeWidth,
               units: 'dp',
               min: 0.0,
               step: 0.1,
               fractionDigits: 1,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.strokeWidth = value;
+                  Generator.settings.strokeWidth = value;
                 });
               },
             ),
@@ -318,7 +318,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
                 caption: 'Side:',
-                value: Generator.style.nipSide.index.toDouble() * 2.0 + (Generator.style.inverse ? 1.0 : 0.0),
+                value: Generator.settings.nipSide.index.toDouble() * 2.0 + (Generator.settings.inverse ? 1.0 : 0.0),
                 min: NipSide.minIndex.toDouble(),
                 max: NipSide.maxIndex.toDouble() * 2.0 + 1.0,
                 step: 1.0,
@@ -326,8 +326,8 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     final index = value.round();
-                    Generator.style.nipSide = NipSide.byIndex(index >> 1);
-                    Generator.style.inverse = index % 2 == 1;
+                    Generator.settings.nipSide = NipSide.byIndex(index >> 1);
+                    Generator.settings.inverse = index % 2 == 1;
                   });
                 },
                 onConvertToText: (value) {
@@ -340,14 +340,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Radius:',
-              value: Generator.style.nipRadius,
+              value: Generator.settings.nipRadius,
               units: 'dp',
               min: 0.0,
               step: 0.1,
               fractionDigits: 1,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.nipRadius = value;
+                  Generator.settings.nipRadius = value;
                 });
               },
             ),
@@ -356,13 +356,13 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Size:',
-              value: Generator.style.nipSize,
+              value: Generator.settings.nipSize,
               units: 'dp',
               min: 0.0,
               step: 1.0,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.nipSize = value;
+                  Generator.settings.nipSize = value;
                 });
               },
             ),
@@ -371,14 +371,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Relative offset:',
-              value: Generator.style.nipOffset.relative * 100.0,
+              value: Generator.settings.nipOffset.relative * 100.0,
               units: '%',
               min: 0.0,
               max: 100.0,
               step: 1.0,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.nipOffset = NipOffset(relative: value / 100.0, absolute: Generator.style.nipOffset.absolute);
+                  Generator.settings.nipOffset = NipOffset(relative: value / 100.0, absolute: Generator.settings.nipOffset.absolute);
                 });
               },
             ),
@@ -387,12 +387,12 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
               caption: 'Absolute offset:',
-              value: Generator.style.nipOffset.absolute,
+              value: Generator.settings.nipOffset.absolute,
               units: 'dp',
               step: 1.0,
               onChanged: (double value) {
                 setState(() {
-                  Generator.style.nipOffset = NipOffset(relative: Generator.style.nipOffset.relative, absolute: value);
+                  Generator.settings.nipOffset = NipOffset(relative: Generator.settings.nipOffset.relative, absolute: value);
                 });
               },
             ),
@@ -407,7 +407,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
                 caption: 'Type of position:',
-                value: Generator.style.topLine.posType.index.toDouble(),
+                value: Generator.settings.topLine.posType.index.toDouble(),
                 min: 0.0,
                 max: (NipLinePosType.values.length - 1).toDouble(),
                 step: 1.0,
@@ -415,7 +415,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     final index = value.round();
-                    Generator.style.topLine = NipLine(Generator.style.topLine.lineType, NipLinePosType.values[index], _topLineValues[index]);
+                    Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType, NipLinePosType.values[index], _topLineValues[index]);
                   });
                 },
                 onConvertToText: (value) {
@@ -424,7 +424,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 }),
           ),
           Visibility(
-            visible: Generator.style.topLine.posType == NipLinePosType.angle,
+            visible: Generator.settings.topLine.posType == NipLinePosType.angle,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -437,14 +437,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _topLineValues[NipLinePosType.angle.index] = value;
-                    Generator.style.topLine = NipLine(Generator.style.topLine.lineType, NipLinePosType.angle, value);
+                    Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType, NipLinePosType.angle, value);
                   });
                 },
               ),
             ),
           ),
           Visibility(
-            visible: Generator.style.topLine.posType == NipLinePosType.pos,
+            visible: Generator.settings.topLine.posType == NipLinePosType.pos,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -455,14 +455,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _topLineValues[NipLinePosType.pos.index] = value;
-                    Generator.style.topLine = NipLine(Generator.style.topLine.lineType, NipLinePosType.pos, value);
+                    Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType, NipLinePosType.pos, value);
                   });
                 },
               ),
             ),
           ),
           Visibility(
-            visible: Generator.style.topLine.posType == NipLinePosType.offset,
+            visible: Generator.settings.topLine.posType == NipLinePosType.offset,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -473,14 +473,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _topLineValues[NipLinePosType.offset.index] = value;
-                    Generator.style.topLine = NipLine(Generator.style.topLine.lineType, NipLinePosType.offset, value);
+                    Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType, NipLinePosType.offset, value);
                   });
                 },
               ),
             ),
           ),
           Visibility(
-            visible: Generator.style.topLine.posType == NipLinePosType.corners,
+            visible: Generator.settings.topLine.posType == NipLinePosType.corners,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -501,7 +501,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _topLineValues[NipLinePosType.corners.index] = value;
-                    Generator.style.topLine = NipLine(Generator.style.topLine.lineType, NipLinePosType.corners, value);
+                    Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType, NipLinePosType.corners, value);
                   });
                 },
               ),
@@ -518,7 +518,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
                 caption: 'Type of position:',
-                value: Generator.style.bottomLine.posType.index.toDouble(),
+                value: Generator.settings.bottomLine.posType.index.toDouble(),
                 min: 0.0,
                 max: (NipLinePosType.values.length - 1).toDouble(),
                 step: 1.0,
@@ -526,7 +526,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     final index = value.round();
-                    Generator.style.bottomLine = NipLine(Generator.style.bottomLine.lineType, NipLinePosType.values[index], _bottomLineValues[index]);
+                    Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType, NipLinePosType.values[index], _bottomLineValues[index]);
                   });
                 },
                 onConvertToText: (value) {
@@ -535,7 +535,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 }),
           ),
           Visibility(
-            visible: Generator.style.bottomLine.posType == NipLinePosType.angle,
+            visible: Generator.settings.bottomLine.posType == NipLinePosType.angle,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -548,14 +548,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _bottomLineValues[NipLinePosType.angle.index] = value;
-                    Generator.style.bottomLine = NipLine(Generator.style.bottomLine.lineType, NipLinePosType.angle, value);
+                    Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType, NipLinePosType.angle, value);
                   });
                 },
               ),
             ),
           ),
           Visibility(
-            visible: Generator.style.bottomLine.posType == NipLinePosType.pos,
+            visible: Generator.settings.bottomLine.posType == NipLinePosType.pos,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -566,14 +566,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _bottomLineValues[NipLinePosType.pos.index] = value;
-                    Generator.style.bottomLine = NipLine(Generator.style.bottomLine.lineType, NipLinePosType.pos, value);
+                    Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType, NipLinePosType.pos, value);
                   });
                 },
               ),
             ),
           ),
           Visibility(
-            visible: Generator.style.bottomLine.posType == NipLinePosType.offset,
+            visible: Generator.settings.bottomLine.posType == NipLinePosType.offset,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -584,14 +584,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _bottomLineValues[NipLinePosType.offset.index] = value;
-                    Generator.style.bottomLine = NipLine(Generator.style.bottomLine.lineType, NipLinePosType.offset, value);
+                    Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType, NipLinePosType.offset, value);
                   });
                 },
               ),
             ),
           ),
           Visibility(
-            visible: Generator.style.bottomLine.posType == NipLinePosType.corners,
+            visible: Generator.settings.bottomLine.posType == NipLinePosType.corners,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: NumericField(
@@ -612,7 +612,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 onChanged: (double value) {
                   setState(() {
                     _bottomLineValues[NipLinePosType.corners.index] = value;
-                    Generator.style.bottomLine = NipLine(Generator.style.bottomLine.lineType, NipLinePosType.corners, value);
+                    Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType, NipLinePosType.corners, value);
                   });
                 },
               ),
@@ -663,12 +663,12 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 Padding(
                   padding: getAddingPadding(1.0),
                   child: Align(
-                    alignment: Generator.style.nipSide.isLeft || Generator.style.nipSide.isVertical && !Generator.style.inverse ? Alignment.topLeft : Alignment.topRight,
+                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.inverse ? Alignment.topLeft : Alignment.topRight,
 //                    child: const Text('test'),
                     child: Bubble(
-                      style: Generator.style.style,
-                      topLine: Generator.style.topLine,
-                      bottomLine: Generator.style.bottomLine,
+                      style: Generator.settings.style,
+                      topLine: Generator.settings.topLine,
+                      bottomLine: Generator.settings.bottomLine,
                       child: Container(
                         padding: EdgeInsets.all(8.0),
                         child: Text('Lorem ipsum dolor sit amet'),
@@ -679,12 +679,12 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 Padding(
                   padding: EdgeInsets.only(top: _staticPadding / 2.0) + getAddingPadding(1.0),
                   child: Align(
-                    alignment: Generator.style.nipSide.isLeft || Generator.style.nipSide.isVertical && !Generator.style.inverse ? Alignment.topLeft : Alignment.topRight,
+                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.inverse ? Alignment.topLeft : Alignment.topRight,
 //                    child: const Text('test'),
                     child: Bubble(
-                      style: Generator.style.style,
-                      topLine: Generator.style.topLine,
-                      bottomLine: Generator.style.bottomLine,
+                      style: Generator.settings.style,
+                      topLine: Generator.settings.topLine,
+                      bottomLine: Generator.settings.bottomLine,
                       child: Container(
                         padding: EdgeInsets.all(8.0),
                         child: Text(
@@ -714,13 +714,13 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                         // child: const Text('TEST'),
                         child: Bubble(
                           scale: _scale,
-                          style: Generator.style.style.copyWith(color: Colors.lightBlue),
-                          topLine: Generator.style.topLine,
-                          bottomLine: Generator.style.bottomLine,
+                          style: Generator.settings.style.copyWith(color: Colors.lightBlue),
+                          topLine: Generator.settings.topLine,
+                          bottomLine: Generator.settings.bottomLine,
                           drawDraft: _drawDraft,
                           child: SizedBox(
-                            height: Generator.style.height,
-                            width: Generator.style.width,
+                            height: Generator.settings.height,
+                            width: Generator.settings.width,
                           ),
                         ),
                       ),
