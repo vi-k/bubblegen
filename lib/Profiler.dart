@@ -58,7 +58,7 @@ class RenderProfiler extends RenderProxyBox {
     _frames.add(timestamp);
 
     final fieldPaint = Paint()
-      ..color = Colors.orange.withAlpha(32)
+      ..color = Colors.white.withAlpha(1)
       ..style = PaintingStyle.fill;
     context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
 
