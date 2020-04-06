@@ -22,16 +22,18 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   var _frames = <int>[];
   var _fps = 0;
   var _animate = false;
+  var cunter = 0;
 
   @override
   void initState() {
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 1000),
+        duration: Duration(milliseconds: 2000),
         animationBehavior: AnimationBehavior.normal,
     );
     _animationController.repeat();
     _animationController.addListener(() {
+      print('${cunter++}');
       var timestamp = DateTime.now().microsecondsSinceEpoch;
       var startTimestamp = timestamp - 2000000; // 1 сек
       _frames.removeWhere((time) => time < startTimestamp);
@@ -52,7 +54,10 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     return Bubble(
       style: Generator.settings.style.copyWith(
         nipSide: index % 2 == 0 ? NipSide.left : NipSide.right,
-        strokeWidth: animationValue != null ? 2.0 - (animationValue - 0.5).abs() * 4.0 : Generator.settings.style.strokeWidth,
+        nipPlaceholderSize: Generator.settings.style.nipSize,
+        nipSize: Generator.settings.style.nipSize - (animationValue != null ? animationValue * Generator.settings.style.nipSize : 0),
+//        strokeWidth: animationValue != null ? animationValue * 2.0 : Generator.settings.style.strokeWidth,
+        elevation: Generator.settings.style.elevation + (animationValue != null ? animationValue * 4.0 : 0.0),
         color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
       ),
       topLine: Generator.settings.topLine,
@@ -125,7 +130,18 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     super.build(context);
 
     print('build $this');
-    final animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
+//    final animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
+    final animation = TweenSequence([
+//      CurveTween(curve: Curves.easeIn).animate(_animationController)
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 40.0,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 40.0,
+      ),
+    ]).animate(_animationController);
 
     final suffix = ' ' * (5 + TimeOfDay(hour: 23, minute: 59).format(context).length);
 
