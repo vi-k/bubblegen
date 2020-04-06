@@ -22,7 +22,6 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   var _frames = <int>[];
   var _fps = 0;
   var _animate = false;
-  var cunter = 0;
 
   @override
   void initState() {
@@ -33,7 +32,6 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     );
     _animationController.repeat();
     _animationController.addListener(() {
-      print('${cunter++}');
       var timestamp = DateTime.now().microsecondsSinceEpoch;
       var startTimestamp = timestamp - 2000000; // 1 сек
       _frames.removeWhere((time) => time < startTimestamp);
