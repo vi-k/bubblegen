@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class Profiler extends SingleChildRenderObjectWidget {
-  const Profiler();
+  const Profiler({this.breath = 0.0});
+
+  final double breath;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -58,11 +60,11 @@ class RenderProfiler extends RenderProxyBox {
     _frames.add(timestamp);
 
     final fieldPaint = Paint()
-      ..color = Colors.white.withAlpha(1)
+      ..color = Colors.white.withAlpha(64)
       ..style = PaintingStyle.fill;
     context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
 
-    if (fps >= 10) {
+//    if (fps >= 10) {
       final textPainter = TextPainter(
           text: TextSpan(
               text: '$fps fps',
@@ -79,10 +81,10 @@ class RenderProfiler extends RenderProxyBox {
 
       final path = Path();
       path.addRRect(RRect.fromLTRBR(
-          textOffset.dx - padding,
-          textOffset.dy - padding,
-          textOffset.dx + textSize.width + padding,
-          textOffset.dy + textSize.height + padding,
+          textOffset.dx - padding - _profiler.breath,
+          textOffset.dy - padding - _profiler.breath,
+          textOffset.dx + textSize.width + padding + _profiler.breath,
+          textOffset.dy + textSize.height + padding + _profiler.breath,
           const Radius.circular(radius)
       ));
 
@@ -100,6 +102,6 @@ class RenderProfiler extends RenderProxyBox {
 //    context.canvas.drawPath(path, paint);
 
       textPainter.paint(context.canvas, textOffset);
-    }
+//    }
   }
 }

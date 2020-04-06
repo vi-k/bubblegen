@@ -467,7 +467,7 @@ class BubbleStyle {
     this.nipSize = 7.0,
     this.nipOffset = const NipOffset(),
     this.color = Colors.white,
-    this.elevation = 0.5,
+    this.elevation = 1.0,
     this.shadowColor = Colors.black,
     this.strokeColor = Colors.orange,
     this.strokeWidth = 0.0,
