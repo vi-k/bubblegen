@@ -465,6 +465,7 @@ class BubbleStyle {
     this.inverse = false,
     this.nipRadius = 0.5,
     this.nipSize = 7.0,
+    this.nipPlaceholderSize,
     this.nipOffset = const NipOffset(),
     this.color = Colors.white,
     this.elevation = 1.0,
@@ -488,6 +489,7 @@ class BubbleStyle {
   final bool inverse;
   final double nipRadius;
   final double nipSize;
+  final double nipPlaceholderSize;
   final NipOffset nipOffset;
   final Color color;
   final double elevation;
@@ -501,6 +503,7 @@ class BubbleStyle {
       bool inverse,
       double nipRadius,
       double nipSize,
+      double nipPlaceholderSize,
       NipOffset nipOffset,
       Color color,
       double elevation,
@@ -514,6 +517,7 @@ class BubbleStyle {
       inverse: inverse ?? this.inverse,
       nipRadius: nipRadius ?? this.nipRadius,
       nipSize: nipSize ?? this.nipSize,
+      nipPlaceholderSize: nipPlaceholderSize ?? this.nipPlaceholderSize,
       nipOffset: nipOffset ?? this.nipOffset,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
@@ -525,7 +529,7 @@ class BubbleStyle {
 
   @override
   String toString() {
-    return 'BubbleStyle(radius: $radius, nipSide: $nipSide, inverse: $inverse, nipRadius: $nipRadius, nipSize: $nipSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor)';
+    return 'BubbleStyle(radius: $radius, nipSide: $nipSide, inverse: $inverse, nipRadius: $nipRadius, nipSize: $nipSize, nipPlaceholderSize: $nipPlaceholderSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor)';
   }
 }
 
@@ -581,7 +585,9 @@ class RenderBubble extends RenderProxyBox {
     assert(bubble != null);
     if (_bubble.scale != bubble.scale
         || _bubble.style.nipSide != bubble.style.nipSide
-        || _bubble.style.nipSize != bubble.style.nipSize) {
+        || _bubble.style.nipPlaceholderSize != bubble.style.nipPlaceholderSize
+        || _bubble.style.nipPlaceholderSize == null
+            && _bubble.style.nipSize != bubble.style.nipSize) {
       markNeedsLayout();
     }
     markNeedsPaint();
@@ -596,17 +602,19 @@ class RenderBubble extends RenderProxyBox {
       // Вычисляем размер child
       BoxConstraints childConstraints;
       Offset changes;
+      final nipPlaceholderSize = bubble.style.nipPlaceholderSize ?? bubble.style.nipSize;
+
       if (bubble.style.nipSide.isHorizontal) {
-        changes = Offset(bubble.style.nipSize, 0);
-        final maxWidth = constraints.maxWidth - bubble.style.nipSize * bubble.scale;
+        changes = Offset(nipPlaceholderSize, 0);
+        final maxWidth = constraints.maxWidth - nipPlaceholderSize * bubble.scale;
         final minWidth = math.min(constraints.minWidth, maxWidth);
         childConstraints = constraints.copyWith(
           maxWidth: maxWidth,
           minWidth: minWidth,
         );
       } else if (bubble.style.nipSide.isVertical) {
-        changes = Offset(0, bubble.style.nipSize);
-        final maxHeight = constraints.maxHeight - bubble.style.nipSize * bubble.scale;
+        changes = Offset(0, nipPlaceholderSize);
+        final maxHeight = constraints.maxHeight - nipPlaceholderSize * bubble.scale;
         final minHeight = math.min(constraints.minHeight, maxHeight);
         childConstraints = constraints.copyWith(
           maxHeight: maxHeight,
@@ -634,7 +642,9 @@ class RenderBubble extends RenderProxyBox {
 
     var pi = BubblePaintInfo();
     pi.scale = bubble.scale;
-    Offset childOffset = offset;
+    var childOffset = offset;
+
+    final nipPlaceholderSize = bubble.style.nipPlaceholderSize ?? bubble.style.nipSize;
 
 //    print('$bubble');
 //    print('size: $size');
@@ -642,13 +652,12 @@ class RenderBubble extends RenderProxyBox {
 
     if (bubble.style.nipSide.isHorizontal) {
       pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
-      pi.box = Rect.fromLTWH(bubble.style.nipSize, 0, size.width / bubble.scale - bubble.style.nipSize, size.height / bubble.scale);
-      if (bubble.style.nipSide.isLeft) childOffset = offset.translate(bubble.style.nipSize * bubble.scale, 0);
+      pi.box = Rect.fromLTWH(nipPlaceholderSize, 0, size.width / bubble.scale - nipPlaceholderSize, size.height / bubble.scale);
+      if (bubble.style.nipSide.isLeft) childOffset = offset.translate(nipPlaceholderSize * bubble.scale, 0);
     } else {
       pi.rect = Rect.fromLTWH(0, 0, size.height / bubble.scale, size.width / bubble.scale);
-      pi.box = Rect.fromLTWH(
-          bubble.style.nipSize, 0, size.height / bubble.scale - bubble.style.nipSize, size.width / bubble.scale);
-      if (bubble.style.nipSide.isTop) childOffset = offset.translate(0, bubble.style.nipSize * bubble.scale);
+      pi.box = Rect.fromLTWH(nipPlaceholderSize, 0, size.height / bubble.scale - nipPlaceholderSize, size.width / bubble.scale);
+      if (bubble.style.nipSide.isTop) childOffset = offset.translate(0, nipPlaceholderSize * bubble.scale);
     }
 
 //    print('childOffset: $childOffset');
