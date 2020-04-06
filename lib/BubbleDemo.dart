@@ -163,26 +163,20 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _animate = !_animate;
-                  });
-                },
-                child: Container(
-//                color: Colors.red,
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: AnimatedBuilder(
-                    animation: animation,
-                    builder: (context, child) {
-                      return Text('$_fps fps');
-                    }
-                  )
-                ),
+              child: AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return RaisedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _animate = !_animate;
+                      });
+                    },
+                    color: _animate ? Colors.orange : Colors.lightGreen,
+                    icon: _animate ? const Icon(Icons.stop) : const Icon(Icons.play_arrow),
+                    label: Text('$_fps fps')
+                  );
+                }
               ),
             )
           ),
