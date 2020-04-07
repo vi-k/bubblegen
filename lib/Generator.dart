@@ -358,7 +358,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
               caption: 'Size:',
               value: Generator.settings.nipSize,
               units: 'dp',
-              min: 0.0,
+              //min: 0.0,
               step: 1.0,
               onChanged: (double value) {
                 setState(() {

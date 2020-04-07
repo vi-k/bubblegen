@@ -712,17 +712,19 @@ class RenderBubble extends RenderProxyBox {
     bubble.createNip(path, pi);
     path.close();
 
-    path.addOval(
-        Rect.fromCenter(center: pi.nipCircle.center, width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
-
-    path.addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
+    var secondaryPath = Path();
+    secondaryPath.addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
         topLeft: Radius.circular(pi.ltCircle.radius),
         topRight: Radius.circular(pi.rtCircle.radius),
         bottomLeft: Radius.circular(pi.lbCircle.radius),
         bottomRight: Radius.circular(pi.rbCircle.radius)));
+    // Без этого части останутся разрозненными и анимация будет выполняться раза в два медленнее
+    // С этим - иногда возникают глюки с тенью
+    path = Path.combine(PathOperation.union, path, secondaryPath);
 
-    // Без этого части останутся разрозненными
-    path = Path.combine(PathOperation.union, path, Path());
+    secondaryPath.reset();
+    secondaryPath.addOval(Rect.fromCenter(center: pi.nipCircle.center, width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
+    path = Path.combine(PathOperation.union, path, secondaryPath);
 
     context.canvas.save();
     context.canvas.translate(offset.dx, offset.dy);
