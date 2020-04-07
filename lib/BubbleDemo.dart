@@ -130,14 +130,13 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     print('build $this');
 //    final animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
     final animation = TweenSequence([
-//      CurveTween(curve: Curves.easeIn).animate(_animationController)
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 40.0,
+        tween: Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOutQuart)),
+        weight: 1.0,
       ),
       TweenSequenceItem<double>(
         tween: Tween<double>(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 40.0,
+        weight: 1.0,
       ),
     ]).animate(_animationController);
 
