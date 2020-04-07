@@ -713,13 +713,15 @@ class RenderBubble extends RenderProxyBox {
     path.close();
 
     var secondaryPath = Path();
-    secondaryPath.addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
+    secondaryPath.addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top + 1, pi.box.right, pi.box.bottom,
         topLeft: Radius.circular(pi.ltCircle.radius),
         topRight: Radius.circular(pi.rtCircle.radius),
         bottomLeft: Radius.circular(pi.lbCircle.radius),
         bottomRight: Radius.circular(pi.rbCircle.radius)));
     // Без этого части останутся разрозненными и анимация будет выполняться раза в два медленнее
     // С этим - иногда возникают глюки с тенью
+//    path.addPath(secondaryPath, Offset.zero);
+//    secondaryPath = Path.combine(PathOperation.difference, secondaryPath, path);
     path = Path.combine(PathOperation.union, path, secondaryPath);
 
     secondaryPath.reset();
@@ -760,6 +762,8 @@ class RenderBubble extends RenderProxyBox {
       paint.style = PaintingStyle.stroke;
       paint.color = bubble.style.strokeColor;
       paint.strokeWidth = bubble.style.strokeWidth;
+//      paint.strokeCap = StrokeCap.round;
+      paint.strokeJoin = StrokeJoin.round;
       context.canvas.drawPath(path, paint);
     }
 
@@ -1012,14 +1016,14 @@ class Bubble extends CustomBubble {
 
   /// Прямая линия к позиции на стороне бокса
   bool lineTo(LineSegment out, double pos, bool inverse, Path path, BubblePaintInfo pi) {
-    bool ok = true;
+    var ok = true;
     Point draftEnd;
 
     //
     // Линия уходит к верхней стороне бокса
     //
     if (pos < 0) {
-      var offset = -pos;
+      final offset = -pos;
       draftEnd = out.end = Point(pi.ltCircle.center.x + offset, pi.box.top);
       if (pi.ltCircle.center.x + offset > pi.rtCircle.center.x) {
         ok = false;
@@ -1030,7 +1034,7 @@ class Bubble extends CustomBubble {
     // Линия уходит к нижней стороне бокса
     //
     else if (pos > pi.box.height) {
-      var offset = pos - pi.box.height;
+      final offset = pos - pi.box.height;
       draftEnd = out.end = Point(pi.lbCircle.center.x + offset, pi.box.bottom);
       if (pi.lbCircle.center.x + offset > pi.rbCircle.center.x) {
         ok = false;
@@ -1076,17 +1080,19 @@ class Bubble extends CustomBubble {
     }
 
     if (pi.draft != null) {
-      var tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
+      final tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
       pi.draft.addPoint(draftEnd);
-      pi.draft.addLineSegment(pi.nipCircle.center, tangent.start);
-      pi.draft.addPoint(tangent.start);
-      pi.draft.addLineSegmentCopy(tangent);
+      if (tangent != null) {
+        pi.draft.addLineSegment(pi.nipCircle.center, tangent.start);
+        pi.draft.addPoint(tangent.start);
+        pi.draft.addLineSegmentCopy(tangent);
+      }
     }
 
     // Смотрим, не вышла ли линия за касательную
-    bool processed = false;
+    var processed = false;
     if (out.end.y < pi.ltCircle.center.y && pi.nipCircle.center.y - pi.nipCircle.radius >= pi.box.top) {
-      var tangent = pi.nipCircle.tangentToCircle(pi.ltCircle, inverse ? 1.0 : -1.0, -1.0);
+      final tangent = pi.nipCircle.tangentToCircle(pi.ltCircle, inverse ? 1.0 : -1.0, -1.0);
       if (out.end.x > tangent.end.x) {
         processed = true;
         ok = false;
@@ -1098,7 +1104,7 @@ class Bubble extends CustomBubble {
         }
       }
     } else if (out.end.y > pi.lbCircle.center.y && pi.nipCircle.center.y + pi.nipCircle.radius <= pi.box.bottom) {
-      var tangent = pi.nipCircle.tangentToCircle(pi.lbCircle, inverse ? 1.0 : -1.0, 1.0);
+      final tangent = pi.nipCircle.tangentToCircle(pi.lbCircle, inverse ? 1.0 : -1.0, 1.0);
       if (out.end.x > tangent.end.x) {
         processed = true;
         ok = false;
@@ -1110,14 +1116,13 @@ class Bubble extends CustomBubble {
         }
       }
     } else if (pi.draft != null) {
-      if (out.end.y == pi.box.top)
-        pi.draft.showTopSide = true;
+      if (out.end.y == pi.box.top) pi.draft.showTopSide = true;
       else if (out.end.y == pi.box.bottom) pi.draft.showBottomSide = true;
     }
 
     if (!processed) {
-      var tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
-      out.start = tangent.start;
+      final tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
+      out.start = tangent?.start ?? out.end;
     }
 
     return ok;

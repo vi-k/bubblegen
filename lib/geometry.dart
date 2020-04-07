@@ -14,7 +14,7 @@ double inf(double value) {
 class Point extends Offset {
   const Point(double x, double y) : super(x, y);
 
-  static const Point infinite = Point(double.infinity, double.infinity);
+//  static const Point infinite = Point(double.infinity, double.infinity);
 
   double get x => dx;
   double get y => dy;
@@ -227,23 +227,28 @@ class Circle {
 
   /// Касательная к окружности из точки
   ///
-  /// @param point Точка, из которая проводится касательная
-  /// @param side Какая часть окружности дожна быть использована: -1.0 - верх, 1.0 - низ.
+  /// @param point Точка, из которой проводится касательная
+  /// @param side Какая часть окружности дожна быть использована: -1.0 - верх, 1.0 - низ
+  ///
+  /// @return null, если точка внутри окружности
   LineSegment tangentToPoint(Point point, double side) {
     // Линия, соединяющая центр и точку
-    var c2c = LineSegment(this.center, point);
+    final c2c = LineSegment(this.center, point);
 
     // Вспомогательный треугольник, где касательная - гипотенуза
-    var alpha = math.asin((this.radius) / c2c.length);
-//    print('alpha: ${alpha / pi * 180}');
+    // alpha - угол между касательной и линией, соединяющей центр и точку
+    final alpha = math.asin(this.radius / c2c.length);
+//    print('radius: ${this.radius} c2c.length: ${c2c.length}');
+//    print('alpha: ${alpha / math.pi * 180}');
 
     // Угол наклона касательной
-    var beta = c2c.direct - side * alpha;
-//    print('beta: ${beta / pi * 180}');
+    final beta = c2c.direct - side * alpha;
+//    print('beta: ${beta / math.pi * 180}');
 
-    var gamma = side > 0 ? beta + math.pi / 2 : beta - math.pi / 2;
+    // Позиция на окружности
+    final gamma = side > 0 ? beta + math.pi / 2 : beta - math.pi / 2;
 
 //    print('tanget: ${LineSegment(this.point(gamma), point)}');
-    return LineSegment(this.point(gamma), point);
+    return gamma.isNaN ? null : LineSegment(this.point(gamma), point);
   }
 }

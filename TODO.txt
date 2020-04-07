@@ -1,3 +1,4 @@
 2020-04-07 nipSize < 0, bottomLine - pos - не рассчитывается пересечение с углом;
            nipSize = 0 - тень становится меньше
+           borderRadius = 0, nipRadius = 3.1, bottomLine = pos, nipSize = 5 или 10 - тень исчезает
 2020-04-07 Неправильно работает floor(): -0.4 на кнопках -/+
