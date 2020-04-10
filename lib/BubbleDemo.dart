@@ -55,7 +55,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
         nipPlaceholderSize: Generator.settings.style.nipSize,
         nipSize: Generator.settings.style.nipSize - (animationValue != null ? animationValue * Generator.settings.style.nipSize : 0),
 //        strokeWidth: animationValue != null ? animationValue * 2.0 : Generator.settings.style.strokeWidth,
-        elevation: Generator.settings.style.elevation + (animationValue != null ? animationValue * 4.0 : 0.0),
+        elevation: Generator.settings.style.elevation + (animationValue != null ? animationValue * 2.0 : 0.0),
         color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
       ),
       topLine: Generator.settings.topLine,

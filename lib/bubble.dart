@@ -258,12 +258,12 @@ class DraftInfo {
     final dp = 1.0 / pi.scale;
     final limitSize = 10.0 * dp;
 
-    var paint = Paint();
+    final paint = Paint();
     paint.strokeWidth = 1 * dp;
     paint.color = draftColor;
     paint.style = PaintingStyle.stroke;
 
-    var path = Path();
+    final path = Path();
 
     // Левая граница
     path.moveTo(pi.rect.left, pi.rect.top - limitSize);
@@ -293,8 +293,8 @@ class DraftInfo {
     final sideSize = 4 * dp;
     final pointSize = 1.5 * dp;
 
-    var path = Path();
-    var paint = Paint()
+    final path = Path();
+    final paint = Paint()
       ..strokeWidth = 1 * dp
       ..color = draftColor
       ..style = PaintingStyle.fill;
@@ -417,10 +417,10 @@ class DraftInfo {
           // Пунктирные линии
           var size = 0.0;
           while (true) {
-            var start = item.line.point(size);
+            final start = item.line.point(size);
             if (start.x < pi.rect.left - padding || start.x > pi.rect.right + padding
                 || start.y < pi.rect.top - padding || start.y > pi.rect.bottom + padding) break;
-            var end = item.line.point(size + interval);
+            final end = item.line.point(size + interval);
             size += 2 * interval;
             canvas.drawLine(start, end, paint);
           }
@@ -640,7 +640,7 @@ class RenderBubble extends RenderProxyBox {
     // print('paint $this');
     if (child == null) return;
 
-    var pi = BubblePaintInfo();
+    final pi = BubblePaintInfo();
     pi.scale = bubble.scale;
     var childOffset = offset;
 
@@ -667,25 +667,25 @@ class RenderBubble extends RenderProxyBox {
     //
     // Если радиусы больше сторон бокса, рассчитываем коэффициент, чтобы равномерно уменьшить все радиусы
     //
-    double k = 1.0;
+    var k = 1.0;
 
     if (bubble.style.radius.topLeft + bubble.style.radius.topRight > pi.box.width) {
-      var tK = pi.box.width / (bubble.style.radius.topLeft + bubble.style.radius.topRight);
+      final tK = pi.box.width / (bubble.style.radius.topLeft + bubble.style.radius.topRight);
       if (tK < k) k = tK;
     }
 
     if (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight > pi.box.width) {
-      var bK = pi.box.width / (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight);
+      final bK = pi.box.width / (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight);
       if (bK < k) k = bK;
     }
 
     if (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft > pi.box.height) {
-      var lK = pi.box.height / (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft);
+      final lK = pi.box.height / (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft);
       if (lK < k) k = lK;
     }
 
     if (bubble.style.radius.topRight + bubble.style.radius.bottomRight > pi.box.height) {
-      var rK = pi.box.height / (bubble.style.radius.topRight + bubble.style.radius.bottomRight);
+      final rK = pi.box.height / (bubble.style.radius.topRight + bubble.style.radius.bottomRight);
       if (rK < k) k = rK;
     }
 
@@ -709,26 +709,63 @@ class RenderBubble extends RenderProxyBox {
     pi.draft = bubble.drawDraft ? DraftInfo() : null;
 
     var path = Path();
-    bubble.createNip(path, pi);
+//    path.moveTo(0.0, 0.0);
+//    path.lineTo(20.0, 0.0);
+//    path.lineTo(20.0, 10.0);
+//    path.lineTo(0.0, 10.0);
+//    bubble.createNip(path, pi);
     path.close();
 
-    var secondaryPath = Path();
-    secondaryPath.addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top + 1, pi.box.right, pi.box.bottom,
+    RRect box = RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
         topLeft: Radius.circular(pi.ltCircle.radius),
         topRight: Radius.circular(pi.rtCircle.radius),
         bottomLeft: Radius.circular(pi.lbCircle.radius),
-        bottomRight: Radius.circular(pi.rbCircle.radius)));
+        bottomRight: Radius.circular(pi.rbCircle.radius)
+    );
+
+    f(path, box);
+    var secondaryPath = Path()
+      ..moveTo(box.left, box.bottom - box.blRadiusY)
+
+      ..lineTo(box.left, box.top + 5.0)
+      ..lineTo(box.left - 7.0, box.top + 5.0)
+      ..lineTo(box.left - 7.0, box.top)
+
+//      ..lineTo(box.left, box.top + box.tlRadiusY)
+//      ..arcToPoint(Offset(box.left + box.tlRadiusX, box.top), radius: Radius.elliptical(box.tlRadiusX, box.tlRadiusY))
+      ..lineTo(box.right - box.trRadiusX, box.top)
+      ..arcToPoint(Offset(box.right, box.top + box.trRadiusY), radius: Radius.elliptical(box.trRadiusX, box.trRadiusY))
+      ..lineTo(box.right, box.bottom - box.brRadiusY)
+      ..arcToPoint(Offset(box.right - box.brRadiusX, box.bottom), radius: Radius.elliptical(box.brRadiusX, box.brRadiusY))
+      ..lineTo(box.left + box.blRadiusX, box.bottom)
+      ..arcToPoint(Offset(box.left, box.bottom - box.blRadiusY), radius: Radius.elliptical(box.blRadiusX, box.blRadiusY))
+      ..close();
+//    path
+//      ..addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
+//        topLeft: Radius.circular(pi.ltCircle.radius),
+//        topRight: Radius.circular(pi.rtCircle.radius),
+//        bottomLeft: Radius.circular(pi.lbCircle.radius),
+//        bottomRight: Radius.circular(pi.rbCircle.radius)
+//      ));
     // Без этого части останутся разрозненными и анимация будет выполняться раза в два медленнее
     // С этим - иногда возникают глюки с тенью
-//    path.addPath(secondaryPath, Offset.zero);
-//    secondaryPath = Path.combine(PathOperation.difference, secondaryPath, path);
+//    path = Path.combine(PathOperation.union, path, secondaryPath);
+//    path = Path.combine(PathOperation.union, path, path);
+//    path.fillType = PathFillType.evenOdd;
+//    path.extendWithPath(secondaryPath, Offset.zero);
+//    secondaryPath.close();
     path = Path.combine(PathOperation.union, path, secondaryPath);
 
-    secondaryPath.reset();
-    secondaryPath.addOval(Rect.fromCenter(center: pi.nipCircle.center, width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
-    path = Path.combine(PathOperation.union, path, secondaryPath);
+    var thirdPath = Path()
+      ..addOval(Rect.fromCenter(center: pi.nipCircle.center - Offset(0.0, 0.0), width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
+//    path = Path.combine(PathOperation.union, path, thirdPath);
+
+    var path4 = Path();
+    bubble.createNip(path4, pi);
+    path4.close();
 
     context.canvas.save();
+//    context.canvas.translate(0.0, 1.0);
     context.canvas.translate(offset.dx, offset.dy);
 
     if (bubble.style.nipSide.isRight) {
@@ -750,12 +787,12 @@ class RenderBubble extends RenderProxyBox {
 
     context.canvas.scale(bubble.scale);
 
-    var paint = Paint();
+    final paint = Paint();
     paint.color = bubble.style.color;
     paint.style = PaintingStyle.fill;
     if (pi.draft != null) pi.draft.paintBackground(context.canvas, pi);
-    context.canvas.drawShadow(path, bubble.style.shadowColor, bubble.style.elevation * bubble.scale, false);
-    context.canvas.drawPath(path, paint);
+    context.canvas.drawShadow(path, bubble.style.shadowColor, bubble.style.elevation * bubble.scale, true);
+//    context.canvas.drawPath(path, paint);
 
     // Обводка
     if (bubble.style.strokeWidth != 0.0) {
@@ -807,8 +844,8 @@ class Bubble extends CustomBubble {
   }
 
   Point addLine(NipLine nipLine, bool inverse, Path path, BubblePaintInfo pi) {
-    bool ok = true;
-    var result = LineSegment(null, null);
+    var ok = true;
+    final result = LineSegment(null, null);
 
 //    print(nipLine.type);
 
@@ -850,7 +887,7 @@ class Bubble extends CustomBubble {
       if (inverse) pi.draft.addPoint(pi.nipCircle.center);
 
       // Линия
-      var type = ok ? DraftType.Main : DraftType.Error;
+      final type = ok ? DraftType.Main : DraftType.Error;
       pi.draft.addLineSegment(result.end, result.start, type);
       pi.draft.addPoint(result.start, type);
       pi.draft.addPoint(result.end, type);
@@ -859,10 +896,15 @@ class Bubble extends CustomBubble {
     if (inverse) {
       path.lineTo(result.end.x, result.end.y);
       path.lineTo(result.start.x, result.start.y);
+//      path.lineTo(result.end.x, result.end.y - 1.0);
+//      path.lineTo(result.start.x, result.start.y - 1.0);
     } else {
 //      print('result: $result');
       path.moveTo(result.start.x, result.start.y);
+//      path.lineTo(result.start.x, result.start.y);
       path.lineTo(result.end.x, result.end.y);
+//      path.moveTo(result.start.x, result.start.y - 1.0);
+//      path.lineTo(result.end.x, result.end.y - 1.0);
     }
 
     return result.start;
@@ -870,12 +912,12 @@ class Bubble extends CustomBubble {
 
   /// Прямая линия под углом
   bool line(LineSegment out, double angle, bool inverse, Path path, BubblePaintInfo pi) {
-    bool ok = true;
+    var ok = true;
 
-    var beta = inverse ? angle + math.pi / 2 : angle - math.pi / 2; // Точка касательной на малом круге
+    final beta = inverse ? angle + math.pi / 2 : angle - math.pi / 2; // Точка касательной на малом круге
 
-    var line = Line(pi.nipCircle.point(beta), angle);
-    var tan = line.tan();
+    final line = Line(pi.nipCircle.point(beta), angle);
+    final tan = line.tan();
     out.start = line.start;
 
     if (pi.draft != null) {
@@ -913,7 +955,7 @@ class Bubble extends CustomBubble {
             ok = false;
 
             out.end = Point(pi.rtCircle.center.x, pi.box.top);
-            var tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
+            final tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
             out.start = tangent.start;
           }
         }
@@ -923,7 +965,7 @@ class Bubble extends CustomBubble {
         pi.draft?.showTopCorner = true;
 
         // Рассчитываем пересечение линии с верхним кругом. Получаем хорду
-        var chord = line.intersectCircle(pi.ltCircle);
+        final chord = line.intersectCircle(pi.ltCircle);
 
         //
         // Линия пересекается с дугой угла
@@ -932,7 +974,7 @@ class Bubble extends CustomBubble {
           out.end = chord.start;
 
           if (pi.draft != null) {
-            var normal = line.normal(pi.ltCircle.center);
+            final normal = line.normal(pi.ltCircle.center);
             pi.draft.addLineSegmentCopy(normal);
             pi.draft.addPoint(normal.end);
           }
@@ -971,7 +1013,7 @@ class Bubble extends CustomBubble {
             ok = false;
 
             out.end = Point(pi.rbCircle.center.x, pi.box.bottom);
-            var tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
+            final tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
             out.start = tangent.start;
           }
         }
@@ -981,7 +1023,7 @@ class Bubble extends CustomBubble {
         pi.draft?.showBottomCorner = true;
 
         // Рассчитываем пересечение линии с нижним кругом
-        var chord = line.intersectCircle(pi.lbCircle);
+        final chord = line.intersectCircle(pi.lbCircle);
 
         //
         // Линия пересекается с дугой угла
@@ -990,7 +1032,7 @@ class Bubble extends CustomBubble {
           out.end = chord.start;
 
           if (pi.draft != null) {
-            var normal = line.normal(pi.lbCircle.center);
+            final normal = line.normal(pi.lbCircle.center);
             pi.draft.addLineSegmentCopy(normal);
             pi.draft.addPoint(normal.end);
           }
@@ -1130,7 +1172,7 @@ class Bubble extends CustomBubble {
 
   /// Прямая линия к углам бокса
   bool lineToCorner(LineSegment out, double angle, bool inverse, Path path, BubblePaintInfo pi) {
-    bool ok = true;
+    var ok = true;
     Point draftEnd;
 
     out.start = null;
@@ -1140,7 +1182,7 @@ class Bubble extends CustomBubble {
 
     if (pi.draft != null) {
       pi.draft.addPoint(draftEnd);
-      var tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
+      final tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
       pi.draft.addLineSegmentCopy(tangent);
     }
 
@@ -1164,7 +1206,7 @@ class Bubble extends CustomBubble {
     }
 
     if (angle <= 0) {
-      var tangent = pi.nipCircle.tangentToCircle(pi.ltCircle, inverse ? 1.0 : -1.0, -1.0);
+      final tangent = pi.nipCircle.tangentToCircle(pi.ltCircle, inverse ? 1.0 : -1.0, -1.0);
       if (out.end.x > tangent.end.x) {
         ok = false;
         out.start = tangent.start;
@@ -1175,7 +1217,7 @@ class Bubble extends CustomBubble {
         }
       }
     } else if (angle >= 0) {
-      var tangent = pi.nipCircle.tangentToCircle(pi.lbCircle, inverse ? 1.0 : -1.0, 1.0);
+      final tangent = pi.nipCircle.tangentToCircle(pi.lbCircle, inverse ? 1.0 : -1.0, 1.0);
       if (out.end.x > tangent.end.x) {
         ok = false;
         out.start = tangent.start;
@@ -1188,12 +1230,12 @@ class Bubble extends CustomBubble {
     }
 
     if (out.start == null) {
-      var tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
+      final tangent = pi.nipCircle.tangentToPoint(out.end, inverse ? 1.0 : -1.0);
       out.start = tangent.start;
     }
 
     if (pi.draft != null) {
-      var tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
+      final tangent = pi.nipCircle.tangentToPoint(draftEnd, inverse ? 1.0 : -1.0);
       out.start = tangent.start;
 
       pi.draft.addPoint(draftEnd);
@@ -1210,4 +1252,194 @@ class Bubble extends CustomBubble {
 
     return ok;
   }
+}
+
+class RelativePos {
+  const RelativePos({this.relative = 0.0, this.absolute = 0.0})
+      : assert(relative != null),
+        assert(absolute != null);
+
+  final double relative;
+  final double absolute;
+
+  double toAbsolute(double size) => size * relative + absolute;
+
+  @override
+  bool operator ==(covariant other) {
+    return other.relative == relative && other.absolute == absolute;
+  }
+
+  @override
+  int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
+
+  @override
+  String toString() {
+    return 'RelativePos(relative: $relative, absolute: $absolute)';
+  }
+}
+
+enum InsetPosType { left, topLeft, top, topRight, right, bottomRight, bottom, bottomLeft }
+
+class AbsInsetPos {
+  const AbsInsetPos(this.type, this.pos);
+
+  final InsetPosType type;
+  final double pos;
+
+  static const zero = AbsInsetPos(InsetPosType.left, 0.0);
+
+  @override
+  int get hashCode => hashValues(type.hashCode, pos.hashCode);
+
+  @override
+  bool operator ==(covariant other) {
+    return this.type == other.type && this.pos == other.pos;
+  }
+
+  int compare(AbsInsetPos other) {
+    if (this.type.index > other.type.index) return 1;
+    if (this.type.index < other.type.index) return -1;
+    if (this.pos > other.pos) return 1;
+    if (this.pos < other.pos) return 1;
+    return 0;
+  }
+
+  bool operator >(AbsInsetPos other) => this.compare(other) > 0;
+  bool operator >=(AbsInsetPos other) => this.compare(other) >= 0;
+  bool operator <(AbsInsetPos other) => this.compare(other) < 0;
+  bool operator <=(AbsInsetPos other) => this.compare(other) <= 0;
+}
+
+class AbsInset {
+  const AbsInset(this.start, this.end)
+    : assert(start != null),
+      assert(end != null);
+
+  final AbsInsetPos start;
+  final AbsInsetPos end;
+
+  bool get crossesZero => start > end;
+
+  int compare(AbsInset other) {
+    // Трудность сравнения пар возникает при переходе нулевой точки
+    if (this.crossesZero) {
+      return other.crossesZero ? this.start.compare(other.start) : -1;
+    }
+    return other.crossesZero ? 1 : this.start.compare(other.start);
+  }
+
+  bool operator >(covariant other) {
+    if (this.start > this.end) {
+      return other.start > other.end ? this.start > other.start : false;
+    }
+    if (other.start > other.end) return true;
+    return this.start > other.start;
+  }
+}
+
+class AbsInsetList {
+  var list = <AbsInset>[];
+
+  void sort() {
+    list.sort((a, b) => a.compare(b));
+  }
+
+//  @override
+//  int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
+}
+
+class InsetPos {
+  const InsetPos(this.type, this.pos);
+
+  final InsetPosType type;
+  final RelativePos pos;
+
+  AbsInsetPos apply(RRect box) {
+    switch (type) {
+      case InsetPosType.left:
+        return AbsInsetPos(type, pos.toAbsolute(box.height - box.blRadiusY - box.tlRadiusY));
+
+      case InsetPosType.top:
+        return AbsInsetPos(type, pos.toAbsolute(box.width - box.tlRadiusX - box.trRadiusX));
+
+      case InsetPosType.right:
+        return AbsInsetPos(type, pos.toAbsolute(box.height - box.trRadiusY - box.brRadiusY));
+
+      case InsetPosType.bottom:
+        return AbsInsetPos(type, pos.toAbsolute(box.width - box.brRadiusX - box.blRadiusX));
+
+      case InsetPosType.topLeft:
+        // TODO: Handle this case.
+        break;
+
+      case InsetPosType.topRight:
+        // TODO: Handle this case.
+        break;
+
+      case InsetPosType.bottomRight:
+        // TODO: Handle this case.
+        break;
+
+      case InsetPosType.bottomLeft:
+        // TODO: Handle this case.
+        break;
+    }
+  }
+}
+
+class Inset {
+  const Inset(this.start, this.end);
+
+  final InsetPos start;
+  final InsetPos end;
+}
+
+class InsetList {
+  InsetList([List<Inset> list])
+      : _list = list ?? [];
+
+  List<Inset> _list;
+  List<Inset> get list => _list;
+
+//  void add(Inset element) => _list.add(element);
+
+  AbsInsetList apply(RRect box) {
+    final result = AbsInsetList();
+    list.forEach((element) {
+      result.list.add(AbsInset(element.start.apply(box), element.end.apply(box)));
+    });
+
+    result.sort();
+
+    return result;
+  }
+}
+
+void f(Path path, RRect box) {
+  final list = InsetList([
+    Inset(InsetPos(InsetPosType.left, RelativePos(relative: 0.0, absolute: 0.0)), InsetPos(InsetPosType.left, RelativePos(relative: 0.0, absolute: 10.0))),
+//    Inset(InsetPos(InsetPosType.topLeft, RelativePos(relative: 0.0, absolute: 0.0)), InsetPos(InsetPosType.top, RelativePos(relative: 0.0, absolute: 0.0))),
+    Inset(InsetPos(InsetPosType.top, RelativePos(relative: 0.0, absolute: 10.0)), InsetPos(InsetPosType.top, RelativePos(relative: 0.0, absolute: 15.0)))
+  ]);
+
+  final absList = list.apply(box);
+
+  var pos = AbsInsetPos.zero;
+
+  path
+    ..moveTo(box.left, box.bottom - box.blRadiusY)
+
+//    ..lineTo(box.left, box.top + 5.0)
+//    ..lineTo(box.left - 7.0, box.top + 5.0)
+//    ..lineTo(box.left - 7.0, box.top)
+
+//      ..lineTo(box.left, box.top + box.tlRadiusY)
+//      ..arcToPoint(Offset(box.left + box.tlRadiusX, box.top), radius: Radius.elliptical(box.tlRadiusX, box.tlRadiusY))
+    ..lineTo(box.right - box.trRadiusX, box.top)
+    ..arcToPoint(Offset(box.right, box.top + box.trRadiusY), radius: Radius.elliptical(box.trRadiusX, box.trRadiusY))
+    ..lineTo(box.right, box.bottom - box.brRadiusY)
+    ..arcToPoint(Offset(box.right - box.brRadiusX, box.bottom), radius: Radius.elliptical(box.brRadiusX, box.brRadiusY))
+    ..lineTo(box.left + box.blRadiusX, box.bottom)
+    ..arcToPoint(Offset(box.left, box.bottom - box.blRadiusY), radius: Radius.elliptical(box.blRadiusX, box.blRadiusY))
+    ..close();
 }
