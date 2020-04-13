@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'NumericField.dart';
+import 'custom_bubble.dart';
 import 'bubble.dart';
 import 'main.dart';
 
@@ -13,9 +14,11 @@ class GeneratorBubbleStyle {
   double height;
   double width;
 
-  double radius;
+  bool hasOneRadius;
+  BubbleRadius radius;
   NipSide nipSide;
-  bool inverse;
+  bool hFlip;
+  bool vFlip;
   double nipRadius;
   double nipSize;
   NipOffset nipOffset;
@@ -25,13 +28,17 @@ class GeneratorBubbleStyle {
   Color strokeColor;
   double strokeWidth;
 
+  Inset inset;
+
   NipLine topLine;
   NipLine bottomLine;
 
   set style(BubbleStyle style) {
-    radius = style.radius.topLeft;
+    hasOneRadius = style.radius.hasOneRadius;
+    radius = style.radius;
     nipSide = style.nipSide;
-    inverse = style.inverse;
+    hFlip = style.hFlip;
+    vFlip = style.vFlip;
     nipRadius = style.nipRadius;
     nipSize = style.nipSize;
     nipOffset = style.nipOffset;
@@ -44,9 +51,10 @@ class GeneratorBubbleStyle {
 
   BubbleStyle get style {
     return BubbleStyle(
-        radius: BubbleRadius.all(radius),
+        radius: hasOneRadius ? BubbleRadius(all: radius.topLeft) : radius,
         nipSide: nipSide,
-        inverse: inverse,
+        hFlip: hFlip,
+        vFlip: vFlip,
         nipRadius: nipRadius,
         nipSize: nipSize,
         nipOffset: nipOffset,
@@ -131,12 +139,19 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
     Generator.settings.height = 50.0;
     Generator.settings.additionalPadding = 0.0;
 
-    Generator.settings.radius = 6.0;
+    Generator.settings.hasOneRadius = true;
+    Generator.settings.radius = BubbleRadius(all: 6.0);
     Generator.settings.nipSide = NipSide.left;
-    Generator.settings.inverse = false;
+    Generator.settings.hFlip = false;
+    Generator.settings.vFlip = false;
     Generator.settings.nipRadius = 1.5;
     Generator.settings.nipSize = 7.0;
     Generator.settings.nipOffset = NipOffset();
+
+    Generator.settings.inset = Inset(
+        InsetPos(InsetPosType.topLeft, Position.zero),
+        InsetPos(InsetPosType.topLeft, Position(ratio: 1.0, offset: 0.0)),
+    );
     Generator.settings.topLine = NipLine.line(0.0);
     Generator.settings.bottomLine = NipLine.line(53.0);
 
@@ -156,10 +171,11 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
   }
 
   EdgeInsets getAddingPadding(double scale) {
-    var padding = Generator.settings.additionalPadding * scale;
-    return Generator.settings.nipSide.isHorizontal
-        ? Generator.settings.inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
-        : Generator.settings.inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
+//    var padding = Generator.settings.additionalPadding * scale;
+//    return Generator.settings.nipSide.isHorizontal
+//        ? Generator.settings.inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
+//        : Generator.settings.inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
+    return EdgeInsets.zero;
   }
 
   Widget getSettings() {
@@ -168,6 +184,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //        color: Colors.lime.shade100.withAlpha(224),
       color: Colors.white.withAlpha(160),
       child: ListView(
+
         children: <Widget>[
           const Text(
             'View',
@@ -264,22 +281,98 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
-              caption: 'Corner\'s radius:',
-              value: Generator.settings.radius,
-              units: 'dp',
+              caption: 'kind of radius:',
+              value: Generator.settings.hasOneRadius ? 0.0 : 1.0,
+              units: '',
               min: 0.0,
+              max: 1.0,
               step: 1.0,
+              textAlign: TextAlign.center,
               onChanged: (double value) {
                 setState(() {
-                  Generator.settings.radius = value;
+                  Generator.settings.hasOneRadius = value == 0.0;
                 });
+              },
+              onConvertToText: (value) {
+                return value == 0.0 ? 'all' : 'every';
               },
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
-              caption: 'Elevation:',
+              caption: Generator.settings.hasOneRadius ? 'radius:' : 'radius.topLeft:',
+              value: Generator.settings.radius.topLeft,
+              units: 'dp',
+              min: 0.0,
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  Generator.settings.radius = Generator.settings.hasOneRadius
+                    ? BubbleRadius(all: value)
+                    : Generator.settings.radius.copyWith(topLeft: value);
+                });
+              },
+            ),
+          ),
+          Visibility(
+            visible: !Generator.settings.hasOneRadius,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'radius.topRight:',
+                value: Generator.settings.radius.topRight,
+                units: 'dp',
+                min: 0.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    Generator.settings.radius = Generator.settings.radius.copyWith(topRight: value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: !Generator.settings.hasOneRadius,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'radius.bottomRight:',
+                value: Generator.settings.radius.bottomRight,
+                units: 'dp',
+                min: 0.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    Generator.settings.radius = Generator.settings.radius.copyWith(bottomRight: value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Visibility(
+            visible: !Generator.settings.hasOneRadius,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: NumericField(
+                caption: 'radius.bottomLeft:',
+                value: Generator.settings.radius.bottomLeft,
+                units: 'dp',
+                min: 0.0,
+                step: 1.0,
+                onChanged: (double value) {
+                  setState(() {
+                    Generator.settings.radius = Generator.settings.radius.copyWith(bottomLeft: value);
+                  });
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'elevation:',
               value: Generator.settings.elevation,
               units: 'dp',
               min: 0.0,
@@ -295,7 +388,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
-              caption: 'Stroke width:',
+              caption: 'strokeWidth:',
               value: Generator.settings.strokeWidth,
               units: 'dp',
               min: 0.0,
@@ -310,6 +403,95 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
           ),
           const Divider(),
           const Text(
+            'Inset',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+                caption: 'start.type:',
+                value: Generator.settings.inset.start.type.index.toDouble(),
+                min: 0.0,
+                max: InsetPosType.values.length - 1.0,
+                step: 1.0,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    Generator.settings.inset = Inset(
+                      Generator.settings.inset.start.copyWith(type: InsetPosType.values[index]),
+                      Generator.settings.inset.end,
+                    );
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.round();
+                  return InsetPosType.values[index].toString().replaceFirst('InsetPosType.', '');
+                }),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'start.pos.ratio:',
+              value: Generator.settings.inset.start.pos.ratio,
+              units: '',
+              min: 0.0,
+              max: 1.0,
+              step: 0.1,
+              fractionDigits: 2,
+              onChanged: (double value) {
+                setState(() {
+                  Generator.settings.inset = Inset(
+                    Generator.settings.inset.start.copyWith(pos: Generator.settings.inset.start.pos.copyWith(ratio: value)),
+                    Generator.settings.inset.end,
+                  );
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+              caption: 'start.pos.offset:',
+              value: Generator.settings.inset.start.pos.offset,
+              units: 'dp',
+              step: 1.0,
+              onChanged: (double value) {
+                setState(() {
+                  Generator.settings.inset = Inset(
+                    Generator.settings.inset.start.copyWith(pos: Generator.settings.inset.start.pos.copyWith(offset: value)),
+                    Generator.settings.inset.end,
+                  );
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: NumericField(
+                caption: 'start.offsetType:',
+                value: Generator.settings.inset.start.offsetType.index.toDouble(),
+                min: 0.0,
+                max: CornerOffsetType.values.length - 1.0,
+                step: 1.0,
+                textAlign: TextAlign.center,
+                onChanged: (double value) {
+                  setState(() {
+                    final index = value.round();
+                    Generator.settings.inset = Inset(
+                      Generator.settings.inset.start.copyWith(offsetType: CornerOffsetType.values[index]),
+                      Generator.settings.inset.end,
+                    );
+                  });
+                },
+                onConvertToText: (value) {
+                  final index = value.round();
+                  return CornerOffsetType.values[index].toString().replaceFirst('CornerOffsetType.', '');
+                }),
+          ),
+          const Divider(),
+          const Text(
             'Nip',
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -318,7 +500,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: NumericField(
                 caption: 'Side:',
-                value: Generator.settings.nipSide.index.toDouble() * 2.0 + (Generator.settings.inverse ? 1.0 : 0.0),
+                value: Generator.settings.nipSide.index.toDouble() * 2.0 + (Generator.settings.hFlip ? 1.0 : 0.0),
                 min: NipSide.minIndex.toDouble(),
                 max: NipSide.maxIndex.toDouble() * 2.0 + 1.0,
                 step: 1.0,
@@ -327,7 +509,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                   setState(() {
                     final index = value.round();
                     Generator.settings.nipSide = NipSide.byIndex(index >> 1);
-                    Generator.settings.inverse = index % 2 == 1;
+                    Generator.settings.hFlip = index % 2 == 1;
                   });
                 },
                 onConvertToText: (value) {
@@ -663,10 +845,11 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 Padding(
                   padding: getAddingPadding(1.0),
                   child: Align(
-                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.inverse ? Alignment.topLeft : Alignment.topRight,
+                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.hFlip ? Alignment.topLeft : Alignment.topRight,
 //                    child: const Text('test'),
                     child: Bubble(
                       style: Generator.settings.style,
+                      inset: Generator.settings.inset,
                       topLine: Generator.settings.topLine,
                       bottomLine: Generator.settings.bottomLine,
                       child: Container(
@@ -679,10 +862,11 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 Padding(
                   padding: EdgeInsets.only(top: _staticPadding / 2.0) + getAddingPadding(1.0),
                   child: Align(
-                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.inverse ? Alignment.topLeft : Alignment.topRight,
+                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.hFlip ? Alignment.topLeft : Alignment.topRight,
 //                    child: const Text('test'),
                     child: Bubble(
                       style: Generator.settings.style,
+                      inset: Generator.settings.inset,
                       topLine: Generator.settings.topLine,
                       bottomLine: Generator.settings.bottomLine,
                       child: Container(
@@ -715,6 +899,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                         child: Bubble(
                           scale: _scale,
                           style: Generator.settings.style.copyWith(color: Colors.lightBlue),
+                          inset: Generator.settings.inset,
                           topLine: Generator.settings.topLine,
                           bottomLine: Generator.settings.bottomLine,
                           drawDraft: _drawDraft,

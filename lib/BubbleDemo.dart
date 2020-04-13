@@ -152,8 +152,8 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
 //              print('itemBuilder: #$index');
               return Padding(
                 padding: EdgeInsets.only(
-                  top: 6.0 + (Generator.settings.inverse ? 0.0 : Generator.settings.additionalPadding),
-                  bottom: 6.0 + (Generator.settings.inverse ? Generator.settings.additionalPadding : 0.0),
+                  top: 6.0 + (Generator.settings.hFlip ? 0.0 : Generator.settings.additionalPadding),
+                  bottom: 6.0 + (Generator.settings.hFlip ? Generator.settings.additionalPadding : 0.0),
                   left: index % 2 == 0 ? 8.0 : 64.0,
                   right: index % 2 == 0 ? 64.0 : 8.0,
                 ),
