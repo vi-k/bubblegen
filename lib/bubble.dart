@@ -534,19 +534,24 @@ class BubbleStyle {
 }
 
 class CustomBubble extends SingleChildRenderObjectWidget {
-  const CustomBubble({
+  CustomBubble({
     this.child,
     this.style = const BubbleStyle(),
     this.scale = 1.0,
     this.drawDraft = false,
+    Inset inset,
+    List<Inset> insets,
   })  : assert(style != null),
         assert(scale != null),
-        assert(drawDraft != null);
+        assert(drawDraft != null),
+        assert(inset == null || insets == null),
+        insets = InsetList(insets ?? (inset != null ? [inset] : []));
 
   final BubbleStyle style;
   final Widget child;
   final double scale;
   final bool drawDraft;
+  final InsetList insets;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -563,9 +568,34 @@ class CustomBubble extends SingleChildRenderObjectWidget {
   @protected
   void createNip(Path path, BubblePaintInfo pi) {}
 
+  void generateInsets() {
+    insets.list.clear();
+    insets.list.add(Inset(
+        InsetPos(InsetPosType.topLeft, Position(ratio: 0.5)),
+        InsetPos(InsetPosType.top, Position(offset: 5.0))
+    ));
+    insets.list.add(Inset(
+        InsetPos(InsetPosType.topRight, Position(ratio: 0.5)),
+        InsetPos(InsetPosType.right, Position(offset: 5.0))
+    ));
+    insets.list.add(Inset(
+        InsetPos(InsetPosType.bottomRight, Position(ratio: 0.5)),
+        InsetPos(InsetPosType.bottom, Position(offset: 5.0))
+    ));
+    insets.list.add(Inset(
+        InsetPos(InsetPosType.bottomLeft, Position(ratio: 0.5)),
+        InsetPos(InsetPosType.left, Position(offset: 5.0))
+    ));
+  }
+
+  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset) {
+//    print('--- inset: $absInset $end');
+    path.arcToPoint(end, radius: Radius.circular(1.0), largeArc: false, clockwise: true);
+  }
+
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'CustomBubble(style: $style, scale: $scale, drawDraft: $drawDraft)';
+    return 'CustomBubble(${scale == 1.0 ? '' : 'scale: $scale, '}${drawDraft == false ? '' : 'drawDraft: $drawDraft, '}style: $style, insets: $insets)';
   }
 }
 
@@ -714,47 +744,17 @@ class RenderBubble extends RenderProxyBox {
 //    path.lineTo(20.0, 10.0);
 //    path.lineTo(0.0, 10.0);
 //    bubble.createNip(path, pi);
-    path.close();
+//    path.close();
 
-    RRect box = RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
-        topLeft: Radius.circular(pi.ltCircle.radius),
-        topRight: Radius.circular(pi.rtCircle.radius),
-        bottomLeft: Radius.circular(pi.lbCircle.radius),
-        bottomRight: Radius.circular(pi.rbCircle.radius)
+    final box = Box.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
+        topLeft: pi.ltCircle.radius,
+        topRight: pi.rtCircle.radius,
+        bottomLeft: pi.lbCircle.radius,
+        bottomRight: pi.rbCircle.radius
     );
 
-    f(path, box);
-    var secondaryPath = Path()
-      ..moveTo(box.left, box.bottom - box.blRadiusY)
-
-      ..lineTo(box.left, box.top + 5.0)
-      ..lineTo(box.left - 7.0, box.top + 5.0)
-      ..lineTo(box.left - 7.0, box.top)
-
-//      ..lineTo(box.left, box.top + box.tlRadiusY)
-//      ..arcToPoint(Offset(box.left + box.tlRadiusX, box.top), radius: Radius.elliptical(box.tlRadiusX, box.tlRadiusY))
-      ..lineTo(box.right - box.trRadiusX, box.top)
-      ..arcToPoint(Offset(box.right, box.top + box.trRadiusY), radius: Radius.elliptical(box.trRadiusX, box.trRadiusY))
-      ..lineTo(box.right, box.bottom - box.brRadiusY)
-      ..arcToPoint(Offset(box.right - box.brRadiusX, box.bottom), radius: Radius.elliptical(box.brRadiusX, box.brRadiusY))
-      ..lineTo(box.left + box.blRadiusX, box.bottom)
-      ..arcToPoint(Offset(box.left, box.bottom - box.blRadiusY), radius: Radius.elliptical(box.blRadiusX, box.blRadiusY))
-      ..close();
-//    path
-//      ..addRRect(RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
-//        topLeft: Radius.circular(pi.ltCircle.radius),
-//        topRight: Radius.circular(pi.rtCircle.radius),
-//        bottomLeft: Radius.circular(pi.lbCircle.radius),
-//        bottomRight: Radius.circular(pi.rbCircle.radius)
-//      ));
-    // Без этого части останутся разрозненными и анимация будет выполняться раза в два медленнее
-    // С этим - иногда возникают глюки с тенью
-//    path = Path.combine(PathOperation.union, path, secondaryPath);
-//    path = Path.combine(PathOperation.union, path, path);
-//    path.fillType = PathFillType.evenOdd;
-//    path.extendWithPath(secondaryPath, Offset.zero);
-//    secondaryPath.close();
-    path = Path.combine(PathOperation.union, path, secondaryPath);
+    bubble.generateInsets();
+    createBox(path, box);
 
     var thirdPath = Path()
       ..addOval(Rect.fromCenter(center: pi.nipCircle.center - Offset(0.0, 0.0), width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
@@ -765,7 +765,6 @@ class RenderBubble extends RenderProxyBox {
     path4.close();
 
     context.canvas.save();
-//    context.canvas.translate(0.0, 1.0);
     context.canvas.translate(offset.dx, offset.dy);
 
     if (bubble.style.nipSide.isRight) {
@@ -792,7 +791,7 @@ class RenderBubble extends RenderProxyBox {
     paint.style = PaintingStyle.fill;
     if (pi.draft != null) pi.draft.paintBackground(context.canvas, pi);
     context.canvas.drawShadow(path, bubble.style.shadowColor, bubble.style.elevation * bubble.scale, true);
-//    context.canvas.drawPath(path, paint);
+    context.canvas.drawPath(path, paint);
 
     // Обводка
     if (bubble.style.strokeWidth != 0.0) {
@@ -813,6 +812,76 @@ class RenderBubble extends RenderProxyBox {
     context.canvas.scale(bubble.scale);
     context.paintChild(child, Offset.zero);
     context.canvas.restore();
+  }
+
+  void createBox(Path path, Box box) {
+//    print('createBox()');
+
+    final absInsets = bubble.insets.apply(box);
+
+//    print('box: $box');
+
+    final start = absInsets.list.length > 0 ? absInsets.list[0].start : AbsInsetPos(InsetPosType.topLeft, 0.0);
+    var lastPoint = start.apply(box);
+//    print('moveTo: $start $lastPoint');
+    path.moveTo(lastPoint.x, lastPoint.y);
+
+    if (absInsets.list.length == 0) {
+      pathFromTo(path, box, start, AbsInsetPos(InsetPosType.left, 0.0));
+    } else {
+      for (var index = 0; index < absInsets.list.length; index++) {
+        var inset = bubble.insets.list[index];
+        var absInset = absInsets.list[index];
+
+        // Врезка
+        var nextPoint = absInset.end.apply(box);
+        bubble.createInset(
+            index,
+            path,
+            box,
+            lastPoint,
+            nextPoint,
+            inset,
+            absInset);
+        lastPoint = nextPoint;
+
+        // Путь до следующей врезки
+        final pos = index < absInsets.list.length - 1 ? absInsets.list[index + 1].start : start;
+        nextPoint = pathFromTo(path, box, absInset.end, pos);
+        if (nextPoint != null) lastPoint = nextPoint;
+      }
+    }
+
+    path.close();
+  }
+
+  Point pathFromTo(Path path, Box box, AbsInsetPos start, AbsInsetPos end) {
+    Point point;
+
+//    print('$start $end');
+//    print('start: ${start.apply(box)}');
+
+    var pos = start;
+    while (pos != end) {
+      final prevPos = pos;
+      if (pos.type == end.type && pos.pos < end.pos) pos = end;
+      else {
+        var nextTypeIndex = pos.type.index + 1;
+        if (nextTypeIndex == InsetPosType.values.length) nextTypeIndex = 0;
+        pos = AbsInsetPos(InsetPosType.values[nextTypeIndex], 0.0);
+      }
+
+      point = pos.apply(box);
+      if (prevPos.isOnCorner) {
+//        print('arcTo: $pos $point');
+        path.arcToPoint(point, radius: Radius.circular(box.tlRadius));
+      } else {
+//        print('lineTo: $pos $point');
+        path.lineTo(point.x, point.y);
+      }
+    }
+
+    return point;
   }
 }
 
@@ -1254,37 +1323,330 @@ class Bubble extends CustomBubble {
   }
 }
 
-class RelativePos {
-  const RelativePos({this.relative = 0.0, this.absolute = 0.0})
-      : assert(relative != null),
-        assert(absolute != null);
+class Position {
+  const Position({this.ratio = 0.0, this.offset = 0.0})
+      : assert(ratio != null),
+        assert(ratio >= 0.0 && ratio <= 1.0),
+        assert(offset != null);
 
-  final double relative;
-  final double absolute;
+  final double ratio;
+  final double offset;
 
-  double toAbsolute(double size) => size * relative + absolute;
+  static const zero = Position();
+
+  double apply(double size) => size * ratio + offset;
 
   @override
   bool operator ==(covariant other) {
-    return other.relative == relative && other.absolute == absolute;
+    return other.ratio == ratio && other.offset == offset;
   }
 
   @override
-  int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
+  int get hashCode => hashValues(ratio.hashCode, offset.hashCode);
 
   @override
   String toString() {
-    return 'RelativePos(relative: $relative, absolute: $absolute)';
+    return 'Position(ratio: $ratio, offset: $offset)';
   }
 }
 
+/// Аналог RRect, но исключительно с круглыми (не овальными) углами
+class Box {
+  const Box._({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+    this.tlRadius = 0.0,
+    this.trRadius = 0.0,
+    this.brRadius = 0.0,
+    this.blRadius = 0.0,
+  })  : assert(left != null),
+        assert(top != null),
+        assert(right != null),
+        assert(bottom != null),
+        assert(tlRadius != null),
+        assert(trRadius != null),
+        assert(brRadius != null),
+        assert(blRadius != null);
+
+  Box.fromLTRBR(
+      double left,
+      double top,
+      double right,
+      double bottom,
+      double radius,
+      ) : this._(
+    top: top,
+    left: left,
+    right: right,
+    bottom: bottom,
+    tlRadius: radius,
+    trRadius: radius,
+    blRadius: radius,
+    brRadius: radius,
+  );
+
+  Box.fromLTRBAndCorners(
+      double left,
+      double top,
+      double right,
+      double bottom, {
+        double topLeft = 0.0,
+        double topRight = 0.0,
+        double bottomRight = 0.0,
+        double bottomLeft = 0.0,
+      })  : this._(
+    top: top,
+    left: left,
+    right: right,
+    bottom: bottom,
+    tlRadius: topLeft,
+    trRadius: topRight,
+    blRadius: bottomLeft,
+    brRadius: bottomRight,
+  );
+
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+  final double tlRadius;
+  final double trRadius;
+  final double brRadius;
+  final double blRadius;
+
+  double get width => right - left;
+  double get height => bottom - top;
+  double get leftHeight => height - blRadius - tlRadius;
+  double get rightHeight => height - trRadius - brRadius;
+  double get topWidth => width - tlRadius - trRadius;
+  double get bottomWidth => width - brRadius - blRadius;
+
+  @override
+  String toString() {
+    var radius = tlRadius == trRadius && tlRadius == brRadius && tlRadius == blRadius
+        ? 'radius: $tlRadius'
+        : 'tlRadius: $tlRadius, trRadius: $trRadius, brRadius: $brRadius, blRadius: $blRadius';
+    return 'Box(left: $left, top: $top, right: $right, bottom: $bottom, width: $width, height: $height, $radius)';
+  }
+}
+
+/// Врезка
+class Inset {
+  const Inset(this.start, this.end);
+
+  final InsetPos start;
+  final InsetPos end;
+
+  @override
+  String toString() {
+    return 'Inset(start: $start, end: $end)';
+  }
+}
+
+/// Тип позиции врезки
 enum InsetPosType { left, topLeft, top, topRight, right, bottomRight, bottom, bottomLeft }
 
+/// Тип рассчёта смещения по углу
+/// byLength - по длине дуги угла
+/// byHeight - по высоте угла
+/// byWidth - по ширине угла
+enum CornerOffsetType { byLength, byHeight, byWidth }
+
+/// Позиция врезки
+class InsetPos {
+  const InsetPos(this.type, this.pos, {offsetType})
+      : assert(type != null),
+        assert(pos != null),
+        assert(offsetType == null
+            || type == InsetPosType.topLeft
+            || type == InsetPosType.topRight
+            || type == InsetPosType.bottomRight
+            || type == InsetPosType.bottomLeft
+        ),
+        offsetType = offsetType ?? CornerOffsetType.byLength;
+
+  final InsetPosType type;
+  final Position pos;
+  final CornerOffsetType offsetType;
+
+  /// Переводит Position в позицию на стороне, применяя соответствующие ограничения
+  /// @param size Размер стороны
+  /// @result Расстояние в пикселях
+  double _posOnSide(double size) {
+    return math.max(math.min(pos.apply(size), size), 0.0);
+  }
+
+  /// Переводит относительную позицию в позицию на углу
+  /// @param radius Радиус дуги
+  /// @result Относительный угол в радианах
+  double _posOnCorner(double radius) {
+    final halfPi = math.pi / 2.0;
+    var radians = pos.ratio * halfPi;
+
+    if (pos.offset != 0.0) {
+      switch (offsetType) {
+        case CornerOffsetType.byLength:
+          final cornerLen = halfPi * radius; // Для дуги угла
+          final distance = cornerLen * pos.ratio + pos.offset; // Расстояние до точки
+          if (distance <= 0.0) radians = 0.0;
+          else if (distance >= cornerLen) radians = halfPi;
+          else radians = distance / cornerLen * halfPi;
+          break;
+
+        case CornerOffsetType.byHeight:
+          final y = math.sin(radians) * radius + pos.offset;
+          if (y <= 0.0) radians = 0.0;
+          else if (y >= radius) radians = halfPi;
+          else radians = math.asin(y / radius);
+          break;
+
+        case CornerOffsetType.byWidth:
+          final x = math.cos(radians) * radius + pos.offset;
+          if (x <= 0.0) radians = 0.0;
+          else if (x >= radius) radians = halfPi;
+          else radians = math.acos(x / radius);
+          break;
+      }
+    }
+
+    return radians;
+  }
+
+  AbsInsetPos apply(Box box) {
+    AbsInsetPos result;
+
+    switch (type) {
+      case InsetPosType.left:
+        result = AbsInsetPos(type, _posOnSide(box.leftHeight));
+        break;
+
+      case InsetPosType.topLeft:
+        result = AbsInsetPos(type, _posOnCorner(box.tlRadius));
+        break;
+
+      case InsetPosType.top:
+        result = AbsInsetPos(type, _posOnSide(box.topWidth));
+        break;
+
+      case InsetPosType.topRight:
+        result = AbsInsetPos(type, _posOnCorner(box.trRadius));
+        break;
+
+      case InsetPosType.right:
+        result = AbsInsetPos(type, _posOnSide(box.rightHeight));
+        break;
+
+      case InsetPosType.bottomRight:
+        result = AbsInsetPos(type, _posOnCorner(box.brRadius));
+        break;
+
+      case InsetPosType.bottom:
+        result = AbsInsetPos(type, _posOnSide(box.bottomWidth));
+        break;
+
+      case InsetPosType.bottomLeft:
+        result = AbsInsetPos(type, _posOnCorner(box.blRadius));
+        break;
+    }
+
+    return result;
+  }
+
+  @override
+  String toString() {
+    var offsetTypeStr = type == InsetPosType.left || type == InsetPosType.top
+        || type == InsetPosType.right || type == InsetPosType.bottom ? '' : ', offsetType: $offsetType';
+    return 'InsetPos($type, $pos$offsetTypeStr)';
+  }
+}
+
+class InsetList {
+  const InsetList(this._list);
+
+//  InsetList([List<Inset> list])
+//      : _list = list ?? [];
+
+  final List<Inset> _list;
+  List<Inset> get list => _list;
+
+//  void add(Inset element) => _list.add(element);
+
+  AbsInsetList apply(Box box) {
+    final result = AbsInsetList();
+    for (var i = 0; i < list.length; i++) {
+      result.list.add(AbsInset(i, list[i].start.apply(box), list[i].end.apply(box)));
+    }
+
+//    result.sort();
+
+    return result;
+  }
+
+  @override
+  String toString() {
+    return 'InsetList($_list)';
+  }
+}
+
+/// Врезка в абсолютных величинах
+class AbsInset {
+  const AbsInset(this.index, this.start, this.end)
+      : assert(index != null),
+        assert(start != null),
+        assert(end != null);
+
+  final int index;
+  final AbsInsetPos start;
+  final AbsInsetPos end;
+
+  bool get crossesZero => start > end;
+
+  int compareTo(AbsInset other) {
+    // Трудность сравнения пар возникает при переходе нулевой точки
+    if (this.crossesZero) {
+      return other.crossesZero ? this.start.compareTo(other.start) : -1;
+    }
+    return other.crossesZero ? 1 : this.start.compareTo(other.start);
+  }
+
+  bool operator >(covariant other) {
+    if (this.start > this.end) {
+      return other.start > other.end ? this.start > other.start : false;
+    }
+    if (other.start > other.end) return true;
+    return this.start > other.start;
+  }
+
+  @override
+  String toString() {
+    return 'AbsInset(index: $index, start: $start, end: $end)';
+  }
+}
+
+/// Позиция врезка в абсолютных величинах
 class AbsInsetPos {
-  const AbsInsetPos(this.type, this.pos);
+  const AbsInsetPos(this.type, this.pos)
+      : assert(type != null),
+        assert(pos != null);
 
   final InsetPosType type;
   final double pos;
+
+  bool get isOnSide {
+    return type == InsetPosType.left
+        || type == InsetPosType.top
+        || type == InsetPosType.right
+        || type == InsetPosType.bottom;
+  }
+
+  bool get isOnCorner {
+    return type == InsetPosType.topLeft
+      || type == InsetPosType.topRight
+      || type == InsetPosType.bottomRight
+      || type == InsetPosType.bottomLeft;
+  }
 
   static const zero = AbsInsetPos(InsetPosType.left, 0.0);
 
@@ -1296,44 +1658,71 @@ class AbsInsetPos {
     return this.type == other.type && this.pos == other.pos;
   }
 
-  int compare(AbsInsetPos other) {
-    if (this.type.index > other.type.index) return 1;
-    if (this.type.index < other.type.index) return -1;
-    if (this.pos > other.pos) return 1;
-    if (this.pos < other.pos) return 1;
-    return 0;
+  int compareTo(AbsInsetPos other) {
+    var result = this.type.index.compareTo(other.type.index);
+    if (result == 0) result = this.pos.compareTo(other.pos);
+    return result;
   }
 
-  bool operator >(AbsInsetPos other) => this.compare(other) > 0;
-  bool operator >=(AbsInsetPos other) => this.compare(other) >= 0;
-  bool operator <(AbsInsetPos other) => this.compare(other) < 0;
-  bool operator <=(AbsInsetPos other) => this.compare(other) <= 0;
-}
+  bool operator >(AbsInsetPos other) => this.compareTo(other) > 0;
+  bool operator >=(AbsInsetPos other) => this.compareTo(other) >= 0;
+  bool operator <(AbsInsetPos other) => this.compareTo(other) < 0;
+  bool operator <=(AbsInsetPos other) => this.compareTo(other) <= 0;
 
-class AbsInset {
-  const AbsInset(this.start, this.end)
-    : assert(start != null),
-      assert(end != null);
+  Point apply(Box box) {
+    Point point;
+    switch (type) {
+      case InsetPosType.left:
+        point = Point(box.left, box.bottom - box.blRadius - pos);
+        break;
 
-  final AbsInsetPos start;
-  final AbsInsetPos end;
+      case InsetPosType.topLeft:
+        point = Point(
+            box.left + (1.0 - math.cos(pos)) * box.tlRadius,
+            box.top + (1.0 - math.sin(pos)) * box.tlRadius
+        );
+        break;
 
-  bool get crossesZero => start > end;
+      case InsetPosType.top:
+        point = Point(box.left + box.tlRadius + pos, box.top);
+        break;
 
-  int compare(AbsInset other) {
-    // Трудность сравнения пар возникает при переходе нулевой точки
-    if (this.crossesZero) {
-      return other.crossesZero ? this.start.compare(other.start) : -1;
+      case InsetPosType.topRight:
+        point = Point(
+            box.right - (1.0 - math.sin(pos)) * box.trRadius,
+            box.top + (1.0 - math.cos(pos)) * box.trRadius
+        );
+        break;
+
+      case InsetPosType.right:
+        point = Point(box.right, box.top + box.trRadius + pos);
+        break;
+
+      case InsetPosType.bottomRight:
+        point = Point(
+            box.right - (1.0 - math.cos(pos)) * box.brRadius,
+            box.bottom - (1.0 - math.sin(pos)) * box.brRadius
+        );
+        break;
+
+      case InsetPosType.bottom:
+        point = Point(box.right - box.brRadius - pos, box.bottom);
+        break;
+
+      case InsetPosType.bottomLeft:
+        point = Point(
+            box.left + (1.0 - math.sin(pos)) * box.blRadius,
+            box.bottom - (1.0 - math.cos(pos)) * box.blRadius
+        );
+        break;
     }
-    return other.crossesZero ? 1 : this.start.compare(other.start);
+
+    return point;
   }
 
-  bool operator >(covariant other) {
-    if (this.start > this.end) {
-      return other.start > other.end ? this.start > other.start : false;
-    }
-    if (other.start > other.end) return true;
-    return this.start > other.start;
+  @override
+  String toString() {
+    return 'AbsInsetPos($type, $pos)';
   }
 }
 
@@ -1341,105 +1730,6 @@ class AbsInsetList {
   var list = <AbsInset>[];
 
   void sort() {
-    list.sort((a, b) => a.compare(b));
+    list.sort((a, b) => a.compareTo(b));
   }
-
-//  @override
-//  int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
-}
-
-class InsetPos {
-  const InsetPos(this.type, this.pos);
-
-  final InsetPosType type;
-  final RelativePos pos;
-
-  AbsInsetPos apply(RRect box) {
-    switch (type) {
-      case InsetPosType.left:
-        return AbsInsetPos(type, pos.toAbsolute(box.height - box.blRadiusY - box.tlRadiusY));
-
-      case InsetPosType.top:
-        return AbsInsetPos(type, pos.toAbsolute(box.width - box.tlRadiusX - box.trRadiusX));
-
-      case InsetPosType.right:
-        return AbsInsetPos(type, pos.toAbsolute(box.height - box.trRadiusY - box.brRadiusY));
-
-      case InsetPosType.bottom:
-        return AbsInsetPos(type, pos.toAbsolute(box.width - box.brRadiusX - box.blRadiusX));
-
-      case InsetPosType.topLeft:
-        // TODO: Handle this case.
-        break;
-
-      case InsetPosType.topRight:
-        // TODO: Handle this case.
-        break;
-
-      case InsetPosType.bottomRight:
-        // TODO: Handle this case.
-        break;
-
-      case InsetPosType.bottomLeft:
-        // TODO: Handle this case.
-        break;
-    }
-  }
-}
-
-class Inset {
-  const Inset(this.start, this.end);
-
-  final InsetPos start;
-  final InsetPos end;
-}
-
-class InsetList {
-  InsetList([List<Inset> list])
-      : _list = list ?? [];
-
-  List<Inset> _list;
-  List<Inset> get list => _list;
-
-//  void add(Inset element) => _list.add(element);
-
-  AbsInsetList apply(RRect box) {
-    final result = AbsInsetList();
-    list.forEach((element) {
-      result.list.add(AbsInset(element.start.apply(box), element.end.apply(box)));
-    });
-
-    result.sort();
-
-    return result;
-  }
-}
-
-void f(Path path, RRect box) {
-  final list = InsetList([
-    Inset(InsetPos(InsetPosType.left, RelativePos(relative: 0.0, absolute: 0.0)), InsetPos(InsetPosType.left, RelativePos(relative: 0.0, absolute: 10.0))),
-//    Inset(InsetPos(InsetPosType.topLeft, RelativePos(relative: 0.0, absolute: 0.0)), InsetPos(InsetPosType.top, RelativePos(relative: 0.0, absolute: 0.0))),
-    Inset(InsetPos(InsetPosType.top, RelativePos(relative: 0.0, absolute: 10.0)), InsetPos(InsetPosType.top, RelativePos(relative: 0.0, absolute: 15.0)))
-  ]);
-
-  final absList = list.apply(box);
-
-  var pos = AbsInsetPos.zero;
-
-  path
-    ..moveTo(box.left, box.bottom - box.blRadiusY)
-
-//    ..lineTo(box.left, box.top + 5.0)
-//    ..lineTo(box.left - 7.0, box.top + 5.0)
-//    ..lineTo(box.left - 7.0, box.top)
-
-//      ..lineTo(box.left, box.top + box.tlRadiusY)
-//      ..arcToPoint(Offset(box.left + box.tlRadiusX, box.top), radius: Radius.elliptical(box.tlRadiusX, box.tlRadiusY))
-    ..lineTo(box.right - box.trRadiusX, box.top)
-    ..arcToPoint(Offset(box.right, box.top + box.trRadiusY), radius: Radius.elliptical(box.trRadiusX, box.trRadiusY))
-    ..lineTo(box.right, box.bottom - box.brRadiusY)
-    ..arcToPoint(Offset(box.right - box.brRadiusX, box.bottom), radius: Radius.elliptical(box.brRadiusX, box.brRadiusY))
-    ..lineTo(box.left + box.blRadiusX, box.bottom)
-    ..arcToPoint(Offset(box.left, box.bottom - box.blRadiusY), radius: Radius.elliptical(box.blRadiusX, box.blRadiusY))
-    ..close();
 }
