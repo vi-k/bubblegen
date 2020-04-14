@@ -858,18 +858,20 @@ enum InsetPosType { left, topLeft, top, topRight, right, bottomRight, bottom, bo
 /// byLength - по длине дуги угла
 /// byHeight - по высоте угла
 /// byWidth - по ширине угла
-enum CornerOffsetType { byLength, byHeight, byWidth }
+enum CornerOffset { byLength, byHeight, byWidth }
 
 /// Позиция врезки
 class InsetPos {
-  const InsetPos(this.type, this.pos, {this.offsetType = CornerOffsetType.byLength})
+  const InsetPos(this.type, this.pos, {this.cornerOffset = CornerOffset.byLength})
       : assert(type != null),
         assert(pos != null),
-        assert(offsetType != null);
+        assert(cornerOffset != null);
 
   final InsetPosType type;
   final Position pos;
-  final CornerOffsetType offsetType;
+  final CornerOffset cornerOffset;
+
+  static const halfPi = math.pi / 2.0;
 
   /// Переводит Position в позицию на стороне, применяя соответствующие ограничения
   /// @param size Размер стороны
@@ -886,8 +888,8 @@ class InsetPos {
     var radians = pos.ratio * halfPi;
 
     if (pos.offset != 0.0) {
-      switch (offsetType) {
-        case CornerOffsetType.byLength:
+      switch (cornerOffset) {
+        case CornerOffset.byLength:
           final cornerLen = halfPi * radius; // Для дуги угла
           final distance = cornerLen * pos.ratio + pos.offset; // Расстояние до точки
           if (distance <= 0.0) radians = 0.0;
@@ -895,14 +897,14 @@ class InsetPos {
           else radians = distance / cornerLen * halfPi;
           break;
 
-        case CornerOffsetType.byHeight:
+        case CornerOffset.byHeight:
           final y = math.sin(radians) * radius + pos.offset;
           if (y <= 0.0) radians = 0.0;
           else if (y >= radius) radians = halfPi;
           else radians = math.asin(y / radius);
           break;
 
-        case CornerOffsetType.byWidth:
+        case CornerOffset.byWidth:
           final x = math.cos(radians) * radius - pos.offset;
           if (x <= 0.0) radians = 0.0;
           else if (x >= radius) radians = halfPi;
@@ -914,41 +916,119 @@ class InsetPos {
     return radians;
   }
 
+  static bool isSide(InsetPosType type) {
+    return type == InsetPosType.left || type == InsetPosType.top || type == InsetPosType.right || type == InsetPosType.bottom;
+  }
+
+  static bool isCorner(InsetPosType type) {
+    return type == InsetPosType.topLeft || type == InsetPosType.topRight || type == InsetPosType.bottomRight || type == InsetPosType.bottomLeft;
+  }
+
+  static InsetPosType nextType(InsetPosType type) {
+    final newIndex = type.index + 1;
+    return newIndex < InsetPosType.values.length ? InsetPosType.values[newIndex] : InsetPosType.values.first;
+  }
+
+  static InsetPosType prevType(InsetPosType type) {
+    final newIndex = type.index - 1;
+    return newIndex >= 0 ? InsetPosType.values[newIndex] : InsetPosType.values.last;
+  }
+
   AbsInsetPos apply(Box box) {
     AbsInsetPos result;
 
-    switch (type) {
-      case InsetPosType.left:
-        result = AbsInsetPos(type, _posOnSide(box.leftHeight));
-        break;
+    var type = this.type;
+    var pos = this.pos;
 
-      case InsetPosType.topLeft:
-        result = AbsInsetPos(type, _posOnCorner(box.tlRadius));
-        break;
+    while (result == null) {
+      if (isSide(type)) {
+        double size;
+        switch (type) {
+          case InsetPosType.left:
+            size = box.leftHeight;
+            break;
+          case InsetPosType.top:
+            size = box.topWidth;
+            break;
+          case InsetPosType.right:
+            size = box.rightHeight;
+            break;
+          case InsetPosType.bottom:
+            size = box.bottomWidth;
+            break;
+          default:
+        }
 
-      case InsetPosType.top:
-        result = AbsInsetPos(type, _posOnSide(box.topWidth));
-        break;
+        final offset = pos.apply(size);
+        if (offset < 0.0) {
+          type = prevType(type);
+          pos = Position(ratio: 1.0, offset: offset);
+        } else if (offset > size) {
+          type = nextType(type);
+          pos = Position(ratio: 0.0, offset: offset - size);
+        } else {
+          result = AbsInsetPos(type, offset);
+        }
+      } else {
+        double radius;
+        switch (type) {
+          case InsetPosType.topLeft:
+            radius = box.tlRadius;
+            break;
+          case InsetPosType.topRight:
+            radius = box.trRadius;
+            break;
+          case InsetPosType.bottomRight:
+            radius = box.brRadius;
+            break;
+          case InsetPosType.bottomLeft:
+            radius = box.blRadius;
+            break;
+          default:
+        }
 
-      case InsetPosType.topRight:
-        result = AbsInsetPos(type, _posOnCorner(box.trRadius));
-        break;
-
-      case InsetPosType.right:
-        result = AbsInsetPos(type, _posOnSide(box.rightHeight));
-        break;
-
-      case InsetPosType.bottomRight:
-        result = AbsInsetPos(type, _posOnCorner(box.brRadius));
-        break;
-
-      case InsetPosType.bottom:
-        result = AbsInsetPos(type, _posOnSide(box.bottomWidth));
-        break;
-
-      case InsetPosType.bottomLeft:
-        result = AbsInsetPos(type, _posOnCorner(box.blRadius));
-        break;
+        if (pos.offset == 0.0) {
+          result = AbsInsetPos(type, pos.ratio * halfPi);
+        } else if (cornerOffset == CornerOffset.byLength) {
+          final cornerLen = halfPi * radius; // Для дуги угла
+          final offset = cornerLen * pos.ratio + pos.offset; // Расстояние до точки
+          if (offset < 0.0) {
+            type = prevType(type);
+            pos = Position(ratio: 1.0, offset: offset);
+          } else if (offset > cornerLen) {
+            type = nextType(type);
+            pos = Position(ratio: 0.0, offset: offset - cornerLen);
+          } else {
+            result = AbsInsetPos(type, offset / cornerLen * halfPi);
+          }
+        } else if (cornerOffset == CornerOffset.byHeight && (type == InsetPosType.topLeft || type == InsetPosType.bottomRight)
+            || cornerOffset == CornerOffset.byWidth && (type == InsetPosType.topRight || type == InsetPosType.bottomLeft)) {
+          final radians = pos.ratio * halfPi;
+          final y = math.sin(radians) * radius + pos.offset;
+          if (y < 0.0) {
+            type = prevType(type);
+            pos = Position(ratio: 1.0, offset: y);
+          } else if (y > radius) {
+            type = nextType(type);
+            pos = Position(ratio: 0.0, offset: y - radius);
+          } else {
+            result = AbsInsetPos(type, math.asin(y / radius));
+          }
+        } else {
+          final radians = pos.ratio * halfPi;
+          print(radians / math.pi * 180.0);
+          final x = (1.0 - math.cos(radians)) * radius + pos.offset;
+          if (x < 0.0) {
+            type = prevType(type);
+            pos = Position(ratio: 1.0, offset: x);
+          } else if (x >= radius) {
+            type = nextType(type);
+            pos = Position(ratio: 0.0, offset: x - radius);
+          } else {
+            result = AbsInsetPos(type, math.acos(1.0 - x / radius));
+          }
+        }
+      }
     }
 
     return result;
@@ -957,19 +1037,19 @@ class InsetPos {
   InsetPos copyWith({
     InsetPosType type,
     Position pos,
-    CornerOffsetType offsetType,
+    CornerOffset offsetType,
   }) {
     return InsetPos(
       type ?? this.type,
       pos ?? this.pos,
-      offsetType: offsetType ?? this.offsetType,
+      cornerOffset: offsetType ?? this.cornerOffset,
     );
   }
 
   @override
   String toString() {
     var offsetTypeStr = type == InsetPosType.left || type == InsetPosType.top
-        || type == InsetPosType.right || type == InsetPosType.bottom ? '' : ', offsetType: $offsetType';
+        || type == InsetPosType.right || type == InsetPosType.bottom ? '' : ', offsetType: $cornerOffset';
     return 'InsetPos($type, $pos$offsetTypeStr)';
   }
 }
