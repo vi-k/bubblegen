@@ -854,7 +854,7 @@ class Inset {
 /// Тип позиции врезки
 enum InsetPosType { left, topLeft, top, topRight, right, bottomRight, bottom, bottomLeft }
 
-/// Тип рассчёта смещения по углу
+/// Тип рассчёта смещения, когда оно попадает на угол
 /// byLength - по длине дуги угла
 /// byHeight - по высоте угла
 /// byWidth - по ширине угла
@@ -862,7 +862,7 @@ enum CornerOffset { byLength, byHeight, byWidth }
 
 /// Позиция врезки
 class InsetPos {
-  const InsetPos(this.type, this.pos, {this.cornerOffset = CornerOffset.byLength})
+  const InsetPos(this.type, this.pos, [this.cornerOffset = CornerOffset.byLength])
       : assert(type != null),
         assert(pos != null),
         assert(cornerOffset != null);
@@ -872,49 +872,6 @@ class InsetPos {
   final CornerOffset cornerOffset;
 
   static const halfPi = math.pi / 2.0;
-
-  /// Переводит Position в позицию на стороне, применяя соответствующие ограничения
-  /// @param size Размер стороны
-  /// @result Расстояние в пикселях
-  double _posOnSide(double size) {
-    return math.max(math.min(pos.apply(size), size), 0.0);
-  }
-
-  /// Переводит относительную позицию в позицию на углу
-  /// @param radius Радиус дуги
-  /// @result Относительный угол в радианах
-  double _posOnCorner(double radius) {
-    final halfPi = math.pi / 2.0;
-    var radians = pos.ratio * halfPi;
-
-    if (pos.offset != 0.0) {
-      switch (cornerOffset) {
-        case CornerOffset.byLength:
-          final cornerLen = halfPi * radius; // Для дуги угла
-          final distance = cornerLen * pos.ratio + pos.offset; // Расстояние до точки
-          if (distance <= 0.0) radians = 0.0;
-          else if (distance >= cornerLen) radians = halfPi;
-          else radians = distance / cornerLen * halfPi;
-          break;
-
-        case CornerOffset.byHeight:
-          final y = math.sin(radians) * radius + pos.offset;
-          if (y <= 0.0) radians = 0.0;
-          else if (y >= radius) radians = halfPi;
-          else radians = math.asin(y / radius);
-          break;
-
-        case CornerOffset.byWidth:
-          final x = math.cos(radians) * radius - pos.offset;
-          if (x <= 0.0) radians = 0.0;
-          else if (x >= radius) radians = halfPi;
-          else radians = math.acos(x / radius);
-          break;
-      }
-    }
-
-    return radians;
-  }
 
   static bool isSide(InsetPosType type) {
     return type == InsetPosType.left || type == InsetPosType.top || type == InsetPosType.right || type == InsetPosType.bottom;
@@ -1037,20 +994,18 @@ class InsetPos {
   InsetPos copyWith({
     InsetPosType type,
     Position pos,
-    CornerOffset offsetType,
+    CornerOffset cornerOffset,
   }) {
     return InsetPos(
       type ?? this.type,
       pos ?? this.pos,
-      cornerOffset: offsetType ?? this.cornerOffset,
+      cornerOffset ?? this.cornerOffset,
     );
   }
 
   @override
   String toString() {
-    var offsetTypeStr = type == InsetPosType.left || type == InsetPosType.top
-        || type == InsetPosType.right || type == InsetPosType.bottom ? '' : ', offsetType: $cornerOffset';
-    return 'InsetPos($type, $pos$offsetTypeStr)';
+    return 'InsetPos($type, $pos, $cornerOffset)';
   }
 }
 
