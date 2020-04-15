@@ -251,17 +251,18 @@ class Bubble extends CustomBubble {
     double scale = 1.0,
     bool drawDraft = false,
     BubbleStyle style,
-    Inset inset,
+    @required Nip nip,
     @required this.topLine,
     @required this.bottomLine,
     Widget child,
   })  : assert(topLine != null),
         assert(bottomLine != null),
+        assert(nip != null),
         super(
           scale: scale,
           drawDraft: drawDraft,
           style: style,
-          inset: inset,
+          inset: nip.inset,
           child: child,
         );
 
@@ -693,4 +694,47 @@ class Bubble extends CustomBubble {
 //
 //    return ok;
 //  }
+}
+
+enum NipAnchor { start, end }
+
+class Nip {
+  const Nip({
+    @required this.inset,
+    @required this.size,
+    @required this.radius,
+    this.anchor = NipAnchor.start,
+    this.offset = 0.0,
+    this.cornerOffset = CornerOffset.byLength,
+  })  : assert(inset != null),
+        assert(anchor != null),
+        assert(offset != null),
+        assert(cornerOffset != null),
+        assert(radius != null),
+        assert(cornerOffset != null);
+
+  final Inset inset;
+  final double size;
+  final double radius;
+  final NipAnchor anchor;
+  final double offset;
+  final CornerOffset cornerOffset;
+
+  Nip copyWith({
+    Inset inset,
+    double size,
+    double radius,
+    NipAnchor anchor,
+    double offset,
+    CornerOffset cornerOffset,
+  }) {
+    return Nip(
+      inset: inset ?? this.inset,
+      size: size ?? this.size,
+      radius: radius ?? this.radius,
+      anchor: anchor ?? this.anchor,
+      offset: offset ?? this.offset,
+      cornerOffset: cornerOffset ?? this.cornerOffset,
+    );
+  }
 }

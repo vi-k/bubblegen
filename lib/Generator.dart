@@ -28,7 +28,7 @@ class GeneratorBubbleStyle {
   Color strokeColor;
   double strokeWidth;
 
-  Inset inset;
+  Nip nip;
 
   NipLine topLine;
   NipLine bottomLine;
@@ -148,10 +148,18 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
     Generator.settings.nipSize = 7.0;
     Generator.settings.nipOffset = NipOffset();
 
-    Generator.settings.inset = Inset(
+    Generator.settings.nip = Nip(
+      inset: Inset(
         InsetPos(InsetPosType.topLeft, Position.zero),
         InsetPos(InsetPosType.topLeft, Position(ratio: 1.0, offset: 0.0)),
+      ),
+      size: 7.0,
+      radius: 1.5,
+      anchor: NipAnchor.start,
+      offset: 0.0,
+      cornerOffset: CornerOffset.byLength,
     );
+
     Generator.settings.topLine = NipLine.line(0.0);
     Generator.settings.bottomLine = NipLine.line(53.0);
 
@@ -410,7 +418,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
           ),
           ExpansionTile(
             title: const Text(
-              'Inset',
+              'nip.inset',
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -419,17 +427,18 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                     caption: 'start.type:',
-                    value: Generator.settings.inset.start.type.index.toDouble(),
+                    value: Generator.settings.nip.inset.start.type.index.toDouble(),
                     min: 0.0,
                     max: InsetPosType.values.length - 1.0,
                     step: 1.0,
                     textAlign: TextAlign.center,
                     onChanged: (double value) {
                       setState(() {
-                        final index = value.round();
-                        Generator.settings.inset = Inset(
-                          Generator.settings.inset.start.copyWith(type: InsetPosType.values[index]),
-                          Generator.settings.inset.end,
+                        Generator.settings.nip = Generator.settings.nip.copyWith(
+                            inset: Inset(
+                              Generator.settings.nip.inset.start.copyWith(type: InsetPosType.values[value.round()]),
+                              Generator.settings.nip.inset.end,
+                            )
                         );
                       });
                     },
@@ -442,7 +451,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                   caption: 'start.pos.ratio:',
-                  value: Generator.settings.inset.start.pos.ratio,
+                  value: Generator.settings.nip.inset.start.pos.ratio,
                   units: '',
                   min: 0.0,
                   max: 1.0,
@@ -450,9 +459,11 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                   fractionDigits: 2,
                   onChanged: (double value) {
                     setState(() {
-                      Generator.settings.inset = Inset(
-                        Generator.settings.inset.start.copyWith(pos: Generator.settings.inset.start.pos.copyWith(ratio: value)),
-                        Generator.settings.inset.end,
+                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                          inset: Inset(
+                            Generator.settings.nip.inset.start.copyWith(pos: Generator.settings.nip.inset.start.pos.copyWith(ratio: value)),
+                            Generator.settings.nip.inset.end,
+                          )
                       );
                     });
                   },
@@ -462,14 +473,16 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                   caption: 'start.pos.offset:',
-                  value: Generator.settings.inset.start.pos.offset,
+                  value: Generator.settings.nip.inset.start.pos.offset,
                   units: 'dp',
                   step: 1.0,
                   onChanged: (double value) {
                     setState(() {
-                      Generator.settings.inset = Inset(
-                        Generator.settings.inset.start.copyWith(pos: Generator.settings.inset.start.pos.copyWith(offset: value)),
-                        Generator.settings.inset.end,
+                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                          inset: Inset(
+                            Generator.settings.nip.inset.start.copyWith(pos: Generator.settings.nip.inset.start.pos.copyWith(offset: value)),
+                            Generator.settings.nip.inset.end,
+                          )
                       );
                     });
                   },
@@ -479,17 +492,18 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                     caption: 'start.cornerOffset:',
-                    value: Generator.settings.inset.start.cornerOffset.index.toDouble(),
+                    value: Generator.settings.nip.inset.start.cornerOffset.index.toDouble(),
                     min: 0.0,
                     max: CornerOffset.values.length - 1.0,
                     step: 1.0,
                     textAlign: TextAlign.center,
                     onChanged: (double value) {
                       setState(() {
-                        final index = value.round();
-                        Generator.settings.inset = Inset(
-                          Generator.settings.inset.start.copyWith(offsetType: CornerOffset.values[index]),
-                          Generator.settings.inset.end,
+                        Generator.settings.nip = Generator.settings.nip.copyWith(
+                            inset: Inset(
+                              Generator.settings.nip.inset.start.copyWith(cornerOffset: CornerOffset.values[value.round()]),
+                              Generator.settings.nip.inset.end,
+                            )
                         );
                       });
                     },
@@ -502,17 +516,18 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                     caption: 'end.type:',
-                    value: Generator.settings.inset.end.type.index.toDouble(),
+                    value: Generator.settings.nip.inset.end.type.index.toDouble(),
                     min: 0.0,
                     max: InsetPosType.values.length - 1.0,
                     step: 1.0,
                     textAlign: TextAlign.center,
                     onChanged: (double value) {
                       setState(() {
-                        final index = value.round();
-                        Generator.settings.inset = Inset(
-                          Generator.settings.inset.start,
-                          Generator.settings.inset.end.copyWith(type: InsetPosType.values[index]),
+                        Generator.settings.nip = Generator.settings.nip.copyWith(
+                            inset: Inset(
+                              Generator.settings.nip.inset.start,
+                              Generator.settings.nip.inset.end.copyWith(type: InsetPosType.values[value.round()]),
+                            )
                         );
                       });
                     },
@@ -525,7 +540,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                   caption: 'end.pos.ratio:',
-                  value: Generator.settings.inset.end.pos.ratio,
+                  value: Generator.settings.nip.inset.end.pos.ratio,
                   units: '',
                   min: 0.0,
                   max: 1.0,
@@ -533,9 +548,11 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                   fractionDigits: 2,
                   onChanged: (double value) {
                     setState(() {
-                      Generator.settings.inset = Inset(
-                        Generator.settings.inset.start,
-                        Generator.settings.inset.end.copyWith(pos: Generator.settings.inset.end.pos.copyWith(ratio: value)),
+                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                          inset: Inset(
+                            Generator.settings.nip.inset.start,
+                            Generator.settings.nip.inset.end.copyWith(pos: Generator.settings.nip.inset.start.pos.copyWith(ratio: value)),
+                          )
                       );
                     });
                   },
@@ -545,14 +562,16 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                   caption: 'end.pos.offset:',
-                  value: Generator.settings.inset.end.pos.offset,
+                  value: Generator.settings.nip.inset.end.pos.offset,
                   units: 'dp',
                   step: 1.0,
                   onChanged: (double value) {
                     setState(() {
-                      Generator.settings.inset = Inset(
-                        Generator.settings.inset.start,
-                        Generator.settings.inset.end.copyWith(pos: Generator.settings.inset.end.pos.copyWith(offset: value)),
+                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                          inset: Inset(
+                            Generator.settings.nip.inset.start,
+                            Generator.settings.nip.inset.end.copyWith(pos: Generator.settings.nip.inset.start.pos.copyWith(offset: value)),
+                          )
                       );
                     });
                   },
@@ -562,17 +581,18 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: NumericField(
                     caption: 'end.cornerOffset:',
-                    value: Generator.settings.inset.end.cornerOffset.index.toDouble(),
+                    value: Generator.settings.nip.inset.end.cornerOffset.index.toDouble(),
                     min: 0.0,
                     max: CornerOffset.values.length - 1.0,
                     step: 1.0,
                     textAlign: TextAlign.center,
                     onChanged: (double value) {
                       setState(() {
-                        final index = value.round();
-                        Generator.settings.inset = Inset(
-                          Generator.settings.inset.start,
-                          Generator.settings.inset.end.copyWith(offsetType: CornerOffset.values[index]),
+                        Generator.settings.nip = Generator.settings.nip.copyWith(
+                            inset: Inset(
+                              Generator.settings.nip.inset.start,
+                              Generator.settings.nip.inset.end.copyWith(cornerOffset: CornerOffset.values[value.round()]),
+                            )
                         );
                       });
                     },
@@ -946,7 +966,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //                    child: const Text('test'),
                     child: Bubble(
                       style: Generator.settings.style,
-                      inset: Generator.settings.inset,
+                      nip: Generator.settings.nip,
                       topLine: Generator.settings.topLine,
                       bottomLine: Generator.settings.bottomLine,
                       child: Container(
@@ -963,7 +983,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //                    child: const Text('test'),
                     child: Bubble(
                       style: Generator.settings.style,
-                      inset: Generator.settings.inset,
+                      nip: Generator.settings.nip,
                       topLine: Generator.settings.topLine,
                       bottomLine: Generator.settings.bottomLine,
                       child: Container(
@@ -996,7 +1016,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                         child: Bubble(
                           scale: _scale,
                           style: Generator.settings.style.copyWith(color: Colors.lightBlue),
-                          inset: Generator.settings.inset,
+                          nip: Generator.settings.nip,
                           topLine: Generator.settings.topLine,
                           bottomLine: Generator.settings.bottomLine,
                           drawDraft: _drawDraft,
