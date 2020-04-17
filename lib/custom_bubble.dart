@@ -64,7 +64,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
   void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset) {
 //    print('--- inset: $absInset $end');
 //    path.arcToPoint(end, radius: Radius.circular(1.0), largeArc: false, clockwise: true);
-    path.lineTo(end.x, end.y);
+//    path.lineTo(end.x, end.y);
   }
 
   @override
@@ -313,6 +313,9 @@ class RenderBubble extends RenderProxyBox {
             inset,
             absInset);
         lastPoint = nextPoint;
+
+        // Устанавливаем в точку возврата самостоятельно
+        path.lineTo(nextPoint.x, nextPoint.y);
 
         // Путь до следующей врезки
         final pos = index < absInsets.length - 1 ? absInsets[index + 1].start : start;

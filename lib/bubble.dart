@@ -251,7 +251,7 @@ class Bubble extends CustomBubble {
     double scale = 1.0,
     bool drawDraft = false,
     BubbleStyle style,
-    @required Nip nip,
+    @required this.nip,
     @required this.topLine,
     @required this.bottomLine,
     Widget child,
@@ -266,6 +266,7 @@ class Bubble extends CustomBubble {
           child: child,
         );
 
+  final Nip nip;
   final NipLine topLine;
   final NipLine bottomLine;
 
@@ -277,6 +278,64 @@ class Bubble extends CustomBubble {
         || style.nipPlaceholderSize != style.nipPlaceholderSize
         || style.nipPlaceholderSize == null
             && style.nipSize != style.nipSize;
+  }
+
+  @override
+  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset) {
+//    final Inset inset;
+//    final double size;
+//    final double radius;
+//    final NipAnchor anchor;
+//    final double offset;
+//    final CornerOffset cornerOffset;
+
+    Point nipPoint;
+    Point anchorPoint;
+    AbsInsetPos anchorAbsInsetPos;
+
+    if (nip.anchor == NipAnchor.start) {
+      anchorPoint = start;
+      anchorAbsInsetPos = absInset.start;
+    } else {
+      anchorPoint = end;
+      anchorAbsInsetPos = absInset.end;
+    }
+
+    if (anchorAbsInsetPos.type == InsetPosType.left || nip.cornerOffset == CornerOffset.byHeight
+        && (anchorAbsInsetPos.type == InsetPosType.bottomLeft || anchorAbsInsetPos.type == InsetPosType.topLeft)) {
+      nipPoint = Point(box.left - nip.size, anchorPoint.y - nip.offset);
+    } else if (anchorAbsInsetPos.type == InsetPosType.right || nip.cornerOffset == CornerOffset.byHeight
+        && (anchorAbsInsetPos.type == InsetPosType.topRight || anchorAbsInsetPos.type == InsetPosType.bottomRight)) {
+      nipPoint = Point(box.right + nip.size, anchorPoint.y + nip.offset);
+    } else if (anchorAbsInsetPos.type == InsetPosType.top || nip.cornerOffset == CornerOffset.byWidth
+        && (anchorAbsInsetPos.type == InsetPosType.topLeft || anchorAbsInsetPos.type == InsetPosType.topRight)) {
+      nipPoint = Point(anchorPoint.x + nip.offset, box.top - nip.size);
+    } else if (anchorAbsInsetPos.type == InsetPosType.bottom || nip.cornerOffset == CornerOffset.byWidth
+        && (anchorAbsInsetPos.type == InsetPosType.bottomRight || anchorAbsInsetPos.type == InsetPosType.bottomLeft)) {
+      nipPoint = Point(anchorPoint.x - nip.offset, box.bottom + nip.size);
+    } else if (nip.cornerOffset == CornerOffset.byLength) {
+      final pos = anchorAbsInsetPos.pos;
+      switch (anchorAbsInsetPos.type) {
+        case InsetPosType.topLeft:
+          final radius = nip.size + box.tlRadius;
+          final x = math.cos(pos) * radius;
+          final y = math.sin(pos) * radius;
+          nipPoint = Point(box.left + box.tlRadius - x, box.top + box.tlRadius - y);
+          break;
+        case InsetPosType.topRight:
+          nipPoint = anchorPoint;
+          break;
+        case InsetPosType.bottomRight:
+          nipPoint = anchorPoint;
+          break;
+        case InsetPosType.bottomLeft:
+          nipPoint = anchorPoint;
+          break;
+        default:
+      }
+    }
+
+    path.lineTo(nipPoint.x, nipPoint.y);
   }
 
 //  void createNip(Path path, BubblePaintInfo pi) {
@@ -707,10 +766,10 @@ class Nip {
     this.offset = 0.0,
     this.cornerOffset = CornerOffset.byLength,
   })  : assert(inset != null),
+        assert(size != null),
+        assert(radius != null),
         assert(anchor != null),
         assert(offset != null),
-        assert(cornerOffset != null),
-        assert(radius != null),
         assert(cornerOffset != null);
 
   final Inset inset;
