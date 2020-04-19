@@ -314,12 +314,12 @@ class Bubble extends CustomBubble {
         && (anchorAbsInsetPos.type == InsetPosType.bottomRight || anchorAbsInsetPos.type == InsetPosType.bottomLeft)) {
       nipPoint = Point(anchorPoint.x - nip.offset, box.bottom + nip.size);
     } else if (nip.cornerOffset == CornerOffset.byLength) {
-      final pos = anchorAbsInsetPos.pos;
+      final alpha = anchorAbsInsetPos.pos;
       switch (anchorAbsInsetPos.type) {
         case InsetPosType.topLeft:
           final radius = nip.size + box.tlRadius;
-          final x = math.cos(pos) * radius;
-          final y = math.sin(pos) * radius;
+          final x = math.cos(alpha) * radius;
+          final y = math.sin(alpha) * radius;
           nipPoint = Point(box.left + box.tlRadius - x, box.top + box.tlRadius - y);
           break;
         case InsetPosType.topRight:

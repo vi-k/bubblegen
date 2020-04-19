@@ -1151,9 +1151,14 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                         width: _settingsWidth,
                         child: AnimatedBuilder(
                           animation: animation,
-                          child: _settings,
+                          child: getSettings(),
                           builder: (BuildContext context, Widget child) {
                             return Visibility(
+                              maintainInteractivity: true,
+                              maintainSemantics: true,
+                              maintainState: true,
+                              maintainAnimation: true,
+                              maintainSize: true,
                               visible: animation.value != _settingsWidth,
                               child: Transform.translate(
                                 offset: Offset(animation.value, 0.0),
