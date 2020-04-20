@@ -281,7 +281,7 @@ class Bubble extends CustomBubble {
   }
 
   @override
-  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset) {
+  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo draftInfo) {
 //    final Inset inset;
 //    final double size;
 //    final double radius;
@@ -335,7 +335,9 @@ class Bubble extends CustomBubble {
       }
     }
 
-    path.lineTo(nipPoint.x, nipPoint.y);
+    path.lineTo(nipPoint.x + 0.02, nipPoint.y);
+    print(nipPoint.x);
+    // path.lineTo(nipPoint.x + 0.02, nipPoint.y);
   }
 
 //  void createNip(Path path, BubblePaintInfo pi) {

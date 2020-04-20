@@ -61,11 +61,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
 //    ));
   }
 
-  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset) {
-//    print('--- inset: $absInset $end');
-//    path.arcToPoint(end, radius: Radius.circular(1.0), largeArc: false, clockwise: true);
-//    path.lineTo(end.x, end.y);
-  }
+  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo draftInfo) { }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -226,7 +222,9 @@ class RenderBubble extends RenderProxyBox {
     );
 
     bubble.generateInsets();
-    createBox(path, box);
+    createBox(path, box, pi.draft);
+
+    // path = Path.combine(PathOperation.union, path, Path());
 
 //    var thirdPath = Path()
 //      ..addOval(Rect.fromCenter(center: pi.nipCircle.center - Offset(0.0, 0.0), width: pi.nipCircle.diameter, height: pi.nipCircle.diameter));
@@ -260,7 +258,7 @@ class RenderBubble extends RenderProxyBox {
     paint.style = PaintingStyle.fill;
     if (pi.draft != null) pi.draft.paintBackground(context.canvas, pi);
     context.canvas.drawShadow(path, bubble.style.shadowColor, bubble.style.elevation * bubble.scale, true);
-    context.canvas.drawPath(path, paint);
+    if (pi.draft != null) context.canvas.drawPath(path, paint);
 
     // Обводка
     if (bubble.style.strokeWidth != 0.0) {
@@ -283,7 +281,7 @@ class RenderBubble extends RenderProxyBox {
     context.canvas.restore();
   }
 
-  void createBox(Path path, Box box) {
+  void createBox(Path path, Box box, DraftInfo draftInfo) {
 //    print('createBox()');
 
     final absInsets = bubble.insets.apply(box);
@@ -304,14 +302,11 @@ class RenderBubble extends RenderProxyBox {
 
         // Врезка
         var nextPoint = absInset.end.apply(box);
-        bubble.createInset(
-            index,
-            path,
-            box,
-            lastPoint,
-            nextPoint,
-            inset,
-            absInset);
+        if (draftInfo != null) {
+          draftInfo.addPoint(lastPoint, DraftType.Draft);
+          draftInfo.addPoint(nextPoint, DraftType.Main);
+        }
+        bubble.createInset(index, path, box, lastPoint, nextPoint, inset, absInset, draftInfo);
         lastPoint = nextPoint;
 
         // Устанавливаем в точку возврата самостоятельно
