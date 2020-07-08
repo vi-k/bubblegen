@@ -51,11 +51,11 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
 
     return Bubble(
       style: Generator.settings.style.copyWith(
-        nipSide: index % 2 == 0 ? NipSide.left : NipSide.right,
-        nipPlaceholderSize: Generator.settings.style.nipSize,
-        nipSize: Generator.settings.style.nipSize - (animationValue != null ? animationValue * Generator.settings.style.nipSize : 0),
+//        nipSide: index % 2 == 0 ? NipSide.left : NipSide.right,
+//        nipPlaceholderSize: Generator.settings.style.nipSize,
+//        nipSize: Generator.settings.style.nipSize - (animationValue != null ? animationValue * Generator.settings.style.nipSize : 0),
 //        strokeWidth: animationValue != null ? animationValue * 2.0 : Generator.settings.style.strokeWidth,
-        elevation: Generator.settings.style.elevation + (animationValue != null ? animationValue * 4.0 : 0.0),
+//        elevation: Generator.settings.style.elevation + (animationValue != null ? animationValue * 4.0 : 0.0),
         color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
       ),
       nip: Generator.settings.nip.copyWith(

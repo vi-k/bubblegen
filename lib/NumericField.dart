@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -72,8 +74,13 @@ class _NumericFieldState extends State<NumericField> {
     super.dispose();
   }
 
-  static double floor(double value, int fractionDigits) {
+  static double round(double value, int fractionDigits) {
     return double.parse(value.toStringAsFixed(fractionDigits));
+  }
+
+  static double floor(double value, int fractionDigits) {
+    final k = pow(10, fractionDigits);
+    return round((value * k).floorToDouble() / k, fractionDigits);
   }
 
   void step(int steps, {double value}) {
@@ -83,12 +90,13 @@ class _NumericFieldState extends State<NumericField> {
     if (_errorText == null) {
       final floorValue = floor(value, widget.fractionDigits);
       if (value == floorValue) {
-        value = floor(value + steps * widget.step, widget.fractionDigits);
+        value += steps * widget.step;
       } else if (steps < 0) {
         value = floorValue + (steps + 1) * widget.step;
       } else if (steps > 0) {
-        value = floor(floorValue + steps * widget.step, widget.fractionDigits);
+        value = floorValue + steps * widget.step;
       }
+      value = round(value, widget.fractionDigits);
     }
 
     setNewValue(value, true);

@@ -246,7 +246,11 @@ class RenderBubble extends RenderProxyBox {
 //    }
 
     if (bubble.style.hFlip) {
-//      context.canvas.translate(0, bubble.style.nipSide.isHorizontal ? size.height : size.width);
+      context.canvas.translate(size.width, 0);
+      context.canvas.scale(-1, 1);
+    }
+
+    if (bubble.style.vFlip) {
       context.canvas.translate(0, size.height);
       context.canvas.scale(1, -1);
     }

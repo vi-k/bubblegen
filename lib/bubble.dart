@@ -6,68 +6,68 @@ import 'package:flutter/rendering.dart';
 import 'geometry.dart';
 import 'custom_bubble.dart';
 
-enum NipSideEnum { left, right, top, bottom }
-class NipSide {
-  const NipSide._internal(this._value);
+//enum NipSideEnum { left, right, top, bottom }
+//class NipSide {
+//  const NipSide._internal(this._value);
+//
+//  final NipSideEnum _value;
+//
+//  static const left = const NipSide._internal(NipSideEnum.left);
+//  static const right = const NipSide._internal(NipSideEnum.right);
+//  static const top = const NipSide._internal(NipSideEnum.top);
+//  static const bottom = const NipSide._internal(NipSideEnum.bottom);
+//  static const int minIndex = 0;
+//  static const int maxIndex = 3;
+//
+//  static NipSide byIndex(int index) {
+//    switch (index) {
+//      case 0: return left;
+//      case 1: return right;
+//      case 2: return top;
+//      case 3: return bottom;
+//    }
+//
+//    throw RangeError.range(index, 0, 3);
+//  }
+//
+//  int get index => _value.index;
+//  bool get isLeft => _value == NipSideEnum.left;
+//  bool get isRight => _value == NipSideEnum.right;
+//  bool get isTop => _value == NipSideEnum.top;
+//  bool get isBottom => _value == NipSideEnum.bottom;
+//  bool get isHorizontal => _value == NipSideEnum.left || _value == NipSideEnum.right;
+//  bool get isVertical => _value == NipSideEnum.top || _value == NipSideEnum.bottom;
+//
+//  @override
+//  String toString({bool onlyValue = false}) {
+//    String str = _value.toString().substring(12);
+//    return onlyValue ? str : 'NipSide.$str';
+//  }
+//}
 
-  final NipSideEnum _value;
-
-  static const left = const NipSide._internal(NipSideEnum.left);
-  static const right = const NipSide._internal(NipSideEnum.right);
-  static const top = const NipSide._internal(NipSideEnum.top);
-  static const bottom = const NipSide._internal(NipSideEnum.bottom);
-  static const int minIndex = 0;
-  static const int maxIndex = 3;
-
-  static NipSide byIndex(int index) {
-    switch (index) {
-      case 0: return left;
-      case 1: return right;
-      case 2: return top;
-      case 3: return bottom;
-    }
-
-    throw RangeError.range(index, 0, 3);
-  }
-
-  int get index => _value.index;
-  bool get isLeft => _value == NipSideEnum.left;
-  bool get isRight => _value == NipSideEnum.right;
-  bool get isTop => _value == NipSideEnum.top;
-  bool get isBottom => _value == NipSideEnum.bottom;
-  bool get isHorizontal => _value == NipSideEnum.left || _value == NipSideEnum.right;
-  bool get isVertical => _value == NipSideEnum.top || _value == NipSideEnum.bottom;
-
-  @override
-  String toString({bool onlyValue = false}) {
-    String str = _value.toString().substring(12);
-    return onlyValue ? str : 'NipSide.$str';
-  }
-}
-
-class NipOffset {
-  const NipOffset({this.relative = 0, this.absolute = 0});
-
-  final double relative;
-  final double absolute;
-
-  double pos(double nipRadius, double sideSize) {
-    return (sideSize - 2 * nipRadius) * relative + absolute;
-  }
-
-  @override
-  bool operator ==(other) {
-    return other is NipOffset && other.relative == relative && other.absolute == absolute;
-  }
-
-  @override
-  int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
-
-  @override
-  String toString() {
-    return 'NipOffset(relative: $relative, absolute: $absolute)';
-  }
-}
+//class NipOffset {
+//  const NipOffset({this.relative = 0, this.absolute = 0});
+//
+//  final double relative;
+//  final double absolute;
+//
+//  double pos(double nipRadius, double sideSize) {
+//    return (sideSize - 2 * nipRadius) * relative + absolute;
+//  }
+//
+//  @override
+//  bool operator ==(other) {
+//    return other is NipOffset && other.relative == relative && other.absolute == absolute;
+//  }
+//
+//  @override
+//  int get hashCode => hashValues(relative.hashCode, absolute.hashCode);
+//
+//  @override
+//  String toString() {
+//    return 'NipOffset(relative: $relative, absolute: $absolute)';
+//  }
+//}
 
 enum NipLineType {
   line,
@@ -173,22 +173,22 @@ class BubbleStyle extends CustomBubbleStyle {
   const BubbleStyle({
     EdgeInsets margin,
     BubbleRadius radius,
-    this.nipSide = NipSide.left,
+//    this.nipSide = NipSide.left,
     bool hFlip,
     bool vFlip,
-    this.nipRadius = 0.5,
-    this.nipSize = 7.0,
-    this.nipPlaceholderSize,
-    this.nipOffset = const NipOffset(),
+//    this.nipRadius = 0.5,
+//    this.nipSize = 7.0,
+//    this.nipPlaceholderSize,
+//    this.nipOffset = const NipOffset(),
     Color color,
     double elevation,
     Color shadowColor,
     Color strokeColor,
     double strokeWidth,
-  })  : assert(nipSide != null),
-        assert(nipRadius != null),
-        assert(nipSize != null),
-        assert(nipOffset != null),
+  })  : //assert(nipSide != null),
+//        assert(nipRadius != null),
+//        assert(nipSize != null),
+//        assert(nipOffset != null),
         super(
           margin: margin,
           radius: radius,
@@ -200,22 +200,22 @@ class BubbleStyle extends CustomBubbleStyle {
           strokeWidth: strokeWidth,
         );
 
-  final NipSide nipSide;
-  final double nipRadius;
-  final double nipSize;
-  final double nipPlaceholderSize;
-  final NipOffset nipOffset;
+//  final NipSide nipSide;
+//  final double nipRadius;
+//  final double nipSize;
+//  final double nipPlaceholderSize;
+//  final NipOffset nipOffset;
 
   BubbleStyle copyWith({
       EdgeInsets margin,
       BubbleRadius radius,
-      NipSide nipSide,
+//      NipSide nipSide,
       bool hFlip,
       bool vFlip,
-      double nipRadius,
-      double nipSize,
-      double nipPlaceholderSize,
-      NipOffset nipOffset,
+//      double nipRadius,
+//      double nipSize,
+//      double nipPlaceholderSize,
+//      NipOffset nipOffset,
       Color color,
       double elevation,
       Color shadowColor,
@@ -225,13 +225,13 @@ class BubbleStyle extends CustomBubbleStyle {
     return BubbleStyle(
       margin: margin ?? this.margin,
       radius: radius ?? this.radius,
-      nipSide: nipSide ?? this.nipSide,
+//      nipSide: nipSide ?? this.nipSide,
       hFlip: hFlip ?? this.hFlip,
       vFlip: vFlip ?? this.vFlip,
-      nipRadius: nipRadius ?? this.nipRadius,
-      nipSize: nipSize ?? this.nipSize,
-      nipPlaceholderSize: nipPlaceholderSize ?? this.nipPlaceholderSize,
-      nipOffset: nipOffset ?? this.nipOffset,
+//      nipRadius: nipRadius ?? this.nipRadius,
+//      nipSize: nipSize ?? this.nipSize,
+//      nipPlaceholderSize: nipPlaceholderSize ?? this.nipPlaceholderSize,
+//      nipOffset: nipOffset ?? this.nipOffset,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
@@ -242,7 +242,8 @@ class BubbleStyle extends CustomBubbleStyle {
 
   @override
   String toString() {
-    return 'BubbleStyle(margin: $margin, radius: $radius, nipSide: $nipSide, hFlip: $hFlip, vFlip: $vFlip, nipRadius: $nipRadius, nipSize: $nipSize, nipPlaceholderSize: $nipPlaceholderSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
+//    return 'BubbleStyle(margin: $margin, radius: $radius, nipSide: $nipSide, hFlip: $hFlip, vFlip: $vFlip, nipRadius: $nipRadius, nipSize: $nipSize, nipPlaceholderSize: $nipPlaceholderSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
+    return 'BubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
   }
 }
 
@@ -272,12 +273,12 @@ class Bubble extends CustomBubble {
 
   @override
   bool needsLayout(CustomBubble other) {
-    final style = other.style as BubbleStyle;
-    return super.needsLayout(other)
-        || style.nipSide != style.nipSide
-        || style.nipPlaceholderSize != style.nipPlaceholderSize
-        || style.nipPlaceholderSize == null
-            && style.nipSize != style.nipSize;
+//    final style = other.style as BubbleStyle;
+    return super.needsLayout(other);
+//        || style.nipSide != style.nipSide
+//        || style.nipPlaceholderSize != style.nipPlaceholderSize
+//        || style.nipPlaceholderSize == null
+//            && style.nipSize != style.nipSize;
   }
 
   @override
@@ -335,9 +336,7 @@ class Bubble extends CustomBubble {
       }
     }
 
-    path.lineTo(nipPoint.x + 0.02, nipPoint.y);
-    print(nipPoint.x);
-    // path.lineTo(nipPoint.x + 0.02, nipPoint.y);
+    path.lineTo(nipPoint.x, nipPoint.y);
   }
 
 //  void createNip(Path path, BubblePaintInfo pi) {
