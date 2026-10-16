@@ -309,7 +309,6 @@ class Bubble extends CustomBubble {
 //    final double offset;
 //    final CornerOffset cornerOffset;
 
-    late Point nipPoint;
     Point anchorPoint;
     AbsInsetPos anchorAbsInsetPos;
 
@@ -321,50 +320,80 @@ class Bubble extends CustomBubble {
       anchorAbsInsetPos = absInset.end;
     }
 
-    if (anchorAbsInsetPos.type == InsetPosType.left ||
+    // The frame at the anchor: [normal] points out of the bubble, [tangent]
+    // runs along the contour in the direction the path goes. The tip is
+    // nip.size out and nip.offset along from [base]: the anchor itself on an
+    // arc, or the anchor moved onto the line of the side the frame comes from.
+    late Offset normal;
+    late Offset tangent;
+    late Offset base;
+
+    final type = anchorAbsInsetPos.type;
+    if (type == InsetPosType.left ||
         nip.cornerOffset == CornerOffset.byHeight &&
-            (anchorAbsInsetPos.type == InsetPosType.bottomLeft ||
-                anchorAbsInsetPos.type == InsetPosType.topLeft)) {
-      nipPoint = Point(box.left - nip.size, anchorPoint.y - nip.offset);
-    } else if (anchorAbsInsetPos.type == InsetPosType.right ||
+            (type == InsetPosType.bottomLeft || type == InsetPosType.topLeft)) {
+      normal = const Offset(-1, 0);
+      tangent = const Offset(0, -1);
+      base = Offset(box.left, anchorPoint.y);
+    } else if (type == InsetPosType.right ||
         nip.cornerOffset == CornerOffset.byHeight &&
-            (anchorAbsInsetPos.type == InsetPosType.topRight ||
-                anchorAbsInsetPos.type == InsetPosType.bottomRight)) {
-      nipPoint = Point(box.right + nip.size, anchorPoint.y + nip.offset);
-    } else if (anchorAbsInsetPos.type == InsetPosType.top ||
+            (type == InsetPosType.topRight ||
+                type == InsetPosType.bottomRight)) {
+      normal = const Offset(1, 0);
+      tangent = const Offset(0, 1);
+      base = Offset(box.right, anchorPoint.y);
+    } else if (type == InsetPosType.top ||
         nip.cornerOffset == CornerOffset.byWidth &&
-            (anchorAbsInsetPos.type == InsetPosType.topLeft ||
-                anchorAbsInsetPos.type == InsetPosType.topRight)) {
-      nipPoint = Point(anchorPoint.x + nip.offset, box.top - nip.size);
-    } else if (anchorAbsInsetPos.type == InsetPosType.bottom ||
+            (type == InsetPosType.topLeft || type == InsetPosType.topRight)) {
+      normal = const Offset(0, -1);
+      tangent = const Offset(1, 0);
+      base = Offset(anchorPoint.x, box.top);
+    } else if (type == InsetPosType.bottom ||
         nip.cornerOffset == CornerOffset.byWidth &&
-            (anchorAbsInsetPos.type == InsetPosType.bottomRight ||
-                anchorAbsInsetPos.type == InsetPosType.bottomLeft)) {
-      nipPoint = Point(anchorPoint.x - nip.offset, box.bottom + nip.size);
-    } else if (nip.cornerOffset == CornerOffset.byLength) {
+            (type == InsetPosType.bottomRight ||
+                type == InsetPosType.bottomLeft)) {
+      normal = const Offset(0, 1);
+      tangent = const Offset(-1, 0);
+      base = Offset(anchorPoint.x, box.bottom);
+    } else {
+      // CornerOffset.byLength on a corner: the frame turns with the arc.
       final alpha = anchorAbsInsetPos.pos;
-      switch (anchorAbsInsetPos.type) {
+      final cos = math.cos(alpha);
+      final sin = math.sin(alpha);
+      late Offset center;
+      late double radius;
+      switch (type) {
         case InsetPosType.topLeft:
-          final radius = nip.size + box.tlRadius;
-          final x = math.cos(alpha) * radius;
-          final y = math.sin(alpha) * radius;
-          nipPoint =
-              Point(box.left + box.tlRadius - x, box.top + box.tlRadius - y);
+          radius = box.tlRadius;
+          center = Offset(box.left + radius, box.top + radius);
+          normal = Offset(-cos, -sin);
+          tangent = Offset(sin, -cos);
         case InsetPosType.topRight:
-          nipPoint = anchorPoint;
+          radius = box.trRadius;
+          center = Offset(box.right - radius, box.top + radius);
+          normal = Offset(sin, -cos);
+          tangent = Offset(cos, sin);
         case InsetPosType.bottomRight:
-          nipPoint = anchorPoint;
+          radius = box.brRadius;
+          center = Offset(box.right - radius, box.bottom - radius);
+          normal = Offset(cos, sin);
+          tangent = Offset(-sin, cos);
         case InsetPosType.bottomLeft:
-          nipPoint = anchorPoint;
+          radius = box.blRadius;
+          center = Offset(box.left + radius, box.bottom - radius);
+          normal = Offset(-sin, cos);
+          tangent = Offset(-cos, -sin);
         // Sides are handled above.
         case InsetPosType.left:
         case InsetPosType.top:
         case InsetPosType.right:
         case InsetPosType.bottom:
       }
+      base = center + normal * radius;
     }
+    final tip = base + normal * nip.size + tangent * nip.offset;
 
-    path.lineTo(nipPoint.x, nipPoint.y);
+    path.lineTo(tip.dx, tip.dy);
   }
 
 //  void createNip(Path path, BubblePaintInfo pi) {
