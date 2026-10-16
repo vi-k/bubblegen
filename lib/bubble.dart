@@ -393,8 +393,78 @@ class Bubble extends CustomBubble {
     }
     final tip = base + normal * nip.size + tangent * nip.offset;
 
-    path.lineTo(tip.dx, tip.dy);
+    _roundTip(path, start, end, tip, normal, tangent);
   }
+
+  /// Goes from the path's current point, [start], to [tip], rounding it with
+  /// a circle of nip.radius; the caller goes on to [end].
+  ///
+  /// The circle sits in the right angle at [tip] between the line along
+  /// [normal] and the line along [tangent], on the side of the other end of
+  /// the inset, so the rounded nip reaches as far out as the sharp one. The
+  /// radius is at most nip.size and at most half the way from the line along
+  /// [normal] to the far end, and shrinks further until neither end of the
+  /// inset is inside the circle.
+  void _roundTip(
+    Path path,
+    Offset start,
+    Offset end,
+    Offset tip,
+    Offset normal,
+    Offset tangent,
+  ) {
+    // The circle lies towards the end the anchor is not.
+    final side = nip.anchor == NipAnchor.start ? 1.0 : -1.0;
+
+    var radius = math.min(nip.radius, nip.size);
+    if (radius < 0) radius = 0;
+
+    // The circle spans 2·radius along the tangent from the line along
+    // [normal]; past the far end of the inset it would overhang that end.
+    final far = (nip.anchor == NipAnchor.start ? end : start) - tip;
+    final reach = side * (far.dx * tangent.dx + far.dy * tangent.dy);
+    if (2 * radius > reach) radius = reach > 0 ? reach / 2 : 0;
+
+    // A point is inside for the radii between the two roots of
+    // r² + 2(a - side·b)r + a² + b², its squared distance to the centre less
+    // r², and when it is inside at all, both roots are positive. Shrinking to
+    // the smaller root puts the point on the circle and keeps it outside for
+    // any smaller radius, so start, end and start again is enough: shrinking
+    // for end can only bring back inside a start that lay beyond the larger
+    // root.
+    for (final point in [start, end, start]) {
+      final d = point - tip;
+      final a = d.dx * normal.dx + d.dy * normal.dy;
+      final b = d.dx * tangent.dx + d.dy * tangent.dy;
+      final p = a - side * b;
+      if (radius * radius + 2 * p * radius + a * a + b * b < -_epsilon) {
+        radius = -p - math.sqrt(math.max(0.0, p * p - a * a - b * b));
+      }
+    }
+
+    if (radius <= 0.0) {
+      path.lineTo(tip.dx, tip.dy);
+      return;
+    }
+
+    final center = tip - normal * radius + tangent * (side * radius);
+
+    double touch(Offset point, double sign) {
+      final d = point - center;
+      return d.direction + sign * math.acos(math.min(1.0, radius / d.distance));
+    }
+
+    final from = touch(start, 1);
+    final to = touch(end, -1);
+    path.arcTo(
+      Rect.fromCircle(center: center, radius: radius),
+      from,
+      (to - from) % (2 * math.pi),
+      false,
+    );
+  }
+
+  static const _epsilon = 1e-9;
 
 //  void createNip(Path path, BubblePaintInfo pi) {
 //    addLine(topLine, false, path, pi);

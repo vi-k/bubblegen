@@ -719,7 +719,9 @@ class _GeneratorState extends State<Generator>
                     caption: 'radius:',
                     value: Generator.settings.nip.radius,
                     units: 'px',
-                    step: 1,
+                    min: 0,
+                    step: 0.5,
+                    fractionDigits: 1,
                     onChanged: (value) {
                       setState(() {
                         Generator.settings.nip =
