@@ -1,5 +1,5 @@
-import 'package:bubblegen/BubbleDemo.dart';
-import 'package:bubblegen/Generator.dart';
+import 'package:bubblegen/bubble_demo.dart';
+import 'package:bubblegen/generator.dart';
 import 'package:bubblegen/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 

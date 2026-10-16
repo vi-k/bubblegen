@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'Generator.dart';
+import 'generator.dart';
 import 'bubble.dart';
 
 class BubbleDemo extends StatefulWidget {

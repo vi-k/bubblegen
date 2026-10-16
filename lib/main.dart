@@ -1,11 +1,11 @@
 //import 'dart:math' as math;
 //import 'dart:ui' as ui;
 
-import 'package:bubblegen/BubbleDemo.dart';
+import 'package:bubblegen/bubble_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'Generator.dart';
+import 'generator.dart';
 
 GeneratorBubbleStyle gBubbleStyle = GeneratorBubbleStyle();
 

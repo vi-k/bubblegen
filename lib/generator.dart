@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'NumericField.dart';
+import 'numeric_field.dart';
 import 'custom_bubble.dart';
 import 'bubble.dart';
 import 'main.dart';
