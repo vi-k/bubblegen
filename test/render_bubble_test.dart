@@ -15,7 +15,7 @@ class _RecordingCanvas implements Canvas {
   final calls = <String>[];
   final paths = <Path>[];
 
-  String _arg(Object arg) {
+  String _arg(Object? arg) {
     if (arg == null) return 'null';
     if (arg is double) return fmt(arg);
     if (arg is Color) return _color(arg);
@@ -42,7 +42,7 @@ class _RecordingCanvas implements Canvas {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     final name = RegExp(r'"(.*)"')
-        .firstMatch(invocation.memberName.toString())
+        .firstMatch(invocation.memberName.toString())!
         .group(1);
     calls.add('$name(${invocation.positionalArguments.map(_arg).join(', ')})');
     return null;
@@ -66,7 +66,7 @@ class _RecordingContext implements PaintingContext {
 }
 
 Future<RenderBubble> _pump(WidgetTester tester, Widget bubble,
-    {Size tight}) async {
+    {Size? tight}) async {
   await tester.pumpWidget(Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -81,8 +81,8 @@ Future<RenderBubble> _pump(WidgetTester tester, Widget bubble,
 List<String> _layout(RenderBubble render) {
   final lines = ['size ${fmt(render.size.width)} x ${fmt(render.size.height)}'];
   if (render.child != null) {
-    lines.add('child ${fmt(render.child.size.width)}'
-        ' x ${fmt(render.child.size.height)}');
+    lines.add('child ${fmt(render.child!.size.width)}'
+        ' x ${fmt(render.child!.size.height)}');
   }
   return lines;
 }
@@ -106,7 +106,7 @@ List<String> _paintNames(RenderBubble render) {
   final canvas = _RecordingCanvas();
   render.paint(_RecordingContext(canvas), Offset.zero);
   final lines = <String>[];
-  String last;
+  String? last;
   var count = 0;
   void flush() {
     if (last != null) lines.add(count == 1 ? last : '$last x$count');

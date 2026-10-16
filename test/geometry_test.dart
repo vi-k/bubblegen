@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'snapshot.dart';
 
-String _segment(LineSegment segment) => segment == null
+String _segment(LineSegment? segment) => segment == null
     ? 'null'
     : '${fmtOffset(segment.start)} -> ${fmtOffset(segment.end)}'
         ' length ${fmt(segment.length)} direct ${fmt(segment.direct)}';

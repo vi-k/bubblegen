@@ -11,27 +11,27 @@ class GeneratorBubbleStyle {
   }
 
   double additionalPadding = 0.0;
-  double height;
-  double width;
+  double? height;
+  double? width;
 
-  bool hasOneRadius;
-  BubbleRadius radius;
+  late bool hasOneRadius;
+  late BubbleRadius radius;
 //  NipSide nipSide;
-  bool hFlip;
-  bool vFlip;
+  late bool hFlip;
+  late bool vFlip;
 //  double nipRadius;
 //  double nipSize;
 //  NipOffset nipOffset;
-  Color color;
-  double elevation;
-  Color shadowColor;
-  Color strokeColor;
-  double strokeWidth;
+  late Color color;
+  late double elevation;
+  late Color shadowColor;
+  late Color strokeColor;
+  late double strokeWidth;
 
-  Nip nip;
+  late Nip nip;
 
-  NipLine topLine;
-  NipLine bottomLine;
+  late NipLine topLine;
+  late NipLine bottomLine;
 
   set style(BubbleStyle style) {
     hasOneRadius = style.radius.hasOneRadius;
@@ -68,7 +68,7 @@ class GeneratorBubbleStyle {
 }
 
 class Generator extends StatefulWidget {
-  Generator({Key key}) : super(key: key);
+  Generator({Key? key}) : super(key: key);
 
   static final settings = GeneratorBubbleStyle();
 
@@ -81,7 +81,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //  Widget _settings;
   var _showSettings = false;
   static final _settingsWidth = 180.0;
-  AnimationController _settingsController;
+  late AnimationController _settingsController;
 
 //  var _elevation = 0.5;
   var _scale = 6.0;
@@ -1108,7 +1108,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
     return Column(
       children: <Widget>[
         PhysicalModel(
-          color: primarySwatch[200],
+          color: primarySwatch[200]!,
           elevation: 4.0,
           child: Container(
             padding: EdgeInsets.all(_staticPadding / 2.0),
@@ -1198,7 +1198,7 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                         child: AnimatedBuilder(
                           animation: animation,
                           child: getSettings(),
-                          builder: (BuildContext context, Widget child) {
+                          builder: (BuildContext context, Widget? child) {
                             return Visibility(
                               maintainInteractivity: true,
                               maintainSemantics: true,

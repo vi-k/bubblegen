@@ -9,33 +9,33 @@ class NumericField extends StatefulWidget {
     this.horizontal = false,
     this.inputWidth,
     this.units,
-    @required this.value,
+    required this.value,
     this.min = double.negativeInfinity,
     this.max = double.infinity,
-    @required this.step,
+    required this.step,
     this.fractionDigits = 0,
     this.textAlign = TextAlign.end,
     this.onBeforeChanging,
-    @required this.onChanged,
+    required this.onChanged,
     this.onConvertToText,
   })  : assert(!horizontal || inputWidth != null),
         assert(step != 0),
         assert(min < max),
         assert(onChanged != null);
 
-  final String caption;
+  final String? caption;
   final bool horizontal;
-  final double inputWidth;
-  final String units;
+  final double? inputWidth;
+  final String? units;
   final double value;
   final double min;
   final double max;
   final double step;
   final int fractionDigits;
   final TextAlign textAlign;
-  final double Function(double) onBeforeChanging;
+  final double Function(double)? onBeforeChanging;
   final Function(double) onChanged;
-  final String Function(double) onConvertToText;
+  final String Function(double)? onConvertToText;
 
   @override
   _NumericFieldState createState() => _NumericFieldState();
@@ -49,13 +49,13 @@ class _NumericFieldState extends State<NumericField> {
   static const _contentPadding = 4.0; // Отступы от края
   static const _swipeStep = 8.0; // Шаг свайпа, за который происходит измение значения на один шаг
 
-  double _value;
-  double _savedValue; // Значение, сохранённое для свайпа
-  Offset _savedPos; // Начальная позиция свайпа
+  late double _value;
+  double? _savedValue; // Значение, сохранённое для свайпа
+  late Offset _savedPos; // Начальная позиция свайпа
   _ValueButton _swipeButton = _ValueButton.no; // Активная кнопка свайпа
-  TextEditingController _controller;
-  FocusNode _focusNode;
-  String _errorText;
+  late TextEditingController _controller;
+  late FocusNode _focusNode;
+  String? _errorText;
 
   @override
   void initState() {
@@ -83,7 +83,7 @@ class _NumericFieldState extends State<NumericField> {
     return round((value * k).floorToDouble() / k, fractionDigits);
   }
 
-  void step(int steps, {double value}) {
+  void step(int steps, {double? value}) {
     if (value == null) value = _value;
 
     // Если значение не выровнено по границе шага, то выравниваем в соответствующую сторону
@@ -104,8 +104,8 @@ class _NumericFieldState extends State<NumericField> {
     if (!_focusNode.hasFocus) _focusNode.requestFocus();
   }
 
-  void setNewValue(double value, bool correctTextField) {
-    String errorText;
+  void setNewValue(double? value, bool correctTextField) {
+    String? errorText;
 
     var correctedValue = value;
 
@@ -119,7 +119,7 @@ class _NumericFieldState extends State<NumericField> {
       correctedValue = widget.max;
       errorText = 'value must be ≤ ${widget.max}';
     } else if (widget.onBeforeChanging != null) {
-      final correctedValue2 = widget.onBeforeChanging(correctedValue);
+      final correctedValue2 = widget.onBeforeChanging!(correctedValue);
       if (correctedValue2 != correctedValue) {
         correctedValue = correctedValue2;
         errorText = 'value incorrect';
@@ -132,7 +132,7 @@ class _NumericFieldState extends State<NumericField> {
       _controller.text = str;
       _controller.selection = TextSelection.fromPosition(TextPosition(offset: str.length));
       // Во время преобразования могло произойти округление, учитываем это
-      _value = widget.onConvertToText == null ? convertToValue(str) : correctedValue;
+      _value = widget.onConvertToText == null ? convertToValue(str)! : correctedValue;
       widget.onChanged(_value);
       errorText = null;
     } else if (correctedValue != _value && errorText == null) {
@@ -150,7 +150,7 @@ class _NumericFieldState extends State<NumericField> {
     return widget.onConvertToText?.call(value) ?? value.toStringAsFixed(widget.fractionDigits);
   }
 
-  double convertToValue(String value) {
+  double? convertToValue(String value) {
     return double.tryParse(value);
   }
 
@@ -283,7 +283,7 @@ class _NumericFieldState extends State<NumericField> {
           visible: widget.caption != null,
           child: Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: Text(widget.caption),
+            child: Text(widget.caption!),
           ),
         ),
         SizedBox(
@@ -299,7 +299,7 @@ class _NumericFieldState extends State<NumericField> {
           visible: widget.caption != null,
           child: Padding(
             padding: const EdgeInsets.only(left: _contentPadding, right: _contentPadding, top: 6.0, bottom: 2.0),
-            child: Text(widget.caption),
+            child: Text(widget.caption!),
           ),
         ),
         input,

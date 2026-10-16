@@ -77,7 +77,7 @@ class Line {
   }
 
   /// Вычисляет пересечение линии с окружностью
-  LineSegment intersectCircle(Circle circle) {
+  LineSegment? intersectCircle(Circle circle) {
     var normal = this.normal(circle.center);
 
     // Линия не пересекается с окружностью
@@ -108,7 +108,7 @@ class Line {
   }
 
   /// Вычисляет пересечение линии с отрезком
-  Point intersectLineSegment(LineSegment lineSegment) {
+  Point? intersectLineSegment(LineSegment lineSegment) {
     Point point = intersectLine(Line(lineSegment.start, lineSegment.direct));
 
     if (point.x < math.min(lineSegment.start.x, lineSegment.end.x) ||
@@ -129,15 +129,15 @@ class Line {
 ///
 /// При запросе не заданных параметров они вычисляются и сохраняются в переменных.
 class LineSegment {
-  LineSegment(this._start, this._end);
-  LineSegment.direct(this._start, this._direct, this._length)
+  LineSegment(this._start, Point this._end);
+  LineSegment.direct(this._start, double this._direct, double this._length)
       : assert(_direct != null),
         assert(_length != null);
 
   Point _start;
-  Point _end;
-  double _length;
-  double _direct;
+  Point? _end;
+  double? _length;
+  double? _direct;
 
   Point get start => _start;
 
@@ -151,9 +151,9 @@ class LineSegment {
 
   Point get end {
     if (_end == null && _direct != null) {
-      _end = Point(start.x + _length * math.cos(_direct), start.y + _length * math.sin(_direct));
+      _end = Point(start.x + _length! * math.cos(_direct!), start.y + _length! * math.sin(_direct!));
     }
-    return _end;
+    return _end!;
   }
 
   set end(Point value) {
@@ -164,16 +164,16 @@ class LineSegment {
 
   double get length {
     if (_length == null) {
-      _length = math.sqrt(math.pow(_end.x - start.x, 2) + math.pow(_end.y - start.y, 2));
+      _length = math.sqrt(math.pow(_end!.x - start.x, 2) + math.pow(_end!.y - start.y, 2));
     }
-    return _length;
+    return _length!;
   }
 
   double get direct {
     if (_direct == null) {
-      _direct = math.atan2(_end.y - start.y, _end.x - start.x);
+      _direct = math.atan2(_end!.y - start.y, _end!.x - start.x);
     }
-    return _direct;
+    return _direct!;
   }
 
   String toString() {
@@ -196,7 +196,7 @@ class Circle {
 
   /// Точка на окружности: point(alpha)
   /// Точка на расстоянии от центра окружности: point(alpha, distance)
-  Point point(double alpha, [double distance]) {
+  Point point(double alpha, [double? distance]) {
     if (distance == null) distance = radius;
     return Point(center.x + distance * math.cos(alpha), center.y + distance * math.sin(alpha));
   }
@@ -231,7 +231,7 @@ class Circle {
   /// @param side Какая часть окружности дожна быть использована: -1.0 - верх, 1.0 - низ
   ///
   /// @return null, если точка внутри окружности
-  LineSegment tangentToPoint(Point point, double side) {
+  LineSegment? tangentToPoint(Point point, double side) {
     // Линия, соединяющая центр и точку
     final c2c = LineSegment(this.center, point);
 

@@ -5,7 +5,7 @@ import 'Generator.dart';
 import 'bubble.dart';
 
 class BubbleDemo extends StatefulWidget {
-  BubbleDemo({Key key}) : super(key: key);
+  BubbleDemo({Key? key}) : super(key: key);
 
   @override
   _BubbleDemoState createState() => _BubbleDemoState();
@@ -14,7 +14,7 @@ class BubbleDemo extends StatefulWidget {
 class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   static const _words = ['Lorem', ' ipsum', ' dolor', ' sit', ' amet', ', consectetur', ' adipiscing', ' elit', ', sed', ' do eiusmod', ' tempor', ' incididunt', ' ut', ' labore', ' et', ' dolore', ' magna', ' aliqua.'];
 
-  AnimationController _animationController;
+  late AnimationController _animationController;
 
   @override
   bool get wantKeepAlive => true;
@@ -43,7 +43,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     super.initState();
   }
 
-  Widget _getBubble({@required int index, double animationValue, @required String suffix}) {
+  Widget _getBubble({required int index, double? animationValue, required String suffix}) {
     var text = StringBuffer();
     for (var i = 0; i < index % (_words.length - 1) + 1; i++) {
       text.write(_words[i]);

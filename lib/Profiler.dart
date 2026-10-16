@@ -22,7 +22,7 @@ class Profiler extends SingleChildRenderObjectWidget {
 class RenderProfiler extends RenderProxyBox {
   RenderProfiler(
       Profiler profiler, {
-        RenderBox child,
+        RenderBox? child,
       })  : assert(profiler != null),
         _profiler = profiler,
         super(child);

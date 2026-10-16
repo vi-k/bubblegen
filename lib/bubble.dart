@@ -107,10 +107,10 @@ class NipLine {
   final NipLinePosType posType;
   final double pos;
   final double h; // arc's radius
-  final double a1; // curve's α₁
-  final double a2; // curve's α₂
-  final double sz1; // curve's sz₁
-  final double sz2; // curve's sz₂
+  final double? a1; // curve's α₁
+  final double? a2; // curve's α₂
+  final double? sz1; // curve's sz₁
+  final double? sz2; // curve's sz₂
 
   const NipLine.line(double lineAngle) : this(NipLineType.line, NipLinePosType.angle, lineAngle);
   const NipLine.lineTo(double pos) : this(NipLineType.line, NipLinePosType.pos, pos);
@@ -171,20 +171,20 @@ class NipLine {
 
 class BubbleStyle extends CustomBubbleStyle {
   const BubbleStyle({
-    EdgeInsets margin,
-    BubbleRadius radius,
+    EdgeInsets? margin,
+    BubbleRadius? radius,
 //    this.nipSide = NipSide.left,
-    bool hFlip,
-    bool vFlip,
+    bool? hFlip,
+    bool? vFlip,
 //    this.nipRadius = 0.5,
 //    this.nipSize = 7.0,
 //    this.nipPlaceholderSize,
 //    this.nipOffset = const NipOffset(),
-    Color color,
-    double elevation,
-    Color shadowColor,
-    Color strokeColor,
-    double strokeWidth,
+    Color? color,
+    double? elevation,
+    Color? shadowColor,
+    Color? strokeColor,
+    double? strokeWidth,
   })  : //assert(nipSide != null),
 //        assert(nipRadius != null),
 //        assert(nipSize != null),
@@ -207,20 +207,20 @@ class BubbleStyle extends CustomBubbleStyle {
 //  final NipOffset nipOffset;
 
   BubbleStyle copyWith({
-      EdgeInsets margin,
-      BubbleRadius radius,
+      EdgeInsets? margin,
+      BubbleRadius? radius,
 //      NipSide nipSide,
-      bool hFlip,
-      bool vFlip,
+      bool? hFlip,
+      bool? vFlip,
 //      double nipRadius,
 //      double nipSize,
 //      double nipPlaceholderSize,
 //      NipOffset nipOffset,
-      Color color,
-      double elevation,
-      Color shadowColor,
-      Color strokeColor,
-      double strokeWidth,
+      Color? color,
+      double? elevation,
+      Color? shadowColor,
+      Color? strokeColor,
+      double? strokeWidth,
   }) {
     return BubbleStyle(
       margin: margin ?? this.margin,
@@ -251,11 +251,11 @@ class Bubble extends CustomBubble {
   Bubble({
     double scale = 1.0,
     bool drawDraft = false,
-    BubbleStyle style,
-    @required this.nip,
-    @required this.topLine,
-    @required this.bottomLine,
-    Widget child,
+    required BubbleStyle style,
+    required this.nip,
+    required this.topLine,
+    required this.bottomLine,
+    Widget? child,
   })  : assert(topLine != null),
         assert(bottomLine != null),
         assert(nip != null),
@@ -282,7 +282,7 @@ class Bubble extends CustomBubble {
   }
 
   @override
-  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo draftInfo) {
+  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo? draftInfo) {
 //    final Inset inset;
 //    final double size;
 //    final double radius;
@@ -290,7 +290,7 @@ class Bubble extends CustomBubble {
 //    final double offset;
 //    final CornerOffset cornerOffset;
 
-    Point nipPoint;
+    late Point nipPoint;
     Point anchorPoint;
     AbsInsetPos anchorAbsInsetPos;
 
@@ -760,9 +760,9 @@ enum NipAnchor { start, end }
 
 class Nip {
   const Nip({
-    @required this.inset,
-    @required this.size,
-    @required this.radius,
+    required this.inset,
+    required this.size,
+    required this.radius,
     this.anchor = NipAnchor.start,
     this.offset = 0.0,
     this.cornerOffset = CornerOffset.byLength,
@@ -781,12 +781,12 @@ class Nip {
   final CornerOffset cornerOffset;
 
   Nip copyWith({
-    Inset inset,
-    double size,
-    double radius,
-    NipAnchor anchor,
-    double offset,
-    CornerOffset cornerOffset,
+    Inset? inset,
+    double? size,
+    double? radius,
+    NipAnchor? anchor,
+    double? offset,
+    CornerOffset? cornerOffset,
   }) {
     return Nip(
       inset: inset ?? this.inset,

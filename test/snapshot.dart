@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Formats [value] with at most nine decimals: platform math libraries may
 /// differ in the last bits, and a snapshot must not depend on them.
-String fmt(double value) {
+String fmt(double? value) {
   if (value == null) return 'null';
   if (value.isNaN || value.isInfinite) return '$value';
   if (value.abs() < 5e-10) return '0.0';
@@ -13,7 +13,7 @@ String fmt(double value) {
   return text == '-0.0' ? '0.0' : text;
 }
 
-String fmtOffset(Offset offset) =>
+String fmtOffset(Offset? offset) =>
     offset == null ? 'null' : '(${fmt(offset.dx)}, ${fmt(offset.dy)})';
 
 /// Draws [path] as text, one string per row: `#` where the pixel centre is

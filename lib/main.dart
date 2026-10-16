@@ -13,7 +13,7 @@ void main() => runApp(MyApp());
 
 final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
 //final primarySwatch = Colors.blue;
-MaterialColor cursorSwatch;
+late MaterialColor cursorSwatch;
 
 MaterialColor createSwatch(Color color) {
   return MaterialColor(color.value, {
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -658,7 +658,7 @@ class MyHomePage extends StatefulWidget {
 //}
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  TabController _tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
