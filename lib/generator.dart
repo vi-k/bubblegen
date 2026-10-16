@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'bubble.dart';
@@ -179,9 +181,11 @@ class _GeneratorState extends State<Generator>
 
   void toggleSettings() {
     _showSettings = !_showSettings;
-    (_showSettings
-        ? _settingsController.forward
-        : _settingsController.reverse)();
+    unawaited(
+      (_showSettings
+          ? _settingsController.forward
+          : _settingsController.reverse)(),
+    );
   }
 
   EdgeInsets getAddingPadding(double scale) =>
@@ -1000,15 +1004,10 @@ class _GeneratorState extends State<Generator>
                       units: '°',
                       step: 1,
                       onBeforeChanging: (value) {
-                        if (value < -180.0) {
-                          value = 180.0;
-                        } else if (value > 180.0) {
-                          value = -180.0;
-                        } else if (value > -90.0 && value <= 0.0) {
-                          value = -90.0;
-                        } else if (value > 0.0 && value < 90.0) {
-                          value = 90.0;
-                        }
+                        if (value < -180.0) return 180.0;
+                        if (value > 180.0) return -180.0;
+                        if (value > -90.0 && value <= 0.0) return -90.0;
+                        if (value > 0.0 && value < 90.0) return 90.0;
                         return value;
                       },
                       onChanged: (value) {
@@ -1144,15 +1143,10 @@ class _GeneratorState extends State<Generator>
                       units: '°',
                       step: 1,
                       onBeforeChanging: (value) {
-                        if (value < -180.0) {
-                          value = 180.0;
-                        } else if (value > 180.0) {
-                          value = -180.0;
-                        } else if (value > -90.0 && value <= 0.0) {
-                          value = -90.0;
-                        } else if (value > 0.0 && value < 90.0) {
-                          value = 90.0;
-                        }
+                        if (value < -180.0) return 180.0;
+                        if (value > 180.0) return -180.0;
+                        if (value > -90.0 && value <= 0.0) return -90.0;
+                        if (value > 0.0 && value < 90.0) return 90.0;
                         return value;
                       },
                       onChanged: (value) {
