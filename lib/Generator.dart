@@ -176,6 +176,12 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _settingsController.dispose();
+    super.dispose();
+  }
+
   void toggleSettings() {
     _showSettings = !_showSettings;
     (_showSettings ? _settingsController.forward : _settingsController.reverse)();

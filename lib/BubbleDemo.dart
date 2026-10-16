@@ -43,6 +43,12 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   Widget _getBubble({required int index, double? animationValue, required String suffix}) {
     var text = StringBuffer();
     for (var i = 0; i < index % (_words.length - 1) + 1; i++) {
