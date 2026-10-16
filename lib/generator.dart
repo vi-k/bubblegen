@@ -626,7 +626,7 @@ class _GeneratorState extends State<Generator>
                           inset: Inset(
                             Generator.settings.nip.inset.start,
                             Generator.settings.nip.inset.end.copyWith(
-                              pos: Generator.settings.nip.inset.start.pos
+                              pos: Generator.settings.nip.inset.end.pos
                                   .copyWith(ratio: value),
                             ),
                           ),
