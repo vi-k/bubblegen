@@ -67,6 +67,30 @@ void main() {
         );
       });
     }
+
+    test('an offset reaching the end of a corner arc stays on the corner', () {
+      final radii = {
+        InsetPosType.topLeft: _box.tlRadius,
+        InsetPosType.topRight: _box.trRadius,
+        InsetPosType.bottomRight: _box.brRadius,
+        InsetPosType.bottomLeft: _box.blRadius,
+      };
+      final lines = <String>[];
+      for (final MapEntry(key: type, value: radius) in radii.entries) {
+        for (final cornerOffset in CornerOffset.values) {
+          // byLength runs along the arc, the others along its projection.
+          final end = cornerOffset == CornerOffset.byLength
+              ? InsetPos.halfPi * radius
+              : radius;
+          final abs =
+              InsetPos(type, Position(offset: end), cornerOffset).apply(_box);
+          lines.add('${_name(type)} ${_name(cornerOffset)}'
+              ' -> ${_name(abs.type)} ${fmt(abs.pos)}'
+              ' ${fmtOffset(abs.apply(_box))}');
+        }
+      }
+      expectSnapshot(_snapshots, 'end of a corner arc', lines);
+    });
   });
 }
 
@@ -491,5 +515,19 @@ const _snapshots = <String, List<String>>{
     'byWidth 0.5 -3.0 -> bottom 97.0 (13.0, 80.0)',
     'byWidth 0.5 0.0 -> bottomLeft 0.785398163 (10.0, 80.0)',
     'byWidth 0.5 3.0 -> left 3.0 (10.0, 77.0)',
+  ],
+  'end of a corner arc': [
+    'topLeft byLength -> topLeft 1.570796327 (16.0, 20.0)',
+    'topLeft byHeight -> topLeft 1.570796327 (16.0, 20.0)',
+    'topLeft byWidth -> topLeft 1.570796327 (16.0, 20.0)',
+    'topRight byLength -> topRight 1.570796327 (110.0, 28.0)',
+    'topRight byHeight -> topRight 1.570796327 (110.0, 28.0)',
+    'topRight byWidth -> topRight 1.570796327 (110.0, 28.0)',
+    'bottomRight byLength -> bottomRight 1.570796327 (100.0, 80.0)',
+    'bottomRight byHeight -> bottomRight 1.570796327 (100.0, 80.0)',
+    'bottomRight byWidth -> bottomRight 1.570796327 (100.0, 80.0)',
+    'bottomLeft byLength -> bottomLeft 1.570796327 (10.0, 76.0)',
+    'bottomLeft byHeight -> bottomLeft 1.570796327 (10.0, 76.0)',
+    'bottomLeft byWidth -> bottomLeft 1.570796327 (10.0, 76.0)',
   ],
 };

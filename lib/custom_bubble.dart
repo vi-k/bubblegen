@@ -1110,7 +1110,7 @@ class InsetPos {
           if (x < 0.0) {
             type = prevType(type);
             pos = Position(ratio: 1, offset: x);
-          } else if (x >= radius) {
+          } else if (x > radius) {
             type = nextType(type);
             pos = Position(offset: x - radius);
           } else {
