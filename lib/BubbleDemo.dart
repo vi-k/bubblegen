@@ -182,13 +182,16 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
               child: AnimatedBuilder(
                 animation: animation,
                 builder: (context, child) {
-                  return RaisedButton.icon(
+                  return ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
                         _animate = !_animate;
                       });
                     },
-                    color: _animate ? Colors.orange : Colors.lightGreen,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _animate ? Colors.orange : Colors.lightGreen,
+                      foregroundColor: Colors.black87,
+                    ),
                     icon: _animate ? const Icon(Icons.stop) : const Icon(Icons.play_arrow),
                     label: Text('$_fps fps')
                   );
