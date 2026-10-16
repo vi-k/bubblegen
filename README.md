@@ -8,15 +8,16 @@ replace any stretch of the perimeter, corners included.
 The app has three tabs:
 
 - **Generator** — one bubble, scaled up, with a panel for every setting: style,
-  inset, nip, and the line settings of the earlier design. Draft mode shows the
-  construction: the bounds, the corner sectors, the ends of the inset.
+  inset, nip, and the line settings of the earlier design, which draw nothing
+  now. Draft mode shows the construction: the bounds, the corner sectors, the
+  ends of the inset.
 - **Bubble demo** — a chat feed drawn with the generator's settings, with an
   animation and a frame counter.
 - **CustomBubble demo** — a placeholder.
 
-This is a prototype from 2020, brought up to Flutter 3.27 without new features.
-The nip is a sharp triangle; the rounded tip and three of the four corner
-placements are unfinished. Known defects are listed in `docs/handoff.md`.
+This is a prototype from 2020, brought up to Flutter 3.27. The nip stands out
+of any side or corner, and its tip can be rounded. Open questions and known
+defects are listed in `docs/handoff.md`.
 
 ## Running
 
@@ -36,8 +37,8 @@ fvm flutter analyze
 fvm flutter test
 ```
 
-The tests are snapshots of the outline taken from the 2020 code: a change that
-is not meant to alter the shape must leave them green.
+The tests snapshot the outline, the nip and the canvas calls: a change that is
+not meant to alter the shape must leave them green.
 
 ## Layout
 
