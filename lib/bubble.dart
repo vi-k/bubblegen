@@ -214,10 +214,7 @@ class BubbleStyle extends CustomBubbleStyle {
     super.color,
     super.elevation,
     super.shadowColor,
-    // Never reaches super, so the stroke keeps its default color: finding F2
-    // in docs/handoff.md.
-    // ignore: avoid_unused_constructor_parameters
-    Color? strokeColor,
+    super.strokeColor,
     super.strokeWidth,
   });
 
