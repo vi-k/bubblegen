@@ -7,10 +7,9 @@ class Profiler extends SingleChildRenderObjectWidget {
   final double breath;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) =>
 //    print('createRenderObject');
-    return RenderProfiler(this);
-  }
+      RenderProfiler(this);
 
   @override
   void updateRenderObject(BuildContext context, RenderProfiler renderObject) {
@@ -73,8 +72,7 @@ class RenderProfiler extends RenderProxyBox {
       ),
       textAlign: TextAlign.left,
       textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
+    )..layout();
 
     final textSize = textPainter.size;
     final textOffset = Offset(
@@ -82,16 +80,16 @@ class RenderProfiler extends RenderProxyBox {
       offset.dy + margin + padding,
     );
 
-    final path = Path();
-    path.addRRect(
-      RRect.fromLTRBR(
-        textOffset.dx - padding - _profiler.breath,
-        textOffset.dy - padding - _profiler.breath,
-        textOffset.dx + textSize.width + padding + _profiler.breath,
-        textOffset.dy + textSize.height + padding + _profiler.breath,
-        const Radius.circular(radius),
-      ),
-    );
+    final path = Path()
+      ..addRRect(
+        RRect.fromLTRBR(
+          textOffset.dx - padding - _profiler.breath,
+          textOffset.dy - padding - _profiler.breath,
+          textOffset.dx + textSize.width + padding + _profiler.breath,
+          textOffset.dy + textSize.height + padding + _profiler.breath,
+          const Radius.circular(radius),
+        ),
+      );
 
     context.canvas.drawShadow(path, Colors.black, 4, true);
 

@@ -71,7 +71,7 @@ class Generator extends StatefulWidget {
   static final settings = GeneratorBubbleStyle();
 
   @override
-  _GeneratorState createState() => _GeneratorState();
+  State<Generator> createState() => _GeneratorState();
 }
 
 class _GeneratorState extends State<Generator>
@@ -184,13 +184,12 @@ class _GeneratorState extends State<Generator>
         : _settingsController.reverse)();
   }
 
-  EdgeInsets getAddingPadding(double scale) {
+  EdgeInsets getAddingPadding(double scale) =>
 //    var padding = Generator.settings.additionalPadding * scale;
 //    return Generator.settings.nipSide.isHorizontal
 //        ? Generator.settings.inverse ? EdgeInsets.only(bottom: padding) : EdgeInsets.only(top: padding)
 //        : Generator.settings.inverse ? EdgeInsets.only(right: padding) : EdgeInsets.only(left: padding);
-    return EdgeInsets.zero;
-  }
+      EdgeInsets.zero;
 
   Widget getSettings() => Material(
         elevation: 2,
@@ -1003,11 +1002,13 @@ class _GeneratorState extends State<Generator>
                       onBeforeChanging: (value) {
                         if (value < -180.0) {
                           value = 180.0;
-                        } else if (value > 180.0)
+                        } else if (value > 180.0) {
                           value = -180.0;
-                        else if (value > -90.0 && value <= 0.0)
+                        } else if (value > -90.0 && value <= 0.0) {
                           value = -90.0;
-                        else if (value > 0.0 && value < 90.0) value = 90.0;
+                        } else if (value > 0.0 && value < 90.0) {
+                          value = 90.0;
+                        }
                         return value;
                       },
                       onChanged: (value) {
@@ -1145,11 +1146,13 @@ class _GeneratorState extends State<Generator>
                       onBeforeChanging: (value) {
                         if (value < -180.0) {
                           value = 180.0;
-                        } else if (value > 180.0)
+                        } else if (value > 180.0) {
                           value = -180.0;
-                        else if (value > -90.0 && value <= 0.0)
+                        } else if (value > -90.0 && value <= 0.0) {
                           value = -90.0;
-                        else if (value > 0.0 && value < 90.0) value = 90.0;
+                        } else if (value > 0.0 && value < 90.0) {
+                          value = 90.0;
+                        }
                         return value;
                       },
                       onChanged: (value) {
@@ -1257,9 +1260,7 @@ class _GeneratorState extends State<Generator>
         Expanded(
           child: Stack(
             children: <Widget>[
-              SizedBox(
-                width: double.infinity,
-                height: double.infinity,
+              SizedBox.expand(
                 child: Stack(
                   fit: StackFit.expand,
                   children: <Widget>[

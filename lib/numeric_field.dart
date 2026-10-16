@@ -34,11 +34,11 @@ class NumericField extends StatefulWidget {
   final int fractionDigits;
   final TextAlign textAlign;
   final double Function(double)? onBeforeChanging;
-  final Function(double) onChanged;
+  final void Function(double) onChanged;
   final String Function(double)? onConvertToText;
 
   @override
-  _NumericFieldState createState() => _NumericFieldState();
+  State<NumericField> createState() => _NumericFieldState();
 }
 
 enum _ValueButton { no, left, right }
@@ -84,22 +84,22 @@ class _NumericFieldState extends State<NumericField> {
   }
 
   void step(int steps, {double? value}) {
-    value ??= _value;
+    var newValue = value ?? _value;
 
     // Если значение не выровнено по границе шага, то выравниваем в соответствующую сторону
     if (_errorText == null) {
-      final floorValue = floor(value, widget.fractionDigits);
-      if (value == floorValue) {
-        value += steps * widget.step;
+      final floorValue = floor(newValue, widget.fractionDigits);
+      if (newValue == floorValue) {
+        newValue += steps * widget.step;
       } else if (steps < 0) {
-        value = floorValue + (steps + 1) * widget.step;
+        newValue = floorValue + (steps + 1) * widget.step;
       } else if (steps > 0) {
-        value = floorValue + steps * widget.step;
+        newValue = floorValue + steps * widget.step;
       }
-      value = round(value, widget.fractionDigits);
+      newValue = round(newValue, widget.fractionDigits);
     }
 
-    setNewValue(value, true);
+    setNewValue(newValue, true);
 
     if (!_focusNode.hasFocus) _focusNode.requestFocus();
   }
@@ -129,9 +129,10 @@ class _NumericFieldState extends State<NumericField> {
     // Вносим изменения в TextField
     if (correctTextField) {
       final str = convertToText(correctedValue);
-      _controller.text = str;
-      _controller.selection =
-          TextSelection.fromPosition(TextPosition(offset: str.length));
+      _controller
+        ..text = str
+        ..selection =
+            TextSelection.fromPosition(TextPosition(offset: str.length));
       // Во время преобразования могло произойти округление, учитываем это
       _value = widget.onConvertToText == null
           ? convertToValue(str)!
@@ -180,7 +181,9 @@ class _NumericFieldState extends State<NumericField> {
               final offset = details.localPosition - _savedPos;
               var steps = -(offset.dy / _swipeStep).floor();
               if (button == _ValueButton.left && steps > 0 ||
-                  button == _ValueButton.right && steps < 0) steps = 0;
+                  button == _ValueButton.right && steps < 0) {
+                steps = 0;
+              }
               step(steps, value: _savedValue);
             },
       onVerticalDragCancel: !_focusNode.hasFocus

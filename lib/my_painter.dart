@@ -369,7 +369,7 @@
 //    bool ok = true;
 //    var result = LineSegment(null, null);
 //
-////    print(nipLine.type);
+// //    print(nipLine.type);
 //
 //    switch (nipLine.lineType) {
 //      case NipLineType.line:
@@ -413,7 +413,7 @@
 //      if (inverse) draft.addPoint(nipCircle.center);
 //
 //      // Линия
-//      var type = ok ? DraftType.Main : DraftType.Error;
+//      var type = ok ? DraftType.main : DraftType.error;
 //      draft.addLineSegment(result.end, result.start, type);
 //      draft.addPoint(result.start, type);
 //      draft.addPoint(result.end, type);
@@ -423,7 +423,7 @@
 //      path.lineTo(result.end.x, result.end.y);
 //      path.lineTo(result.start.x, result.start.y);
 //    } else {
-////      print('result: $result');
+// //      print('result: $result');
 //      path.moveTo(result.start.x, result.start.y);
 //      path.lineTo(result.end.x, result.end.y);
 //    }
@@ -452,11 +452,11 @@
 //    final r = boxRadius > maxRadius ? maxRadius : boxRadius;
 //
 //    paint.color = Colors.lightGreen;
-////    canvas.translate(size.width, 0);
-////    canvas.scale(-1, 1);
-////    canvas.translate(0, size.height);
-////    canvas.scale(1, -1);
-////    canvas.drawRRect(RRect.fromRectAndRadius(box, Radius.circular(r)), paint);
+// //    canvas.translate(size.width, 0);
+// //    canvas.scale(-1, 1);
+// //    canvas.translate(0, size.height);
+// //    canvas.scale(1, -1);
+// //    canvas.drawRRect(RRect.fromRectAndRadius(box, Radius.circular(r)), paint);
 //    canvas.drawRRect(
 //        RRect.fromLTRBAndCorners(pi.box.left, pi.box.top, pi.box.right, pi.box.bottom,
 //            topLeft: Radius.circular(r),

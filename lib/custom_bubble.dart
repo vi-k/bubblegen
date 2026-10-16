@@ -12,13 +12,11 @@ class CustomBubble extends SingleChildRenderObjectWidget {
     this.style = const CustomBubbleStyle(),
     Inset? inset,
     List<Inset>? insets,
-    this.child,
+    super.child,
   })  : assert(inset == null || insets == null),
         insets = InsetList(insets ?? (inset != null ? [inset] : []));
 
   final CustomBubbleStyle style;
-  @override
-  final Widget? child;
   final double scale;
   final bool drawDraft;
   final InsetList insets;
@@ -145,8 +143,7 @@ class RenderBubble extends RenderProxyBox {
     // print('paint $this');
     if (child == null) return;
 
-    final pi = BubblePaintInfo();
-    pi.scale = bubble.scale;
+    final pi = BubblePaintInfo()..scale = bubble.scale;
     var childOffset = offset;
 
 //    final nipPlaceholderSize = bubble.style.nipPlaceholderSize ?? bubble.style.nipSize;
@@ -155,18 +152,19 @@ class RenderBubble extends RenderProxyBox {
 //    print('size: $size');
 //    print('original size: ${size / pi.scale}');
 
-    pi.rect = Rect.fromLTWH(
-      0,
-      0,
-      size.width / bubble.scale,
-      size.height / bubble.scale,
-    );
-    pi.box = Rect.fromLTRB(
-      bubble.style.margin.left,
-      bubble.style.margin.top,
-      pi.rect.right - bubble.style.margin.right,
-      pi.rect.bottom - bubble.style.margin.bottom,
-    );
+    pi
+      ..rect = Rect.fromLTWH(
+        0,
+        0,
+        size.width / bubble.scale,
+        size.height / bubble.scale,
+      )
+      ..box = Rect.fromLTRB(
+        bubble.style.margin.left,
+        bubble.style.margin.top,
+        pi.rect.right - bubble.style.margin.right,
+        pi.rect.bottom - bubble.style.margin.bottom,
+      );
     childOffset = offset.translate(
       bubble.style.margin.left * bubble.scale,
       bubble.style.margin.top * bubble.scale,
@@ -235,10 +233,10 @@ class RenderBubble extends RenderProxyBox {
         Circle(Point(pi.box.right - radius, pi.box.top + radius), radius);
 
     radius = bubble.style.radius.bottomRight * k;
-    pi.rbCircle =
-        Circle(Point(pi.box.right - radius, pi.box.bottom - radius), radius);
-
-    pi.draft = bubble.drawDraft ? DraftInfo() : null;
+    pi
+      ..rbCircle =
+          Circle(Point(pi.box.right - radius, pi.box.bottom - radius), radius)
+      ..draft = bubble.drawDraft ? DraftInfo() : null;
 
     final path = Path();
 
@@ -289,9 +287,9 @@ class RenderBubble extends RenderProxyBox {
 
     context.canvas.scale(bubble.scale);
 
-    final paint = Paint();
-    paint.color = bubble.style.color;
-    paint.style = PaintingStyle.fill;
+    final paint = Paint()
+      ..color = bubble.style.color
+      ..style = PaintingStyle.fill;
     if (pi.draft != null) pi.draft!.paintBackground(context.canvas, pi);
     context.canvas.drawShadow(
       path,
@@ -303,11 +301,12 @@ class RenderBubble extends RenderProxyBox {
 
     // Обводка
     if (bubble.style.strokeWidth != 0.0) {
-      paint.style = PaintingStyle.stroke;
-      paint.color = bubble.style.strokeColor;
-      paint.strokeWidth = bubble.style.strokeWidth;
-//      paint.strokeCap = StrokeCap.round;
-      paint.strokeJoin = StrokeJoin.round;
+      paint
+        ..style = PaintingStyle.stroke
+        ..color = bubble.style.strokeColor
+        ..strokeWidth = bubble.style.strokeWidth
+//        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
       context.canvas.drawPath(path, paint);
     }
 
@@ -346,8 +345,9 @@ class RenderBubble extends RenderProxyBox {
         // Врезка
         final nextPoint = absInset.end.apply(box);
         if (draftInfo != null) {
-          draftInfo.addPoint(lastPoint);
-          draftInfo.addPoint(nextPoint, DraftType.Main);
+          draftInfo
+            ..addPoint(lastPoint)
+            ..addPoint(nextPoint, DraftType.main);
         }
         bubble.createInset(
           index,
@@ -420,9 +420,15 @@ class BubbleRadius {
         assert(topRight != null || all != null),
         assert(bottomRight != null || all != null),
         assert(bottomLeft != null || all != null),
+        // The asserts above make the casts safe; `!` is not allowed in a const
+        // constructor's initializer.
+        // ignore: cast_nullable_to_non_nullable
         topLeft = (topLeft ?? all) as double,
+        // ignore: cast_nullable_to_non_nullable
         topRight = (topRight ?? all) as double,
+        // ignore: cast_nullable_to_non_nullable
         bottomRight = (bottomRight ?? all) as double,
+        // ignore: cast_nullable_to_non_nullable
         bottomLeft = (bottomLeft ?? all) as double;
 
   final double topLeft;
@@ -452,7 +458,7 @@ class BubbleRadius {
       : 'BubbleRadius(topLeft: $topLeft, topRight: $topRight, bottomLeft: $bottomLeft, bottomRight: $bottomRight)';
 }
 
-enum DraftType { Draft, Main, Error }
+enum DraftType { draft, main, error }
 
 class DraftLine {
   DraftLine(this.line, this.type);
@@ -498,21 +504,21 @@ class DraftInfo {
   void addLine(
     Point start,
     double direct, [
-    DraftType type = DraftType.Draft,
+    DraftType type = DraftType.draft,
   ]) =>
       lines.add(DraftLine(Line(start, direct), type));
-  void addLineCopy(Line line, [DraftType type = DraftType.Draft]) =>
+  void addLineCopy(Line line, [DraftType type = DraftType.draft]) =>
       lines.add(DraftLine(Line(line.start, line.direct), type));
 
   void addLineSegment(
     Point start,
     Point end, [
-    DraftType type = DraftType.Draft,
+    DraftType type = DraftType.draft,
   ]) =>
       lineSegments.add(DraftLineSegment(LineSegment(start, end), type));
   void addLineSegmentCopy(
     LineSegment lineSegment, [
-    DraftType type = DraftType.Draft,
+    DraftType type = DraftType.draft,
   ]) =>
       lineSegments.add(
         DraftLineSegment(
@@ -521,39 +527,34 @@ class DraftInfo {
         ),
       );
 
-  void addPoint(Point point, [DraftType type = DraftType.Draft]) =>
+  void addPoint(Point point, [DraftType type = DraftType.draft]) =>
       points.add(DraftPoint(point, type));
 
   void paintBackground(Canvas canvas, BubblePaintInfo pi) {
     final dp = 1.0 / pi.scale;
     final limitSize = 10.0 * dp;
 
-    final paint = Paint();
-    paint.strokeWidth = 1 * dp;
-    paint.color = draftColor;
-    paint.style = PaintingStyle.stroke;
+    final paint = Paint()
+      ..strokeWidth = 1 * dp
+      ..color = draftColor
+      ..style = PaintingStyle.stroke;
 
-    final path = Path();
-
-    // Левая граница
-    path.moveTo(pi.rect.left, pi.rect.top - limitSize);
-    path.lineTo(pi.rect.left, pi.rect.bottom + limitSize);
-
-    // Правая граница
-    path.moveTo(pi.rect.right, pi.rect.top - limitSize);
-    path.lineTo(pi.rect.right, pi.rect.bottom + limitSize);
-
-    // Верхняя граница
-    path.moveTo(pi.rect.left - limitSize, pi.rect.top);
-    path.lineTo(pi.rect.right + limitSize, pi.rect.top);
-
-    // Нижняя граница
-    path.moveTo(pi.rect.left - limitSize, pi.rect.bottom);
-    path.lineTo(pi.rect.right + limitSize, pi.rect.bottom);
-
-    // Границы бокса
-    path.moveTo(pi.box.left, pi.box.top - limitSize);
-    path.lineTo(pi.box.left, pi.box.bottom + limitSize);
+    final path = Path()
+      // Левая граница
+      ..moveTo(pi.rect.left, pi.rect.top - limitSize)
+      ..lineTo(pi.rect.left, pi.rect.bottom + limitSize)
+      // Правая граница
+      ..moveTo(pi.rect.right, pi.rect.top - limitSize)
+      ..lineTo(pi.rect.right, pi.rect.bottom + limitSize)
+      // Верхняя граница
+      ..moveTo(pi.rect.left - limitSize, pi.rect.top)
+      ..lineTo(pi.rect.right + limitSize, pi.rect.top)
+      // Нижняя граница
+      ..moveTo(pi.rect.left - limitSize, pi.rect.bottom)
+      ..lineTo(pi.rect.right + limitSize, pi.rect.bottom)
+      // Границы бокса
+      ..moveTo(pi.box.left, pi.box.top - limitSize)
+      ..lineTo(pi.box.left, pi.box.bottom + limitSize);
 
     canvas.drawPath(path, paint);
   }
@@ -576,36 +577,39 @@ class DraftInfo {
 
     // Верхняя сторона
     if (showTopSide) {
-      path.reset();
-      path.moveTo(pi.ltCircle.center.x, pi.box.top);
-      path.lineTo(pi.rtCircle.center.x, pi.box.top);
-      path.lineTo(pi.rtCircle.center.x, pi.box.top + sideSize);
-      path.lineTo(pi.ltCircle.center.x, pi.box.top + sideSize);
-      path.close();
+      path
+        ..reset()
+        ..moveTo(pi.ltCircle.center.x, pi.box.top)
+        ..lineTo(pi.rtCircle.center.x, pi.box.top)
+        ..lineTo(pi.rtCircle.center.x, pi.box.top + sideSize)
+        ..lineTo(pi.ltCircle.center.x, pi.box.top + sideSize)
+        ..close();
 
       canvas.drawPath(path, paint);
     }
 
     // Левая сторона
     if (showLeftSide) {
-      path.reset();
-      path.moveTo(pi.box.left, pi.ltCircle.center.y);
-      path.lineTo(pi.box.left + sideSize, pi.ltCircle.center.y);
-      path.lineTo(pi.box.left + sideSize, pi.lbCircle.center.y);
-      path.lineTo(pi.box.left, pi.lbCircle.center.y);
-      path.close();
+      path
+        ..reset()
+        ..moveTo(pi.box.left, pi.ltCircle.center.y)
+        ..lineTo(pi.box.left + sideSize, pi.ltCircle.center.y)
+        ..lineTo(pi.box.left + sideSize, pi.lbCircle.center.y)
+        ..lineTo(pi.box.left, pi.lbCircle.center.y)
+        ..close();
 
       canvas.drawPath(path, paint);
     }
 
     // Нижняя сторона
     if (showBottomSide) {
-      path.reset();
-      path.moveTo(pi.lbCircle.center.x, pi.box.bottom);
-      path.lineTo(pi.rbCircle.center.x, pi.box.bottom);
-      path.lineTo(pi.rbCircle.center.x, pi.box.bottom - sideSize);
-      path.lineTo(pi.lbCircle.center.x, pi.box.bottom - sideSize);
-      path.close();
+      path
+        ..reset()
+        ..moveTo(pi.lbCircle.center.x, pi.box.bottom)
+        ..lineTo(pi.rbCircle.center.x, pi.box.bottom)
+        ..lineTo(pi.rbCircle.center.x, pi.box.bottom - sideSize)
+        ..lineTo(pi.lbCircle.center.x, pi.box.bottom - sideSize)
+        ..close();
 
       canvas.drawPath(path, paint);
     }
@@ -625,16 +629,17 @@ class DraftInfo {
         paint,
       );
     } else {
-      path.reset();
-      path.moveTo(
-        pi.ltCircle.center.dx,
-        pi.ltCircle.center.dy - pi.ltCircle.radius,
-      );
-      path.lineTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy);
-      path.lineTo(
-        pi.ltCircle.center.dx - pi.ltCircle.radius,
-        pi.ltCircle.center.dy,
-      );
+      path
+        ..reset()
+        ..moveTo(
+          pi.ltCircle.center.dx,
+          pi.ltCircle.center.dy - pi.ltCircle.radius,
+        )
+        ..lineTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy)
+        ..lineTo(
+          pi.ltCircle.center.dx - pi.ltCircle.radius,
+          pi.ltCircle.center.dy,
+        );
       paint.style = PaintingStyle.stroke;
       canvas.drawPath(path, paint);
     }
@@ -654,56 +659,59 @@ class DraftInfo {
         paint,
       );
     } else {
-      path.reset();
-      path.moveTo(
-        pi.lbCircle.center.dx,
-        pi.lbCircle.center.dy + pi.lbCircle.radius,
-      );
-      path.lineTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy);
-      path.lineTo(
-        pi.lbCircle.center.dx - pi.lbCircle.radius,
-        pi.lbCircle.center.dy,
-      );
+      path
+        ..reset()
+        ..moveTo(
+          pi.lbCircle.center.dx,
+          pi.lbCircle.center.dy + pi.lbCircle.radius,
+        )
+        ..lineTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy)
+        ..lineTo(
+          pi.lbCircle.center.dx - pi.lbCircle.radius,
+          pi.lbCircle.center.dy,
+        );
       paint.style = PaintingStyle.stroke;
       canvas.drawPath(path, paint);
     }
 
     // Правый верхний угол
-    path.reset();
-    path.moveTo(
-      pi.rtCircle.center.dx,
-      pi.rtCircle.center.dy - pi.rtCircle.radius,
-    );
-    path.lineTo(pi.rtCircle.center.dx, pi.rtCircle.center.dy);
-    path.lineTo(
-      pi.rtCircle.center.dx + pi.rtCircle.radius,
-      pi.rtCircle.center.dy,
-    );
+    path
+      ..reset()
+      ..moveTo(
+        pi.rtCircle.center.dx,
+        pi.rtCircle.center.dy - pi.rtCircle.radius,
+      )
+      ..lineTo(pi.rtCircle.center.dx, pi.rtCircle.center.dy)
+      ..lineTo(
+        pi.rtCircle.center.dx + pi.rtCircle.radius,
+        pi.rtCircle.center.dy,
+      );
     paint.style = PaintingStyle.stroke;
     canvas.drawPath(path, paint);
 
     // Правый нижний угол
-    path.reset();
-    path.moveTo(
-      pi.rbCircle.center.dx,
-      pi.rbCircle.center.dy + pi.rbCircle.radius,
-    );
-    path.lineTo(pi.rbCircle.center.dx, pi.rbCircle.center.dy);
-    path.lineTo(
-      pi.rbCircle.center.dx + pi.rbCircle.radius,
-      pi.rbCircle.center.dy,
-    );
+    path
+      ..reset()
+      ..moveTo(
+        pi.rbCircle.center.dx,
+        pi.rbCircle.center.dy + pi.rbCircle.radius,
+      )
+      ..lineTo(pi.rbCircle.center.dx, pi.rbCircle.center.dy)
+      ..lineTo(
+        pi.rbCircle.center.dx + pi.rbCircle.radius,
+        pi.rbCircle.center.dy,
+      );
     paint.style = PaintingStyle.stroke;
     canvas.drawPath(path, paint);
 
     for (final type in DraftType.values) {
-      paint.color = type == DraftType.Error
-          ? errorColor
-          : type == DraftType.Main
-              ? mainColor
-              : draftColor;
-
-      paint.style = PaintingStyle.stroke;
+      paint
+        ..color = type == DraftType.error
+            ? errorColor
+            : type == DraftType.main
+                ? mainColor
+                : draftColor
+        ..style = PaintingStyle.stroke;
 
       // Линии
       for (final item in lines) {
@@ -829,6 +837,7 @@ class CustomBubbleStyle {
       'CustomBubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
 }
 
+@immutable
 class Position {
   const Position({this.ratio = 0.0, this.offset = 0.0})
       : assert(ratio >= 0.0 && ratio <= 1.0);
@@ -1024,7 +1033,10 @@ class InsetPos {
             size = box.rightHeight;
           case InsetPosType.bottom:
             size = box.bottomWidth;
-          default:
+          case InsetPosType.topLeft:
+          case InsetPosType.topRight:
+          case InsetPosType.bottomRight:
+          case InsetPosType.bottomLeft:
         }
 
         final offset = pos.apply(size);
@@ -1048,7 +1060,10 @@ class InsetPos {
             radius = box.brRadius;
           case InsetPosType.bottomLeft:
             radius = box.blRadius;
-          default:
+          case InsetPosType.left:
+          case InsetPosType.top:
+          case InsetPosType.right:
+          case InsetPosType.bottom:
         }
 
         if (pos.offset == 0.0) {
@@ -1165,6 +1180,7 @@ class AbsInset {
 }
 
 /// Позиция врезка в абсолютных величинах
+@immutable
 class AbsInsetPos {
   const AbsInsetPos(this.type, this.pos);
 
@@ -1260,7 +1276,10 @@ class AbsInsetPos {
       case InsetPosType.bottomLeft:
         radius = box.blRadius;
 
-      default:
+      case InsetPosType.left:
+      case InsetPosType.top:
+      case InsetPosType.right:
+      case InsetPosType.bottom:
     }
 
     return radius;

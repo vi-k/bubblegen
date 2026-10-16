@@ -46,6 +46,8 @@ void expectSnapshot(
       buffer.writeln("@@    '$line',");
     }
     buffer.write('@@  ],');
+    // The entry is meant to be copied from the test output.
+    // ignore: avoid_print
     print(buffer);
     fail('No snapshot "$name"; the actual value is printed above.');
   }

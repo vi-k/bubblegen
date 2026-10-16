@@ -137,10 +137,10 @@ class NipLine {
 
   const NipLine.curve(
     double lineAngle, {
-    angle1,
-    angle2,
-    size1 = 2 / 3,
-    size2 = 2 / 3,
+    double? angle1,
+    double? angle2,
+    double size1 = 2 / 3,
+    double size2 = 2 / 3,
   }) : this(
           NipLineType.curve,
           NipLinePosType.angle,
@@ -153,10 +153,10 @@ class NipLine {
 
   const NipLine.curveTo(
     double pos, {
-    angle1,
-    angle2,
-    size1 = 2 / 3,
-    size2 = 2 / 3,
+    double? angle1,
+    double? angle2,
+    double size1 = 2 / 3,
+    double size2 = 2 / 3,
   }) : this(
           NipLineType.curve,
           NipLinePosType.pos,
@@ -169,10 +169,10 @@ class NipLine {
 
   const NipLine.relativeCurveTo(
     double pos, {
-    angle1,
-    angle2,
-    size1 = 2 / 3,
-    size2 = 2 / 3,
+    double? angle1,
+    double? angle2,
+    double size1 = 2 / 3,
+    double size2 = 2 / 3,
   }) : this(
           NipLineType.curve,
           NipLinePosType.offset,
@@ -185,10 +185,10 @@ class NipLine {
 
   const NipLine.curveToCorner(
     double cornerAngle, {
-    angle1,
-    angle2,
-    size1 = 2 / 3,
-    size2 = 2 / 3,
+    double? angle1,
+    double? angle2,
+    double size1 = 2 / 3,
+    double size2 = 2 / 3,
   }) : this(
           NipLineType.curve,
           NipLinePosType.corners,
@@ -214,6 +214,9 @@ class BubbleStyle extends CustomBubbleStyle {
     super.color,
     super.elevation,
     super.shadowColor,
+    // Never reaches super, so the stroke keeps its default color: finding F2
+    // in docs/handoff.md.
+    // ignore: avoid_unused_constructor_parameters
     Color? strokeColor,
     super.strokeWidth,
   });
@@ -259,10 +262,9 @@ class BubbleStyle extends CustomBubbleStyle {
       );
 
   @override
-  String toString() {
-//    return 'BubbleStyle(margin: $margin, radius: $radius, nipSide: $nipSide, hFlip: $hFlip, vFlip: $vFlip, nipRadius: $nipRadius, nipSize: $nipSize, nipPlaceholderSize: $nipPlaceholderSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
-    return 'BubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
-  }
+  String toString() =>
+//      'BubbleStyle(margin: $margin, radius: $radius, nipSide: $nipSide, hFlip: $hFlip, vFlip: $vFlip, nipRadius: $nipRadius, nipSize: $nipSize, nipPlaceholderSize: $nipPlaceholderSize, nipOffset: $nipOffset, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
+      'BubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
 }
 
 class Bubble extends CustomBubble {
@@ -284,14 +286,13 @@ class Bubble extends CustomBubble {
   final NipLine bottomLine;
 
   @override
-  bool needsLayout(CustomBubble other) {
+  bool needsLayout(CustomBubble other) =>
 //    final style = other.style as BubbleStyle;
-    return super.needsLayout(other);
+      super.needsLayout(other);
 //        || style.nipSide != style.nipSide
 //        || style.nipPlaceholderSize != style.nipPlaceholderSize
 //        || style.nipPlaceholderSize == null
 //            && style.nipSize != style.nipSize;
-  }
 
   @override
   void createInset(
@@ -358,7 +359,11 @@ class Bubble extends CustomBubble {
           nipPoint = anchorPoint;
         case InsetPosType.bottomLeft:
           nipPoint = anchorPoint;
-        default:
+        // Sides are handled above.
+        case InsetPosType.left:
+        case InsetPosType.top:
+        case InsetPosType.right:
+        case InsetPosType.bottom:
       }
     }
 
@@ -415,7 +420,7 @@ class Bubble extends CustomBubble {
 //      if (inverse) pi.draft.addPoint(pi.nipCircle.center);
 //
 //      // Линия
-//      final type = ok ? DraftType.Main : DraftType.Error;
+//      final type = ok ? DraftType.main : DraftType.error;
 //      pi.draft.addLineSegment(result.end, result.start, type);
 //      pi.draft.addPoint(result.start, type);
 //      pi.draft.addPoint(result.end, type);

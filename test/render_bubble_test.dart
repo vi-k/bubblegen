@@ -96,14 +96,15 @@ List<String> _paint(RenderBubble render) {
   final lines = List<String>.from(canvas.calls);
   final scale = render.bubble.scale;
   for (var i = 0; i < canvas.paths.length; i++) {
-    lines.add('path$i:');
-    lines.addAll(
-      rasterize(
-        canvas.paths[i],
-        (render.size.width / scale).ceil(),
-        (render.size.height / scale).ceil(),
-      ),
-    );
+    lines
+      ..add('path$i:')
+      ..addAll(
+        rasterize(
+          canvas.paths[i],
+          (render.size.width / scale).ceil(),
+          (render.size.height / scale).ceil(),
+        ),
+      );
   }
   return lines;
 }

@@ -7,7 +7,7 @@ class BubbleDemo extends StatefulWidget {
   const BubbleDemo({super.key});
 
   @override
-  _BubbleDemoState createState() => _BubbleDemoState();
+  State<BubbleDemo> createState() => _BubbleDemoState();
 }
 
 class _BubbleDemoState extends State<BubbleDemo>
@@ -48,16 +48,17 @@ class _BubbleDemoState extends State<BubbleDemo>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     );
-    _animationController.repeat();
-    _animationController.addListener(() {
-      final timestamp = DateTime.now().microsecondsSinceEpoch;
-      final startTimestamp = timestamp - 2000000; // 1 сек
-      _frames.removeWhere((time) => time < startTimestamp);
-      final count = _frames.length;
-      final duration = _frames.isNotEmpty ? timestamp - _frames[0] : 0;
-      _frames.add(timestamp);
-      _fps = duration == 0 ? 0 : count * 1000000.0 ~/ duration;
-    });
+    _animationController
+      ..repeat()
+      ..addListener(() {
+        final timestamp = DateTime.now().microsecondsSinceEpoch;
+        final startTimestamp = timestamp - 2000000; // 1 сек
+        _frames.removeWhere((time) => time < startTimestamp);
+        final count = _frames.length;
+        final duration = _frames.isNotEmpty ? timestamp - _frames[0] : 0;
+        _frames.add(timestamp);
+        _fps = duration == 0 ? 0 : count * 1000000.0 ~/ duration;
+      });
     super.initState();
   }
 
@@ -84,7 +85,7 @@ class _BubbleDemoState extends State<BubbleDemo>
 //        nipSize: Generator.settings.style.nipSize - (animationValue != null ? animationValue * Generator.settings.style.nipSize : 0),
 //        strokeWidth: animationValue != null ? animationValue * 2.0 : Generator.settings.style.strokeWidth,
 //        elevation: Generator.settings.style.elevation + (animationValue != null ? animationValue * 4.0 : 0.0),
-        color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
+        color: index.isEven ? Colors.white : Colors.lightGreen[100],
       ),
       nip: Generator.settings.nip.copyWith(
         size: Generator.settings.nip.size -
@@ -185,37 +186,36 @@ class _BubbleDemoState extends State<BubbleDemo>
         children: <Widget>[
           ListView.builder(
             shrinkWrap: true,
-            itemBuilder: (context, index) {
+            itemBuilder: (context, index) =>
 //              print('itemBuilder: #$index');
-              return Padding(
-                padding: EdgeInsets.only(
-                  top: 6.0 +
-                      (Generator.settings.hFlip
-                          ? 0.0
-                          : Generator.settings.additionalPadding),
-                  bottom: 6.0 +
-                      (Generator.settings.hFlip
-                          ? Generator.settings.additionalPadding
-                          : 0.0),
-                  left: index % 2 == 0 ? 8.0 : 64.0,
-                  right: index % 2 == 0 ? 64.0 : 8.0,
-                ),
-                child: Align(
-                  alignment:
-                      index % 2 == 0 ? Alignment.topLeft : Alignment.topRight,
-                  child: _animate
-                      ? AnimatedBuilder(
-                          animation: animation,
-                          builder: (context, child) => _getBubble(
-                            index: index,
-                            animationValue: animation.value,
-                            suffix: suffix,
-                          ),
-                        )
-                      : _getBubble(index: index, suffix: suffix),
-                ),
-              );
-            },
+                Padding(
+              padding: EdgeInsets.only(
+                top: 6.0 +
+                    (Generator.settings.hFlip
+                        ? 0.0
+                        : Generator.settings.additionalPadding),
+                bottom: 6.0 +
+                    (Generator.settings.hFlip
+                        ? Generator.settings.additionalPadding
+                        : 0.0),
+                left: index.isEven ? 8.0 : 64.0,
+                right: index.isEven ? 64.0 : 8.0,
+              ),
+              child: Align(
+                alignment:
+                    index.isEven ? Alignment.topLeft : Alignment.topRight,
+                child: _animate
+                    ? AnimatedBuilder(
+                        animation: animation,
+                        builder: (context, child) => _getBubble(
+                          index: index,
+                          animationValue: animation.value,
+                          suffix: suffix,
+                        ),
+                      )
+                    : _getBubble(index: index, suffix: suffix),
+              ),
+            ),
           ),
 //          Profiler(),
           Align(

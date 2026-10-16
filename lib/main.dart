@@ -6,62 +6,59 @@ import 'package:flutter/material.dart';
 
 import 'generator.dart';
 
-GeneratorBubbleStyle gBubbleStyle = GeneratorBubbleStyle();
-
 void main() => runApp(const MyApp());
 
 final primarySwatch = createSwatch(const Color.fromARGB(255, 132, 151, 176));
 //final primarySwatch = Colors.blue;
 late MaterialColor cursorSwatch;
 
-MaterialColor createSwatch(Color color) {
-  // toARGB32() replaces value from Flutter 3.29; the floor is 3.27.
-  // ignore: deprecated_member_use
-  return MaterialColor(color.value, {
-    // Почти совпадают с Colors.blue
-    50: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.12)),
-      Colors.white,
-    ),
-    100: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.30)),
-      Colors.white,
-    ),
-    200: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.50)),
-      Colors.white,
-    ),
-    300: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.70)),
-      Colors.white,
-    ),
-    400: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.85)),
-      Colors.white,
-    ),
-    500: color,
-    // Дальше синяя составляющая расходится с Colors.blue, равняюсь по зелёному
-    // Тогда они расходятся по цвету, но совпадают по яркости
-    600: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.91)),
-      Colors.black,
-    ),
-    700: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.79)),
-      Colors.black,
-    ),
-    800: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.68)),
-      Colors.black,
-    ),
-    900: Color.alphaBlend(
-      color.withAlpha(Color.getAlphaFromOpacity(0.48)),
-      Colors.black,
-    ),
-  });
-}
+MaterialColor createSwatch(Color color) =>
+    // toARGB32() replaces value from Flutter 3.29; the floor is 3.27.
+    // ignore: deprecated_member_use
+    MaterialColor(color.value, {
+      // Почти совпадают с Colors.blue
+      50: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.12)),
+        Colors.white,
+      ),
+      100: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.30)),
+        Colors.white,
+      ),
+      200: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.50)),
+        Colors.white,
+      ),
+      300: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.70)),
+        Colors.white,
+      ),
+      400: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.85)),
+        Colors.white,
+      ),
+      500: color,
+      // Дальше синяя составляющая расходится с Colors.blue, равняюсь по зелёному
+      // Тогда они расходятся по цвету, но совпадают по яркости
+      600: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.91)),
+        Colors.black,
+      ),
+      700: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.79)),
+        Colors.black,
+      ),
+      800: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.68)),
+        Colors.black,
+      ),
+      900: Color.alphaBlend(
+        color.withAlpha(Color.getAlphaFromOpacity(0.48)),
+        Colors.black,
+      ),
+    });
 
-// TODO: пунктирные линии в Draft'е не выводятся наверху
+// TODO(vi-k): пунктирные линии в Draft'е не выводятся наверху
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -98,7 +95,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 //class NipLineSelect extends StatefulWidget {
@@ -252,23 +249,23 @@ class MyHomePage extends StatefulWidget {
 //          widget.caption,
 //          style: TextStyle(fontWeight: FontWeight.bold),
 //        ),
-////        ToggleButtons(
-////          isSelected: List.generate(3, (_) => false)..[_lineTypeIndex] = true,
-////          children: <Widget>[
-////            Text('line'),
-////            Text('arc'),
-////            Text('curve'),
-////          ],
-////          borderRadius: BorderRadius.circular(100),
-////          borderWidth: 5,
-////          borderColor: Colors.orange,
-////          selectedBorderColor: Colors.deepOrange,
-////          fillColor: Colors.orange.shade200,
-////          onPressed: (index) {
-////            _lineTypeIndex = index;
-////            doChange();
-////          },
-////        ),
+// //        ToggleButtons(
+// //          isSelected: List.generate(3, (_) => false)..[_lineTypeIndex] = true,
+// //          children: <Widget>[
+// //            Text('line'),
+// //            Text('arc'),
+// //            Text('curve'),
+// //          ],
+// //          borderRadius: BorderRadius.circular(100),
+// //          borderWidth: 5,
+// //          borderColor: Colors.orange,
+// //          selectedBorderColor: Colors.deepOrange,
+// //          fillColor: Colors.orange.shade200,
+// //          onPressed: (index) {
+// //            _lineTypeIndex = index;
+// //            doChange();
+// //          },
+// //        ),
 //        Column(
 //          children: <Widget>[
 //            Table(
@@ -713,15 +710,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           title: Text(widget.title),
           elevation: 4,
           actions: [
-            PopupMenuButton(
+            PopupMenuButton<void>(
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                const PopupMenuItem<void>(
                   child: Text('1'),
                 ),
-                const PopupMenuItem(
+                const PopupMenuItem<void>(
                   child: Text('2'),
                 ),
-                const PopupMenuItem(
+                const PopupMenuItem<void>(
                   child: Text('3'),
                 ),
               ],
