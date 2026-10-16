@@ -554,7 +554,13 @@ class DraftInfo {
       ..lineTo(pi.rect.right + limitSize, pi.rect.bottom)
       // Границы бокса
       ..moveTo(pi.box.left, pi.box.top - limitSize)
-      ..lineTo(pi.box.left, pi.box.bottom + limitSize);
+      ..lineTo(pi.box.left, pi.box.bottom + limitSize)
+      ..moveTo(pi.box.right, pi.box.top - limitSize)
+      ..lineTo(pi.box.right, pi.box.bottom + limitSize)
+      ..moveTo(pi.box.left - limitSize, pi.box.top)
+      ..lineTo(pi.box.right + limitSize, pi.box.top)
+      ..moveTo(pi.box.left - limitSize, pi.box.bottom)
+      ..lineTo(pi.box.right + limitSize, pi.box.bottom);
 
     canvas.drawPath(path, paint);
   }

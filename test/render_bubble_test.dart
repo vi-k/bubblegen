@@ -1,3 +1,5 @@
+import 'dart:ui' show PathMetric;
+
 import 'package:bubblegen/custom_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -232,6 +234,35 @@ void main() {
       );
       expectSnapshot(_snapshots, 'draft', _paintNames(render));
     });
+
+    testWidgets('draft background', (tester) async {
+      final render = await _pump(
+        tester,
+        CustomBubble(
+          drawDraft: true,
+          style: const CustomBubbleStyle(
+            margin: EdgeInsets.fromLTRB(2, 3, 4, 5),
+          ),
+          child: _child,
+        ),
+      );
+      final canvas = _RecordingCanvas();
+      render.paint(_RecordingContext(canvas), Offset.zero);
+      expect(canvas.calls.first, startsWith('save('));
+      final background = canvas.calls.firstWhere(
+        (call) => call.startsWith('drawPath('),
+      );
+      expect(background, startsWith('drawPath(path0,'));
+      String line(PathMetric metric) {
+        final start = metric.getTangentForOffset(0)!.position;
+        final end = metric.getTangentForOffset(metric.length)!.position;
+        return '${fmtOffset(start)} -> ${fmtOffset(end)}';
+      }
+
+      expectSnapshot(_snapshots, 'draft background', [
+        for (final metric in canvas.paths[0].computeMetrics()) line(metric),
+      ]);
+    });
   });
 }
 
@@ -321,5 +352,15 @@ const _snapshots = <String, List<String>>{
     'scale',
     'paintChild',
     'restore',
+  ],
+  'draft background': [
+    '(0.0, -10.0) -> (0.0, 28.0)',
+    '(26.0, -10.0) -> (26.0, 28.0)',
+    '(-10.0, 0.0) -> (36.0, 0.0)',
+    '(-10.0, 18.0) -> (36.0, 18.0)',
+    '(2.0, -7.0) -> (2.0, 23.0)',
+    '(22.0, -7.0) -> (22.0, 23.0)',
+    '(-8.0, 3.0) -> (32.0, 3.0)',
+    '(-8.0, 13.0) -> (32.0, 13.0)',
   ],
 };
