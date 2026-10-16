@@ -1,8 +1,6 @@
-import 'dart:ui';
 
 import 'package:bubblegen/custom_bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'snapshot.dart';
@@ -43,7 +41,7 @@ class _RecordingCanvas implements Canvas {
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    final name = RegExp(r'"(.*)"')
+    final name = RegExp('"(.*)"')
         .firstMatch(invocation.memberName.toString())!
         .group(1);
     calls.add('$name(${invocation.positionalArguments.map(_arg).join(', ')})');
@@ -68,7 +66,7 @@ class _RecordingContext implements PaintingContext {
 }
 
 Future<RenderBubble> _pump(WidgetTester tester, Widget bubble,
-    {Size? tight}) async {
+    {Size? tight,}) async {
   await tester.pumpWidget(Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -76,7 +74,7 @@ Future<RenderBubble> _pump(WidgetTester tester, Widget bubble,
           ? bubble
           : SizedBox(width: tight.width, height: tight.height, child: bubble),
     ),
-  ));
+  ),);
   return tester.renderObject<RenderBubble>(find.byType(CustomBubble));
 }
 
@@ -92,13 +90,13 @@ List<String> _layout(RenderBubble render) {
 /// The calls of one paint, then each path drawn over the unscaled bubble.
 List<String> _paint(RenderBubble render) {
   final canvas = _RecordingCanvas();
-  render.paint(_RecordingContext(canvas), const Offset(5.0, 7.0));
+  render.paint(_RecordingContext(canvas), const Offset(5, 7));
   final lines = List<String>.from(canvas.calls);
   final scale = render.bubble.scale;
   for (var i = 0; i < canvas.paths.length; i++) {
     lines.add('path$i:');
     lines.addAll(rasterize(canvas.paths[i], (render.size.width / scale).ceil(),
-        (render.size.height / scale).ceil()));
+        (render.size.height / scale).ceil(),),);
   }
   return lines;
 }
@@ -128,19 +126,19 @@ List<String> _paintNames(RenderBubble render) {
   return lines;
 }
 
-const _child = SizedBox(width: 20.0, height: 10.0);
+const _child = SizedBox(width: 20, height: 10);
 
-final _fancyStyle = CustomBubbleStyle(
-  margin: const EdgeInsets.all(2.0),
+const _fancyStyle = CustomBubbleStyle(
+  margin: EdgeInsets.all(2),
   // topLeft + bottomLeft exceed the box height 12: all radii are halved.
-  radius: const BubbleRadius(
-      topLeft: 20.0, topRight: 4.0, bottomRight: 4.0, bottomLeft: 4.0),
+  radius: BubbleRadius(
+      topLeft: 20, topRight: 4, bottomRight: 4, bottomLeft: 4,),
   hFlip: true,
   vFlip: true,
-  color: const Color(0xff112233),
-  elevation: 2.0,
-  shadowColor: const Color(0x80000000),
-  strokeColor: const Color(0xff00ff00),
+  color: Color(0xff112233),
+  elevation: 2,
+  shadowColor: Color(0x80000000),
+  strokeColor: Color(0xff00ff00),
   strokeWidth: 1.5,
 );
 
@@ -150,11 +148,11 @@ void main() {
       final render = await _pump(
           tester,
           CustomBubble(
-            scale: 2.0,
+            scale: 2,
             style: const CustomBubbleStyle(
-                margin: EdgeInsets.fromLTRB(1.0, 2.0, 3.0, 4.0)),
+                margin: EdgeInsets.fromLTRB(1, 2, 3, 4),),
             child: _child,
-          ));
+          ),);
       expectSnapshot(_snapshots, 'margin and scale', _layout(render));
     });
 
@@ -162,12 +160,12 @@ void main() {
       final render = await _pump(
           tester,
           CustomBubble(
-            scale: 2.0,
+            scale: 2,
             style: const CustomBubbleStyle(
-                margin: EdgeInsets.fromLTRB(1.0, 2.0, 3.0, 4.0)),
+                margin: EdgeInsets.fromLTRB(1, 2, 3, 4),),
             child: _child,
           ),
-          tight: const Size(100.0, 50.0));
+          tight: const Size(100, 50),);
       expectSnapshot(_snapshots, 'tight constraints', _layout(render));
     });
 
@@ -187,12 +185,12 @@ void main() {
       final render = await _pump(
           tester,
           CustomBubble(
-            scale: 2.0,
+            scale: 2,
             style: _fancyStyle,
-            child: const SizedBox(width: 20.0, height: 12.0),
-          ));
+            child: const SizedBox(width: 20, height: 12),
+          ),);
       expectSnapshot(_snapshots, 'flips, scale, stroke and oversized radii',
-          _paint(render));
+          _paint(render),);
     });
 
     testWidgets('no child', (tester) async {
@@ -205,10 +203,10 @@ void main() {
           tester,
           CustomBubble(
             drawDraft: true,
-            inset: Inset(InsetPos(InsetPosType.topLeft, Position.zero),
-                InsetPos(InsetPosType.topLeft, Position(ratio: 1.0))),
+            inset: const Inset(InsetPos(InsetPosType.topLeft, Position.zero),
+                InsetPos(InsetPosType.topLeft, Position(ratio: 1)),),
             child: _child,
-          ));
+          ),);
       expectSnapshot(_snapshots, 'draft', _paintNames(render));
     });
   });

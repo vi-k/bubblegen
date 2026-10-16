@@ -1,10 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'geometry.dart';
 import 'custom_bubble.dart';
+import 'geometry.dart';
 
 //enum NipSideEnum { left, right, top, bottom }
 //class NipSide {
@@ -101,7 +101,7 @@ class NipLine {
     this.a2,
     this.sz1,
     this.sz2,
-  }) : assert(pos != null);
+  });
 
   final NipLineType lineType;
   final NipLinePosType posType;
@@ -171,34 +171,21 @@ class NipLine {
 
 class BubbleStyle extends CustomBubbleStyle {
   const BubbleStyle({
-    EdgeInsets? margin,
-    BubbleRadius? radius,
+    super.margin,
+    super.radius,
 //    this.nipSide = NipSide.left,
-    bool? hFlip,
-    bool? vFlip,
+    super.hFlip,
+    super.vFlip,
 //    this.nipRadius = 0.5,
 //    this.nipSize = 7.0,
 //    this.nipPlaceholderSize,
 //    this.nipOffset = const NipOffset(),
-    Color? color,
-    double? elevation,
-    Color? shadowColor,
+    super.color,
+    super.elevation,
+    super.shadowColor,
     Color? strokeColor,
-    double? strokeWidth,
-  })  : //assert(nipSide != null),
-//        assert(nipRadius != null),
-//        assert(nipSize != null),
-//        assert(nipOffset != null),
-        super(
-          margin: margin,
-          radius: radius,
-          hFlip: hFlip,
-          vFlip: vFlip,
-          color: color,
-          elevation: elevation,
-          shadowColor: shadowColor,
-          strokeWidth: strokeWidth,
-        );
+    super.strokeWidth,
+  });
 
 //  final NipSide nipSide;
 //  final double nipRadius;
@@ -206,6 +193,7 @@ class BubbleStyle extends CustomBubbleStyle {
 //  final double nipPlaceholderSize;
 //  final NipOffset nipOffset;
 
+  @override
   BubbleStyle copyWith({
       EdgeInsets? margin,
       BubbleRadius? radius,
@@ -221,8 +209,7 @@ class BubbleStyle extends CustomBubbleStyle {
       Color? shadowColor,
       Color? strokeColor,
       double? strokeWidth,
-  }) {
-    return BubbleStyle(
+  }) => BubbleStyle(
       margin: margin ?? this.margin,
       radius: radius ?? this.radius,
 //      nipSide: nipSide ?? this.nipSide,
@@ -238,7 +225,6 @@ class BubbleStyle extends CustomBubbleStyle {
       strokeColor: strokeColor ?? this.strokeColor,
       strokeWidth: strokeWidth ?? this.strokeWidth,
     );
-  }
 
   @override
   String toString() {
@@ -248,23 +234,16 @@ class BubbleStyle extends CustomBubbleStyle {
 }
 
 class Bubble extends CustomBubble {
-  Bubble({
-    double scale = 1.0,
-    bool drawDraft = false,
-    required BubbleStyle style,
+  Bubble({super.key, 
+    super.scale,
+    super.drawDraft,
+    required BubbleStyle super.style,
     required this.nip,
     required this.topLine,
     required this.bottomLine,
-    Widget? child,
-  })  : assert(topLine != null),
-        assert(bottomLine != null),
-        assert(nip != null),
-        super(
-          scale: scale,
-          drawDraft: drawDraft,
-          style: style,
+    super.child,
+  })  : super(
           inset: nip.inset,
-          child: child,
         );
 
   final Nip nip;
@@ -322,16 +301,12 @@ class Bubble extends CustomBubble {
           final x = math.cos(alpha) * radius;
           final y = math.sin(alpha) * radius;
           nipPoint = Point(box.left + box.tlRadius - x, box.top + box.tlRadius - y);
-          break;
         case InsetPosType.topRight:
           nipPoint = anchorPoint;
-          break;
         case InsetPosType.bottomRight:
           nipPoint = anchorPoint;
-          break;
         case InsetPosType.bottomLeft:
           nipPoint = anchorPoint;
-          break;
         default:
       }
     }
@@ -766,12 +741,7 @@ class Nip {
     this.anchor = NipAnchor.start,
     this.offset = 0.0,
     this.cornerOffset = CornerOffset.byLength,
-  })  : assert(inset != null),
-        assert(size != null),
-        assert(radius != null),
-        assert(anchor != null),
-        assert(offset != null),
-        assert(cornerOffset != null);
+  });
 
   final Inset inset;
   final double size;
@@ -787,8 +757,7 @@ class Nip {
     NipAnchor? anchor,
     double? offset,
     CornerOffset? cornerOffset,
-  }) {
-    return Nip(
+  }) => Nip(
       inset: inset ?? this.inset,
       size: size ?? this.size,
       radius: radius ?? this.radius,
@@ -796,5 +765,4 @@ class Nip {
       offset: offset ?? this.offset,
       cornerOffset: cornerOffset ?? this.cornerOffset,
     );
-  }
 }

@@ -13,45 +13,45 @@ String _segment(LineSegment? segment) => segment == null
 void main() {
   test('inf', () {
     expectSnapshot(_snapshots, 'inf', [
-      fmt(inf(5.0)),
-      fmt(inf(1e16)),
-      fmt(inf(-1e16)),
+      fmt(inf(5)),
+      fmt(inf(10000000000000000)),
+      fmt(inf(-10000000000000000)),
     ]);
   });
 
   test('Line', () {
-    const line = Line(Point(1.0, 2.0), math.pi / 6);
-    const horizontal = Line(Point(0.0, 3.0), 0.0);
+    const line = Line(Point(1, 2), math.pi / 6);
+    const horizontal = Line(Point(0, 3), 0);
     expectSnapshot(_snapshots, 'Line', [
       'tan ${fmt(line.tan())}',
-      'point ${fmtOffset(line.point(10.0))}',
-      'pointByX ${fmtOffset(line.pointByX(5.0))}',
-      'pointByY ${fmtOffset(line.pointByY(5.0))}',
-      'normal ${_segment(line.normal(const Point(5.0, 0.0)))}',
-      'normal of horizontal ${_segment(horizontal.normal(const Point(4.0, 7.0)))}',
-      'intersectCircle ${_segment(const Line(Point(0.0, 0.0), 0.3).intersectCircle(const Circle(Point(5.0, 3.0), 2.5)))}',
-      'intersectCircle miss ${_segment(const Line(Point(0.0, 0.0), 0.3).intersectCircle(const Circle(Point(5.0, 9.0), 2.5)))}',
-      'intersectLine ${fmtOffset(line.intersectLine(const Line(Point(10.0, 0.0), 2 * math.pi / 3)))}',
+      'point ${fmtOffset(line.point(10))}',
+      'pointByX ${fmtOffset(line.pointByX(5))}',
+      'pointByY ${fmtOffset(line.pointByY(5))}',
+      'normal ${_segment(line.normal(const Point(5, 0)))}',
+      'normal of horizontal ${_segment(horizontal.normal(const Point(4, 7)))}',
+      'intersectCircle ${_segment(const Line(Point(0, 0), 0.3).intersectCircle(const Circle(Point(5, 3), 2.5)))}',
+      'intersectCircle miss ${_segment(const Line(Point(0, 0), 0.3).intersectCircle(const Circle(Point(5, 9), 2.5)))}',
+      'intersectLine ${fmtOffset(line.intersectLine(const Line(Point(10, 0), 2 * math.pi / 3)))}',
       'intersectLine horizontal ${fmtOffset(horizontal.intersectLine(line))}',
-      'intersectLineSegment ${fmtOffset(line.intersectLineSegment(LineSegment(const Point(4.0, 0.0), const Point(4.0, 8.0))))}',
-      'intersectLineSegment miss ${fmtOffset(line.intersectLineSegment(LineSegment(const Point(4.0, 0.0), const Point(4.0, 2.0))))}',
+      'intersectLineSegment ${fmtOffset(line.intersectLineSegment(LineSegment(const Point(4, 0), const Point(4, 8))))}',
+      'intersectLineSegment miss ${fmtOffset(line.intersectLineSegment(LineSegment(const Point(4, 0), const Point(4, 2))))}',
     ]);
   });
 
   test('LineSegment', () {
     expectSnapshot(_snapshots, 'LineSegment', [
-      'by points ${_segment(LineSegment(const Point(0.0, 0.0), const Point(3.0, 4.0)))}',
-      'direct ${_segment(LineSegment.direct(const Point(1.0, 1.0), math.pi / 3, 4.0))}',
+      'by points ${_segment(LineSegment(const Point(0, 0), const Point(3, 4)))}',
+      'direct ${_segment(LineSegment.direct(const Point(1, 1), math.pi / 3, 4))}',
     ]);
   });
 
   test('Circle', () {
-    const circle = Circle(Point(5.0, 5.0), 2.0);
-    const other = Circle(Point(15.0, 5.0), 1.0);
+    const circle = Circle(Point(5, 5), 2);
+    const other = Circle(Point(15, 5), 1);
     final lines = [
       'diameter ${fmt(circle.diameter)}',
       'point ${fmtOffset(circle.point(math.pi / 4))}',
-      'point at 3 ${fmtOffset(circle.point(math.pi / 4, 3.0))}',
+      'point at 3 ${fmtOffset(circle.point(math.pi / 4, 3))}',
     ];
     for (final first in [-1.0, 1.0]) {
       for (final second in [-1.0, 1.0]) {
@@ -61,10 +61,10 @@ void main() {
     }
     for (final side in [-1.0, 1.0]) {
       lines.add('tangentToPoint ${fmt(side)}'
-          ' ${_segment(circle.tangentToPoint(const Point(12.0, 9.0), side))}');
+          ' ${_segment(circle.tangentToPoint(const Point(12, 9), side))}');
     }
     lines.add('tangentToPoint inside'
-        ' ${_segment(circle.tangentToPoint(const Point(5.5, 5.5), 1.0))}');
+        ' ${_segment(circle.tangentToPoint(const Point(5.5, 5.5), 1))}');
     expectSnapshot(_snapshots, 'Circle', lines);
   });
 }

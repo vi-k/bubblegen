@@ -10,10 +10,10 @@ const _width = 40;
 const _height = 32;
 
 // Boxes are 24×16, inset by 8 from the canvas, so a nip of size 6 still fits.
-final _box4 = Box.fromLTRBR(8.0, 8.0, 32.0, 24.0, 4.0);
-final _box6 = Box.fromLTRBR(8.0, 8.0, 32.0, 24.0, 6.0);
-final _box2468 = Box.fromLTRBAndCorners(8.0, 8.0, 32.0, 24.0,
-    topLeft: 2.0, topRight: 4.0, bottomRight: 6.0, bottomLeft: 8.0);
+final _box4 = Box.fromLTRBR(8, 8, 32, 24, 4);
+final _box6 = Box.fromLTRBR(8, 8, 32, 24, 6);
+final _box2468 = Box.fromLTRBAndCorners(8, 8, 32, 24,
+    topLeft: 2, topRight: 4, bottomRight: 6, bottomLeft: 8,);
 
 String _name(Object value) => value.toString().split('.').last;
 
@@ -25,27 +25,27 @@ List<String> _outline(CustomBubble bubble, Box box) {
 
 Inset _on(InsetPosType type, double from, double to) =>
     Inset(InsetPos(type, Position(ratio: from)),
-        InsetPos(type, Position(ratio: to)));
+        InsetPos(type, Position(ratio: to)),);
 
 Bubble _bubble(Inset inset,
         {NipAnchor anchor = NipAnchor.start,
         double offset = 0.0,
-        CornerOffset cornerOffset = CornerOffset.byLength}) =>
+        CornerOffset cornerOffset = CornerOffset.byLength,}) =>
     Bubble(
       style: const BubbleStyle(),
       nip: Nip(
         inset: inset,
-        size: 6.0,
+        size: 6,
         radius: 1.5,
         anchor: anchor,
         offset: offset,
         cornerOffset: cornerOffset,
       ),
-      topLine: const NipLine.line(0.0),
-      bottomLine: const NipLine.line(0.0),
+      topLine: const NipLine.line(0),
+      bottomLine: const NipLine.line(0),
     );
 
-void _case(String name, CustomBubble bubble(), Box box) {
+void _case(String name, CustomBubble Function() bubble, Box box) {
   test(name, () {
     expectSnapshot(_snapshots, name, _outline(bubble(), box));
   });
@@ -53,34 +53,34 @@ void _case(String name, CustomBubble bubble(), Box box) {
 
 void main() {
   group('CustomBubble', () {
-    _case('no insets, radius 4', () => CustomBubble(), _box4);
-    _case('no insets, radii 2 4 6 8', () => CustomBubble(), _box2468);
+    _case('no insets, radius 4', CustomBubble.new, _box4);
+    _case('no insets, radii 2 4 6 8', CustomBubble.new, _box2468);
     _case('chord over bottomLeft',
-        () => CustomBubble(inset: _on(InsetPosType.bottomLeft, 0.0, 1.0)),
-        _box2468);
+        () => CustomBubble(inset: _on(InsetPosType.bottomLeft, 0, 1)),
+        _box2468,);
     _case(
         'chords over bottomRight and bottomLeft',
         () => CustomBubble(insets: [
-              _on(InsetPosType.bottomRight, 0.0, 1.0),
-              _on(InsetPosType.bottomLeft, 0.0, 1.0),
-            ]),
-        _box2468);
+              _on(InsetPosType.bottomRight, 0, 1),
+              _on(InsetPosType.bottomLeft, 0, 1),
+            ],),
+        _box2468,);
     _case(
         'chord over the start of left',
         () => CustomBubble(
-            inset: Inset(
+            inset: const Inset(
                 InsetPos(InsetPosType.bottomLeft, Position(ratio: 0.5)),
-                InsetPos(InsetPosType.left, Position(ratio: 0.5)))),
-        _box2468);
+                InsetPos(InsetPosType.left, Position(ratio: 0.5)),),),
+        _box2468,);
     _case(
         'adjacent chords',
-        () => CustomBubble(insets: [
+        () => CustomBubble(insets: const [
               Inset(InsetPos(InsetPosType.left, Position(ratio: 0.5)),
-                  InsetPos(InsetPosType.top, Position(ratio: 0.5))),
+                  InsetPos(InsetPosType.top, Position(ratio: 0.5)),),
               Inset(InsetPos(InsetPosType.top, Position(ratio: 0.5)),
-                  InsetPos(InsetPosType.right, Position(ratio: 0.5))),
-            ]),
-        _box4);
+                  InsetPos(InsetPosType.right, Position(ratio: 0.5)),),
+            ],),
+        _box4,);
   });
 
   group('Bubble on a side', () {
@@ -93,9 +93,9 @@ void main() {
       final side = _on(type, 0.25, 0.75);
       _case('${_name(type)}, anchor start', () => _bubble(side), _box4);
       _case('${_name(type)}, anchor end',
-          () => _bubble(side, anchor: NipAnchor.end), _box4);
+          () => _bubble(side, anchor: NipAnchor.end), _box4,);
       _case('${_name(type)}, anchor end, offset 2',
-          () => _bubble(side, anchor: NipAnchor.end, offset: 2.0), _box4);
+          () => _bubble(side, anchor: NipAnchor.end, offset: 2), _box4,);
     }
   });
 
@@ -109,25 +109,25 @@ void main() {
       for (final cornerOffset in CornerOffset.values) {
         _case(
             '${_name(type)}, ${_name(cornerOffset)}',
-            () => _bubble(_on(type, 0.0, 0.5),
-                anchor: NipAnchor.end, cornerOffset: cornerOffset),
-            _box6);
+            () => _bubble(_on(type, 0, 0.5),
+                anchor: NipAnchor.end, cornerOffset: cornerOffset,),
+            _box6,);
       }
     }
 
     _case(
         'Generator default',
-        () => _bubble(_on(InsetPosType.topLeft, 0.0, 1.0),
-            anchor: NipAnchor.end, cornerOffset: CornerOffset.byHeight),
-        _box6);
+        () => _bubble(_on(InsetPosType.topLeft, 0, 1),
+            anchor: NipAnchor.end, cornerOffset: CornerOffset.byHeight,),
+        _box6,);
 
     _case(
         'left wrapping into topLeft',
         () => _bubble(
-            Inset(InsetPos(InsetPosType.left, Position(ratio: 0.5)),
-                InsetPos(InsetPosType.left, Position(ratio: 1.0, offset: 3.0))),
-            anchor: NipAnchor.end),
-        _box6);
+            const Inset(InsetPos(InsetPosType.left, Position(ratio: 0.5)),
+                InsetPos(InsetPosType.left, Position(ratio: 1, offset: 3)),),
+            anchor: NipAnchor.end,),
+        _box6,);
   });
 }
 

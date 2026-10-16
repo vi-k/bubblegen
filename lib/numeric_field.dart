@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class NumericField extends StatefulWidget {
-  const NumericField({
+  const NumericField({super.key, 
     this.caption,
     this.horizontal = false,
     this.inputWidth,
@@ -20,8 +20,7 @@ class NumericField extends StatefulWidget {
     this.onConvertToText,
   })  : assert(!horizontal || inputWidth != null),
         assert(step != 0),
-        assert(min < max),
-        assert(onChanged != null);
+        assert(min < max);
 
   final String? caption;
   final bool horizontal;
@@ -74,9 +73,7 @@ class _NumericFieldState extends State<NumericField> {
     super.dispose();
   }
 
-  static double round(double value, int fractionDigits) {
-    return double.parse(value.toStringAsFixed(fractionDigits));
-  }
+  static double round(double value, int fractionDigits) => double.parse(value.toStringAsFixed(fractionDigits));
 
   static double floor(double value, int fractionDigits) {
     final k = pow(10, fractionDigits);
@@ -84,7 +81,7 @@ class _NumericFieldState extends State<NumericField> {
   }
 
   void step(int steps, {double? value}) {
-    if (value == null) value = _value;
+    value ??= _value;
 
     // Если значение не выровнено по границе шага, то выравниваем в соответствующую сторону
     if (_errorText == null) {
@@ -140,19 +137,16 @@ class _NumericFieldState extends State<NumericField> {
       widget.onChanged(_value);
     }
 
-    if (errorText != _errorText)
+    if (errorText != _errorText) {
       setState(() {
         _errorText = errorText;
       });
+    }
   }
 
-  String convertToText(double value) {
-    return widget.onConvertToText?.call(value) ?? value.toStringAsFixed(widget.fractionDigits);
-  }
+  String convertToText(double value) => widget.onConvertToText?.call(value) ?? value.toStringAsFixed(widget.fractionDigits);
 
-  double? convertToValue(String value) {
-    return double.tryParse(value);
-  }
+  double? convertToValue(String value) => double.tryParse(value);
 
   Widget getButton(BuildContext context, _ValueButton button) {
     assert(button == _ValueButton.left || button == _ValueButton.right);
@@ -171,7 +165,7 @@ class _NumericFieldState extends State<NumericField> {
       },
       onVerticalDragUpdate: !_focusNode.hasFocus ? null : (details) {
 //        print('onVerticalDragUpdate: $this focused=$_focused');
-        var offset = details.localPosition - _savedPos;
+        final offset = details.localPosition - _savedPos;
         var steps = -(offset.dy / _swipeStep).floor();
         if (button == _ValueButton.left && steps > 0 || button == _ValueButton.right && steps < 0) steps = 0;
         step(steps, value: _savedValue);
@@ -195,23 +189,23 @@ class _NumericFieldState extends State<NumericField> {
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
             borderRadius: button == _ValueButton.left
-                ? const BorderRadius.only(topLeft: const Radius.circular(4.0), bottomLeft: const Radius.circular(4.0))
-                : const BorderRadius.only(topRight: const Radius.circular(4.0), bottomRight: const Radius.circular(4.0))
+                ? const BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4))
+                : const BorderRadius.only(topRight: Radius.circular(4), bottomRight: Radius.circular(4)),
         ),
         child: InkWell(
           onTap: () => step(button == _ValueButton.left ? -1 : 1),
           highlightColor: Theme.of(context).colorScheme.secondary,
-          child: Container(
+          child: SizedBox(
               height: _fieldHeight,
               width: _buttonWidth,
               child: Center(
                   child: Text(
                       widget.onConvertToText == null ? (button == _ValueButton.left ? '–' : '+') : (button == _ValueButton.left ? '<' : '>'),
-                      style: TextStyle(fontSize: 20.0,
-                          color: Colors.black.withAlpha(_value != (button == _ValueButton.left ? widget.min : widget.max) ? 255 : 48)
-                      )
-                  )
-              )
+                      style: TextStyle(fontSize: 20,
+                          color: Colors.black.withAlpha(_value != (button == _ValueButton.left ? widget.min : widget.max) ? 255 : 48),
+                      ),
+                  ),
+              ),
           ),
         ),
       ),
@@ -240,17 +234,17 @@ class _NumericFieldState extends State<NumericField> {
               filled: true,
               errorText: _errorText,
               contentPadding: EdgeInsets.zero,
-              prefix: SizedBox(width: _buttonWidth),
+              prefix: const SizedBox(width: _buttonWidth),
               suffix: Padding(
-                padding: EdgeInsets.only(right: _contentPadding + _buttonWidth),
+                padding: const EdgeInsets.only(right: _contentPadding + _buttonWidth),
                 child: Text(widget.units ?? ''),
               ),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
                       color: _errorText != null ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.secondary,
-                      width: 2.0
-                  )
+                      width: 2,
+                  ),
               ),
             ),
             keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
@@ -281,14 +275,14 @@ class _NumericFieldState extends State<NumericField> {
         Visibility(
           visible: widget.caption != null,
           child: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.only(right: 8),
             child: Text(widget.caption!),
           ),
         ),
         SizedBox(
             width: widget.inputWidth,
-            child: input
-        )
+            child: input,
+        ),
       ],
     )
         : Column(
@@ -297,7 +291,7 @@ class _NumericFieldState extends State<NumericField> {
         Visibility(
           visible: widget.caption != null,
           child: Padding(
-            padding: const EdgeInsets.only(left: _contentPadding, right: _contentPadding, top: 6.0, bottom: 2.0),
+            padding: const EdgeInsets.only(left: _contentPadding, right: _contentPadding, top: 6, bottom: 2),
             child: Text(widget.caption!),
           ),
         ),

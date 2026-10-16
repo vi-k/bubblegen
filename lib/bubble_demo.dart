@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'generator.dart';
 import 'bubble.dart';
+import 'generator.dart';
 
 class BubbleDemo extends StatefulWidget {
-  BubbleDemo({Key? key}) : super(key: key);
+  const BubbleDemo({super.key});
 
   @override
   _BubbleDemoState createState() => _BubbleDemoState();
@@ -19,7 +18,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   @override
   bool get wantKeepAlive => true;
 
-  var _frames = <int>[];
+  final _frames = <int>[];
   var _fps = 0;
   var _animate = false;
 
@@ -27,16 +26,15 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   void initState() {
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 2000),
-        animationBehavior: AnimationBehavior.normal,
+        duration: const Duration(milliseconds: 2000),
     );
     _animationController.repeat();
     _animationController.addListener(() {
-      var timestamp = DateTime.now().microsecondsSinceEpoch;
-      var startTimestamp = timestamp - 2000000; // 1 сек
+      final timestamp = DateTime.now().microsecondsSinceEpoch;
+      final startTimestamp = timestamp - 2000000; // 1 сек
       _frames.removeWhere((time) => time < startTimestamp);
       final count = _frames.length;
-      final duration = _frames.length > 0 ? timestamp - _frames[0] : 0;
+      final duration = _frames.isNotEmpty ? timestamp - _frames[0] : 0;
       _frames.add(timestamp);
       _fps = duration == 0 ? 0 : count * 1000000.0 ~/ duration;
     });
@@ -50,7 +48,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   }
 
   Widget _getBubble({required int index, double? animationValue, required String suffix}) {
-    var text = StringBuffer();
+    final text = StringBuffer();
     for (var i = 0; i < index % (_words.length - 1) + 1; i++) {
       text.write(_words[i]);
     }
@@ -65,16 +63,16 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
         color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
       ),
       nip: Generator.settings.nip.copyWith(
-          size: Generator.settings.nip.size - (animationValue != null ? animationValue * Generator.settings.nip.size : 0)
+          size: Generator.settings.nip.size - (animationValue != null ? animationValue * Generator.settings.nip.size : 0),
       ),
       topLine: Generator.settings.topLine,
       bottomLine: Generator.settings.bottomLine,
       child: Stack(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: Text(
-              '${text.toString()}$suffix',
+              '$text$suffix',
               textWidthBasis: TextWidthBasis.longestLine,
             ),
 //                      child: RichText(
@@ -116,17 +114,17 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
             right: 0,
             bottom: 0,
             child: Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(4),
               child: Text(
                   TimeOfDay(hour: index ~/ 60, minute: index % 60).format(context),
                   style: DefaultTextStyle.of(context).style.copyWith(
                     color: Colors.black.withAlpha(64),
-                    fontSize: 10.0,
+                    fontSize: 10,
                     fontStyle: FontStyle.italic,
-                  )
+                  ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -139,16 +137,16 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
 //    final animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
     final animation = TweenSequence([
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOutQuart)),
-        weight: 1.0,
+        tween: Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeOutQuart)),
+        weight: 1,
       ),
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 1.0,
+        tween: Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 1,
       ),
     ]).animate(_animationController);
 
-    final suffix = ' ' * (5 + TimeOfDay(hour: 23, minute: 59).format(context).length);
+    final suffix = ' ' * (5 + const TimeOfDay(hour: 23, minute: 59).format(context).length);
 
     return Container(
       color: Colors.grey[300],
@@ -156,7 +154,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
         children: <Widget>[
           ListView.builder(
             shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (context, index) {
 //              print('itemBuilder: #$index');
               return Padding(
                 padding: EdgeInsets.only(
@@ -170,9 +168,7 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
                   child: _animate
                       ? AnimatedBuilder(
                           animation: animation,
-                          builder: (context, child) {
-                            return _getBubble(index: index, animationValue: animation.value, suffix: suffix);
-                          }
+                          builder: (context, child) => _getBubble(index: index, animationValue: animation.value, suffix: suffix),
                         )
                       : _getBubble(index: index, suffix: suffix),
                 ),
@@ -183,11 +179,10 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
           Align(
             alignment: Alignment.bottomRight,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: AnimatedBuilder(
                 animation: animation,
-                builder: (context, child) {
-                  return ElevatedButton.icon(
+                builder: (context, child) => ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
                         _animate = !_animate;
@@ -198,11 +193,10 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
                       foregroundColor: Colors.black87,
                     ),
                     icon: _animate ? const Icon(Icons.stop) : const Icon(Icons.play_arrow),
-                    label: Text('$_fps fps')
-                  );
-                }
+                    label: Text('$_fps fps'),
+                  ),
               ),
-            )
+            ),
           ),
         ],
       ),

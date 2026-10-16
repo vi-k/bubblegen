@@ -1,35 +1,29 @@
 import 'dart:math' as math;
-import 'dart:ui';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'geometry.dart';
 
 class CustomBubble extends SingleChildRenderObjectWidget {
-  CustomBubble({
+  CustomBubble({super.key, 
     this.scale = 1.0,
     this.drawDraft = false,
     this.style = const CustomBubbleStyle(),
     Inset? inset,
     List<Inset>? insets,
     this.child,
-  })  : assert(scale != null),
-        assert(drawDraft != null),
-        assert(style != null),
-        assert(inset == null || insets == null),
+  })  : assert(inset == null || insets == null),
         insets = InsetList(insets ?? (inset != null ? [inset] : []));
 
   final CustomBubbleStyle style;
+  @override
   final Widget? child;
   final double scale;
   final bool drawDraft;
   final InsetList insets;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return RenderBubble(this);
-  }
+  RenderObject createRenderObject(BuildContext context) => RenderBubble(this);
 
   @override
   void updateRenderObject(BuildContext context, RenderBubble renderObject) {
@@ -37,9 +31,7 @@ class CustomBubble extends SingleChildRenderObjectWidget {
   }
 
   @protected
-  bool needsLayout(CustomBubble other) {
-    return this.scale != other.scale;
-  }
+  bool needsLayout(CustomBubble other) => scale != other.scale;
 
   void generateInsets() {
 //    insets.list.clear();
@@ -64,17 +56,14 @@ class CustomBubble extends SingleChildRenderObjectWidget {
   void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo? draftInfo) { }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'CustomBubble(${scale == 1.0 ? '' : 'scale: $scale, '}${drawDraft == false ? '' : 'drawDraft: $drawDraft, '}style: $style, insets: $insets)';
-  }
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) => 'CustomBubble(${scale == 1.0 ? '' : 'scale: $scale, '}${drawDraft == false ? '' : 'drawDraft: $drawDraft, '}style: $style, insets: $insets)';
 }
 
 class RenderBubble extends RenderProxyBox {
   RenderBubble(
       CustomBubble bubble, {
         RenderBox? child,
-      })  : assert(bubble != null),
-        _bubble = bubble,
+      })  : _bubble = bubble,
         super(child);
 
   CustomBubble _bubble;
@@ -82,7 +71,6 @@ class RenderBubble extends RenderProxyBox {
   CustomBubble get bubble => _bubble;
 
   set bubble(CustomBubble bubble) {
-    assert(bubble != null);
     if (_bubble.needsLayout(bubble)) markNeedsLayout();
     markNeedsPaint();
     _bubble = bubble;
@@ -124,7 +112,7 @@ class RenderBubble extends RenderProxyBox {
 
       child!.layout(childConstraints, parentUsesSize: true);
       size = Size(child!.size.width + bubble.style.margin.left + bubble.style.margin.right,
-          child!.size.height + bubble.style.margin.top + bubble.style.margin.bottom) * bubble.scale;
+          child!.size.height + bubble.style.margin.top + bubble.style.margin.bottom,) * bubble.scale;
 //      print('child.size: ${child.size}');
 //      print('size: $size');
     } else {
@@ -149,7 +137,7 @@ class RenderBubble extends RenderProxyBox {
 
       pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
       pi.box = Rect.fromLTRB(bubble.style.margin.left, bubble.style.margin.top,
-          pi.rect.right - bubble.style.margin.right, pi.rect.bottom - bubble.style.margin.bottom);
+          pi.rect.right - bubble.style.margin.right, pi.rect.bottom - bubble.style.margin.bottom,);
       childOffset = offset.translate(bubble.style.margin.left * bubble.scale, bubble.style.margin.top * bubble.scale);
 
 //    if (bubble.style.nipSide.isHorizontal) {
@@ -208,7 +196,7 @@ class RenderBubble extends RenderProxyBox {
 
     pi.draft = bubble.drawDraft ? DraftInfo() : null;
 
-    var path = Path();
+    final path = Path();
 
     final box = Box.fromLTRBAndCorners(
         pi.box.left,
@@ -218,7 +206,7 @@ class RenderBubble extends RenderProxyBox {
         topLeft: pi.ltCircle.radius,
         topRight: pi.rtCircle.radius,
         bottomLeft: pi.lbCircle.radius,
-        bottomRight: pi.rbCircle.radius
+        bottomRight: pi.rbCircle.radius,
     );
 
     bubble.generateInsets();
@@ -292,22 +280,22 @@ class RenderBubble extends RenderProxyBox {
 
 //    print('box: $box');
 
-    final start = absInsets.length > 0 ? absInsets[0].start : AbsInsetPos(InsetPosType.topLeft, 0.0);
+    final start = absInsets.isNotEmpty ? absInsets[0].start : const AbsInsetPos(InsetPosType.topLeft, 0);
     var lastPoint = start.apply(box);
 //    print('moveTo: $start $lastPoint');
     path.moveTo(lastPoint.x, lastPoint.y);
 
-    if (absInsets.length == 0) {
-      pathFromTo(path, box, start, AbsInsetPos(InsetPosType.left, 0.0));
+    if (absInsets.isEmpty) {
+      pathFromTo(path, box, start, const AbsInsetPos(InsetPosType.left, 0));
     } else {
       for (var index = 0; index < absInsets.length; index++) {
-        var inset = bubble.insets.list[index];
-        var absInset = absInsets[index];
+        final inset = bubble.insets.list[index];
+        final absInset = absInsets[index];
 
         // Врезка
-        var nextPoint = absInset.end.apply(box);
+        final nextPoint = absInset.end.apply(box);
         if (draftInfo != null) {
-          draftInfo.addPoint(lastPoint, DraftType.Draft);
+          draftInfo.addPoint(lastPoint);
           draftInfo.addPoint(nextPoint, DraftType.Main);
         }
         bubble.createInset(index, path, box, lastPoint, nextPoint, inset, absInset, draftInfo);
@@ -335,11 +323,12 @@ class RenderBubble extends RenderProxyBox {
     var pos = start;
     while (pos != end) {
       final prevPos = pos;
-      if (pos.type == end.type && pos.pos < end.pos) pos = end;
-      else {
+      if (pos.type == end.type && pos.pos < end.pos) {
+        pos = end;
+      } else {
         var nextTypeIndex = pos.type.index + 1;
         if (nextTypeIndex == InsetPosType.values.length) nextTypeIndex = 0;
-        pos = AbsInsetPos(InsetPosType.values[nextTypeIndex], 0.0);
+        pos = AbsInsetPos(InsetPosType.values[nextTypeIndex], 0);
       }
 
       point = pos.apply(box);
@@ -384,21 +373,17 @@ class BubbleRadius {
     double? topRight,
     double? bottomLeft,
     double? bottomRight,
-  }) {
-    return BubbleRadius(
+  }) => BubbleRadius(
       topLeft: topLeft ?? this.topLeft,
       topRight: topRight ?? this.topRight,
       bottomRight: bottomRight ?? this.bottomRight,
       bottomLeft: bottomLeft ?? this.bottomLeft,
     );
-  }
 
   @override
-  String toString() {
-    return hasOneRadius
+  String toString() => hasOneRadius
         ? 'BubbleRadius(all: $topLeft)'
         : 'BubbleRadius(topLeft: $topLeft, topRight: $topRight, bottomLeft: $bottomLeft, bottomRight: $bottomRight)';
-  }
 }
 
 enum DraftType { Draft, Main, Error }
@@ -431,18 +416,18 @@ class DraftInfo {
   bool showTopCorner = false;
   bool showBottomCorner = false;
 
-  static final Color draftColor = Colors.black26;
-  static final Color lineColor = Colors.orange;
-  static final Color mainColor = Colors.black;
-  static final Color errorColor = Colors.red;
+  static const Color draftColor = Colors.black26;
+  static const Color lineColor = Colors.orange;
+  static const Color mainColor = Colors.black;
+  static const Color errorColor = Colors.red;
 
-  List<DraftLine> _lines = [];
-  List<DraftLineSegment> _lineSegments = [];
-  List<DraftPoint> _points = [];
+  final List<DraftLine> _lines = [];
+  final List<DraftLineSegment> _lineSegments = [];
+  final List<DraftPoint> _points = [];
 
-  get lines => _lines;
-  get lineSegments => _lineSegments;
-  get points => _points;
+  List<DraftLine> get lines => _lines;
+  List<DraftLineSegment> get lineSegments => _lineSegments;
+  List<DraftPoint> get points => _points;
 
   void addLine(Point start, double direct, [DraftType type = DraftType.Draft]) =>
       lines.add(DraftLine(Line(start, direct), type));
@@ -550,7 +535,7 @@ class DraftInfo {
           -math.pi / 2,
           -math.pi / 2,
           true,
-          paint);
+          paint,);
     } else {
       path.reset();
       path.moveTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy - pi.ltCircle.radius);
@@ -568,7 +553,7 @@ class DraftInfo {
           math.pi / 2,
           math.pi / 2,
           true,
-          paint);
+          paint,);
     } else {
       path.reset();
       path.moveTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy + pi.lbCircle.radius);
@@ -594,13 +579,13 @@ class DraftInfo {
     paint.style = PaintingStyle.stroke;
     canvas.drawPath(path, paint);
 
-    DraftType.values.forEach((type) {
+    for (final type in DraftType.values) {
       paint.color = type == DraftType.Error ? errorColor : type == DraftType.Main ? mainColor : draftColor;
 
       paint.style = PaintingStyle.stroke;
 
       // Линии
-      lines.forEach((item) {
+      for (final item in lines) {
         if (item.type == type) {
           final interval = 6 / pi.scale;
           final padding = 4 * interval;
@@ -621,30 +606,32 @@ class DraftInfo {
           while (true) {
             final start = item.line.point(size);
             if (start.x < pi.rect.left - padding || start.x > pi.rect.right + padding
-                || start.y < pi.rect.top - padding || start.y > pi.rect.bottom + padding) break;
+                || start.y < pi.rect.top - padding || start.y > pi.rect.bottom + padding) {
+              break;
+            }
             final end = item.line.point(size + interval);
             size += 2 * interval;
             canvas.drawLine(start, end, paint);
           }
         }
-      });
+      }
 
       // Отрезки
-      lineSegments.forEach((item) {
+      for (final item in lineSegments) {
         if (item.type == type) {
           canvas.drawLine(item.lineSegment.start, item.lineSegment.end, paint);
         }
-      });
+      }
 
       paint.style = PaintingStyle.fill;
 
       // Точки
-      points.forEach((item) {
+      for (final item in points) {
         if (item.type == type) {
           canvas.drawCircle(item.point, pointSize, paint);
         }
-      });
-    });
+      }
+    }
   }
 }
 
@@ -672,7 +659,7 @@ class CustomBubbleStyle {
     Color? strokeColor,
     double? strokeWidth,
   })  : margin = margin ?? EdgeInsets.zero,
-        radius = radius ?? const BubbleRadius(all: 4.0),
+        radius = radius ?? const BubbleRadius(all: 4),
         hFlip = hFlip ?? false,
         vFlip = vFlip ?? false,
         color = color ?? Colors.white,
@@ -701,8 +688,7 @@ class CustomBubbleStyle {
       Color? shadowColor,
       Color? strokeColor,
       double? strokeWidth,
-  }) {
-    return CustomBubbleStyle(
+  }) => CustomBubbleStyle(
       margin: margin ?? this.margin,
       radius: radius ?? this.radius,
       hFlip: hFlip ?? this.hFlip,
@@ -713,19 +699,14 @@ class CustomBubbleStyle {
       strokeColor: strokeColor ?? this.strokeColor,
       strokeWidth: strokeWidth ?? this.strokeWidth,
     );
-  }
 
   @override
-  String toString() {
-    return 'CustomBubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
-  }
+  String toString() => 'CustomBubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
 }
 
 class Position {
   const Position({this.ratio = 0.0, this.offset = 0.0})
-      : assert(ratio != null),
-        assert(ratio >= 0.0 && ratio <= 1.0),
-        assert(offset != null);
+      : assert(ratio >= 0.0 && ratio <= 1.0);
 
   final double ratio;
   final double offset;
@@ -735,9 +716,7 @@ class Position {
   double apply(double size) => size * ratio + offset;
 
   @override
-  bool operator ==(Object other) {
-    return other is Position && other.ratio == ratio && other.offset == offset;
-  }
+  bool operator ==(Object other) => other is Position && other.ratio == ratio && other.offset == offset;
 
   @override
   int get hashCode => Object.hash(ratio, offset);
@@ -745,17 +724,13 @@ class Position {
   Position copyWith({
     double? ratio,
     double? offset,
-  }) {
-    return Position(
+  }) => Position(
       ratio: ratio ?? this.ratio,
       offset: offset ?? this.offset,
     );
-  }
 
   @override
-  String toString() {
-    return 'Position(ratio: $ratio, offset: $offset)';
-  }
+  String toString() => 'Position(ratio: $ratio, offset: $offset)';
 }
 
 /// Аналог RRect, но исключительно с круглыми (не овальными) углами
@@ -769,14 +744,7 @@ class Box {
     this.trRadius = 0.0,
     this.brRadius = 0.0,
     this.blRadius = 0.0,
-  })  : assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
-        assert(tlRadius != null),
-        assert(trRadius != null),
-        assert(brRadius != null),
-        assert(blRadius != null);
+  });
 
   Box.fromLTRBR(
       double left,
@@ -833,7 +801,7 @@ class Box {
 
   @override
   String toString() {
-    var radius = tlRadius == trRadius && tlRadius == brRadius && tlRadius == blRadius
+    final radius = tlRadius == trRadius && tlRadius == brRadius && tlRadius == blRadius
         ? 'radius: $tlRadius'
         : 'tlRadius: $tlRadius, trRadius: $trRadius, brRadius: $brRadius, blRadius: $blRadius';
     return 'Box(left: $left, top: $top, right: $right, bottom: $bottom, width: $width, height: $height, $radius)';
@@ -848,9 +816,7 @@ class Inset {
   final InsetPos end;
 
   @override
-  String toString() {
-    return 'Inset(start: $start, end: $end)';
-  }
+  String toString() => 'Inset(start: $start, end: $end)';
 }
 
 /// Тип позиции врезки
@@ -864,10 +830,7 @@ enum CornerOffset { byLength, byHeight, byWidth }
 
 /// Позиция врезки
 class InsetPos {
-  const InsetPos(this.type, this.pos, [this.cornerOffset = CornerOffset.byLength])
-      : assert(type != null),
-        assert(pos != null),
-        assert(cornerOffset != null);
+  const InsetPos(this.type, this.pos, [this.cornerOffset = CornerOffset.byLength]);
 
   final InsetPosType type;
   final Position pos;
@@ -875,13 +838,9 @@ class InsetPos {
 
   static const halfPi = math.pi / 2.0;
 
-  static bool isSide(InsetPosType type) {
-    return type == InsetPosType.left || type == InsetPosType.top || type == InsetPosType.right || type == InsetPosType.bottom;
-  }
+  static bool isSide(InsetPosType type) => type == InsetPosType.left || type == InsetPosType.top || type == InsetPosType.right || type == InsetPosType.bottom;
 
-  static bool isCorner(InsetPosType type) {
-    return type == InsetPosType.topLeft || type == InsetPosType.topRight || type == InsetPosType.bottomRight || type == InsetPosType.bottomLeft;
-  }
+  static bool isCorner(InsetPosType type) => type == InsetPosType.topLeft || type == InsetPosType.topRight || type == InsetPosType.bottomRight || type == InsetPosType.bottomLeft;
 
   static InsetPosType nextType(InsetPosType type) {
     final newIndex = type.index + 1;
@@ -905,26 +864,22 @@ class InsetPos {
         switch (type) {
           case InsetPosType.left:
             size = box.leftHeight;
-            break;
           case InsetPosType.top:
             size = box.topWidth;
-            break;
           case InsetPosType.right:
             size = box.rightHeight;
-            break;
           case InsetPosType.bottom:
             size = box.bottomWidth;
-            break;
           default:
         }
 
         final offset = pos.apply(size);
         if (offset < 0.0) {
           type = prevType(type);
-          pos = Position(ratio: 1.0, offset: offset);
+          pos = Position(ratio: 1, offset: offset);
         } else if (offset > size) {
           type = nextType(type);
-          pos = Position(ratio: 0.0, offset: offset - size);
+          pos = Position(offset: offset - size);
         } else {
           result = AbsInsetPos(type, offset);
         }
@@ -933,16 +888,12 @@ class InsetPos {
         switch (type) {
           case InsetPosType.topLeft:
             radius = box.tlRadius;
-            break;
           case InsetPosType.topRight:
             radius = box.trRadius;
-            break;
           case InsetPosType.bottomRight:
             radius = box.brRadius;
-            break;
           case InsetPosType.bottomLeft:
             radius = box.blRadius;
-            break;
           default:
         }
 
@@ -953,10 +904,10 @@ class InsetPos {
           final offset = cornerLen * pos.ratio + pos.offset; // Расстояние до точки
           if (offset < 0.0) {
             type = prevType(type);
-            pos = Position(ratio: 1.0, offset: offset);
+            pos = Position(ratio: 1, offset: offset);
           } else if (offset > cornerLen) {
             type = nextType(type);
-            pos = Position(ratio: 0.0, offset: offset - cornerLen);
+            pos = Position(offset: offset - cornerLen);
           } else {
             result = AbsInsetPos(type, offset / cornerLen * halfPi);
           }
@@ -966,10 +917,10 @@ class InsetPos {
           final y = math.sin(radians) * radius + pos.offset;
           if (y < 0.0) {
             type = prevType(type);
-            pos = Position(ratio: 1.0, offset: y);
+            pos = Position(ratio: 1, offset: y);
           } else if (y > radius) {
             type = nextType(type);
-            pos = Position(ratio: 0.0, offset: y - radius);
+            pos = Position(offset: y - radius);
           } else {
             result = AbsInsetPos(type, math.asin(y / radius));
           }
@@ -978,10 +929,10 @@ class InsetPos {
           final x = (1.0 - math.cos(radians)) * radius + pos.offset;
           if (x < 0.0) {
             type = prevType(type);
-            pos = Position(ratio: 1.0, offset: x);
+            pos = Position(ratio: 1, offset: x);
           } else if (x >= radius) {
             type = nextType(type);
-            pos = Position(ratio: 0.0, offset: x - radius);
+            pos = Position(offset: x - radius);
           } else {
             result = AbsInsetPos(type, math.acos(1.0 - x / radius));
           }
@@ -996,18 +947,14 @@ class InsetPos {
     InsetPosType? type,
     Position? pos,
     CornerOffset? cornerOffset,
-  }) {
-    return InsetPos(
+  }) => InsetPos(
       type ?? this.type,
       pos ?? this.pos,
       cornerOffset ?? this.cornerOffset,
     );
-  }
 
   @override
-  String toString() {
-    return 'InsetPos($type, $pos, $cornerOffset)';
-  }
+  String toString() => 'InsetPos($type, $pos, $cornerOffset)';
 }
 
 class InsetList {
@@ -1019,7 +966,7 @@ class InsetList {
 
   List<AbsInset> apply(Box box) {
     final result = <AbsInset>[];
-    for (var element in list) {
+    for (final element in list) {
       result.add(AbsInset(element.start.apply(box), element.end.apply(box)));
     }
 
@@ -1032,9 +979,7 @@ class InsetList {
 
 /// Врезка в абсолютных величинах
 class AbsInset {
-  const AbsInset(this.start, this.end)
-      : assert(start != null),
-        assert(end != null);
+  const AbsInset(this.start, this.end);
 
   final AbsInsetPos start;
   final AbsInsetPos end;
@@ -1056,99 +1001,81 @@ class AbsInset {
 //  }
 
   @override
-  String toString() {
-    return 'AbsInset(start: $start, end: $end)';
-  }
+  String toString() => 'AbsInset(start: $start, end: $end)';
 }
 
 /// Позиция врезка в абсолютных величинах
 class AbsInsetPos {
-  const AbsInsetPos(this.type, this.pos)
-      : assert(type != null),
-        assert(pos != null);
+  const AbsInsetPos(this.type, this.pos);
 
   final InsetPosType type;
   final double pos;
 
-  bool get isOnSide {
-    return type == InsetPosType.left
+  bool get isOnSide => type == InsetPosType.left
         || type == InsetPosType.top
         || type == InsetPosType.right
         || type == InsetPosType.bottom;
-  }
 
-  bool get isOnCorner {
-    return type == InsetPosType.topLeft
+  bool get isOnCorner => type == InsetPosType.topLeft
       || type == InsetPosType.topRight
       || type == InsetPosType.bottomRight
       || type == InsetPosType.bottomLeft;
-  }
 
   @override
   int get hashCode => Object.hash(type, pos);
 
   @override
-  bool operator ==(Object other) {
-    return other is AbsInsetPos && this.type == other.type && this.pos == other.pos;
-  }
+  bool operator ==(Object other) => other is AbsInsetPos && type == other.type && pos == other.pos;
 
   int compareTo(AbsInsetPos other) {
-    var result = this.type.index.compareTo(other.type.index);
-    if (result == 0) result = this.pos.compareTo(other.pos);
+    var result = type.index.compareTo(other.type.index);
+    if (result == 0) result = pos.compareTo(other.pos);
     return result;
   }
 
-  bool operator >(AbsInsetPos other) => this.compareTo(other) > 0;
-  bool operator >=(AbsInsetPos other) => this.compareTo(other) >= 0;
-  bool operator <(AbsInsetPos other) => this.compareTo(other) < 0;
-  bool operator <=(AbsInsetPos other) => this.compareTo(other) <= 0;
+  bool operator >(AbsInsetPos other) => compareTo(other) > 0;
+  bool operator >=(AbsInsetPos other) => compareTo(other) >= 0;
+  bool operator <(AbsInsetPos other) => compareTo(other) < 0;
+  bool operator <=(AbsInsetPos other) => compareTo(other) <= 0;
 
   Point apply(Box box) {
     late Point point;
     switch (type) {
       case InsetPosType.left:
         point = Point(box.left, box.bottom - box.blRadius - pos);
-        break;
 
       case InsetPosType.topLeft:
         point = Point(
             box.left + (1.0 - math.cos(pos)) * box.tlRadius,
-            box.top + (1.0 - math.sin(pos)) * box.tlRadius
+            box.top + (1.0 - math.sin(pos)) * box.tlRadius,
         );
-        break;
 
       case InsetPosType.top:
         point = Point(box.left + box.tlRadius + pos, box.top);
-        break;
 
       case InsetPosType.topRight:
         point = Point(
             box.right - (1.0 - math.sin(pos)) * box.trRadius,
-            box.top + (1.0 - math.cos(pos)) * box.trRadius
+            box.top + (1.0 - math.cos(pos)) * box.trRadius,
         );
-        break;
 
       case InsetPosType.right:
         point = Point(box.right, box.top + box.trRadius + pos);
-        break;
 
       case InsetPosType.bottomRight:
         point = Point(
             box.right - (1.0 - math.cos(pos)) * box.brRadius,
-            box.bottom - (1.0 - math.sin(pos)) * box.brRadius
+            box.bottom - (1.0 - math.sin(pos)) * box.brRadius,
         );
-        break;
 
       case InsetPosType.bottom:
         point = Point(box.right - box.brRadius - pos, box.bottom);
-        break;
 
       case InsetPosType.bottomLeft:
         point = Point(
             box.left + (1.0 - math.sin(pos)) * box.blRadius,
-            box.bottom - (1.0 - math.cos(pos)) * box.blRadius
+            box.bottom - (1.0 - math.cos(pos)) * box.blRadius,
         );
-        break;
     }
 
     return point;
@@ -1160,19 +1087,15 @@ class AbsInsetPos {
     switch (type) {
       case InsetPosType.topLeft:
         radius = box.tlRadius;
-        break;
 
       case InsetPosType.topRight:
         radius = box.trRadius;
-        break;
 
       case InsetPosType.bottomRight:
         radius = box.brRadius;
-        break;
 
       case InsetPosType.bottomLeft:
         radius = box.blRadius;
-        break;
 
       default:
     }

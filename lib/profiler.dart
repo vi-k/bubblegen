@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class Profiler extends SingleChildRenderObjectWidget {
-  const Profiler({this.breath = 0.0});
+  const Profiler({super.key, this.breath = 0.0});
 
   final double breath;
 
@@ -23,20 +23,18 @@ class RenderProfiler extends RenderProxyBox {
   RenderProfiler(
       Profiler profiler, {
         RenderBox? child,
-      })  : assert(profiler != null),
-        _profiler = profiler,
+      })  : _profiler = profiler,
         super(child);
 
   static const margin = 8.0;
   static const padding = 8.0;
   static const radius = 4.0;
 
-  var _frames = <int>[];
+  final _frames = <int>[];
 
   Profiler _profiler;
   Profiler get profiler => _profiler;
   set profiler(Profiler profiler) {
-    assert(profiler != null);
     markNeedsPaint();
     _profiler = profiler;
   }
@@ -51,11 +49,11 @@ class RenderProfiler extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    var timestamp = DateTime.now().microsecondsSinceEpoch;
-    var startTimestamp = timestamp - 1000000; // 1 сек
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
+    final startTimestamp = timestamp - 1000000; // 1 сек
     _frames.removeWhere((time) => time < startTimestamp);
     final count = _frames.length;
-    final duration = _frames.length > 0 ? timestamp - _frames[0] : 0;
+    final duration = _frames.isNotEmpty ? timestamp - _frames[0] : 0;
     final fps = duration == 0 ? 0 : count * 1000000 ~/ duration;
     _frames.add(timestamp);
 
@@ -68,16 +66,16 @@ class RenderProfiler extends RenderProxyBox {
       final textPainter = TextPainter(
           text: TextSpan(
               text: '$fps fps',
-              style: TextStyle(color: Colors.black)
+              style: const TextStyle(color: Colors.black),
           ),
           textAlign: TextAlign.left,
-          textDirection: TextDirection.ltr
+          textDirection: TextDirection.ltr,
       );
       textPainter.layout();
 
       final textSize = textPainter.size;
       final textOffset = Offset(
-          offset.dx + size.width - textSize.width - padding - margin, offset.dy + margin + padding);
+          offset.dx + size.width - textSize.width - padding - margin, offset.dy + margin + padding,);
 
       final path = Path();
       path.addRRect(RRect.fromLTRBR(
@@ -85,10 +83,10 @@ class RenderProfiler extends RenderProxyBox {
           textOffset.dy - padding - _profiler.breath,
           textOffset.dx + textSize.width + padding + _profiler.breath,
           textOffset.dy + textSize.height + padding + _profiler.breath,
-          const Radius.circular(radius)
-      ));
+          const Radius.circular(radius),
+      ),);
 
-      context.canvas.drawShadow(path, Colors.black, 4.0, true);
+      context.canvas.drawShadow(path, Colors.black, 4, true);
 
       final paint = Paint()
         ..color = Colors.orange.withAlpha(192)

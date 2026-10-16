@@ -3,15 +3,14 @@
 
 import 'package:bubblegen/bubble_demo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'generator.dart';
 
 GeneratorBubbleStyle gBubbleStyle = GeneratorBubbleStyle();
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
-final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
+final primarySwatch = createSwatch(const Color.fromARGB(255, 132, 151, 176));
 //final primarySwatch = Colors.blue;
 late MaterialColor cursorSwatch;
 
@@ -38,6 +37,8 @@ MaterialColor createSwatch(Color color) {
 // TODO: пунктирные линии в Draft'е не выводятся наверху
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
 //    cursorSwatch = createSwatch(Theme.of(context).cursorColor);
@@ -58,13 +59,13 @@ class MyApp extends StatelessWidget {
 //        textSelectionColor: cursorSwatch[200],
 //        textSelectionHandleColor: cursorSwatch[400],
       ),
-      home: MyHomePage(title: 'Bubble generator'),
+      home: const MyHomePage(title: 'Bubble generator'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
@@ -670,7 +671,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    _tabController = new TabController(vsync: this, length: 3);
+    _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) setState(() {});
     });
@@ -679,48 +680,43 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: true,
         title: Text(widget.title),
-        elevation: 4.0,
+        elevation: 4,
         actions: [
           PopupMenuButton(
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(
-                  child: const Text('1'),
+            itemBuilder: (context) => [
+                const PopupMenuItem(
+                  child: Text('1'),
                 ),
-                PopupMenuItem(
-                  child: const Text('2'),
+                const PopupMenuItem(
+                  child: Text('2'),
                 ),
-                PopupMenuItem(
-                  child: const Text('3'),
+                const PopupMenuItem(
+                  child: Text('3'),
                 ),
-              ];
-            },
+              ],
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            const Tab(text: 'Generator'),
-            const Tab(text: 'Bubble\ndemo'),
-            const Tab(text: 'CustomBubble\ndemo'),
+          tabs: const [
+            Tab(text: 'Generator'),
+            Tab(text: 'Bubble\ndemo'),
+            Tab(text: 'CustomBubble\ndemo'),
           ],
         ),
       ),
       body: SafeArea(
         child: TabBarView(
           controller: _tabController,
-          children: <Widget>[
+          children: const <Widget>[
             Generator(),
             BubbleDemo(),
-            const Text('Test #2'),
+            Text('Test #2'),
           ],
         ),
       ),
     );
-  }
 }

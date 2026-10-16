@@ -5,14 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('the app opens on the generator', (tester) async {
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(const MyApp());
 
     expect(find.text('Bubble generator'), findsOneWidget);
     expect(find.byType(Generator), findsOneWidget);
   });
 
   testWidgets('every tab builds', (tester) async {
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(const MyApp());
 
     // The bubble demo starts a repeating animation: pumpAndSettle never ends.
     await tester.tap(find.text('Bubble\ndemo'));
