@@ -16,20 +16,22 @@ final primarySwatch = createSwatch(Color.fromARGB(255, 132, 151, 176));
 late MaterialColor cursorSwatch;
 
 MaterialColor createSwatch(Color color) {
+  // toARGB32() replaces value from Flutter 3.29; the floor is 3.27.
+  // ignore: deprecated_member_use
   return MaterialColor(color.value, {
     // Почти совпадают с Colors.blue
-    50: Color.alphaBlend(color.withOpacity(0.12), Colors.white),
-    100: Color.alphaBlend(color.withOpacity(0.30), Colors.white),
-    200: Color.alphaBlend(color.withOpacity(0.50), Colors.white),
-    300: Color.alphaBlend(color.withOpacity(0.70), Colors.white),
-    400: Color.alphaBlend(color.withOpacity(0.85), Colors.white),
+    50: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.12)), Colors.white),
+    100: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.30)), Colors.white),
+    200: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.50)), Colors.white),
+    300: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.70)), Colors.white),
+    400: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.85)), Colors.white),
     500: color,
     // Дальше синяя составляющая расходится с Colors.blue, равняюсь по зелёному
     // Тогда они расходятся по цвету, но совпадают по яркости
-    600: Color.alphaBlend(color.withOpacity(0.91), Colors.black),
-    700: Color.alphaBlend(color.withOpacity(0.79), Colors.black),
-    800: Color.alphaBlend(color.withOpacity(0.68), Colors.black),
-    900: Color.alphaBlend(color.withOpacity(0.48), Colors.black),
+    600: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.91)), Colors.black),
+    700: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.79)), Colors.black),
+    800: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.68)), Colors.black),
+    900: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.48)), Colors.black),
   });
 }
 
@@ -44,8 +46,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Bubble generator',
       theme: ThemeData(
+        // Drawn by the Material 2 rules it was written for: Material 3 ignores
+        // primarySwatch and would repaint the app in its own palette.
+        useMaterial3: false,
         primarySwatch: primarySwatch,
-        accentColor: Colors.blue,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: primarySwatch,
+          accentColor: Colors.blue,
+        ),
         textSelectionTheme: TextSelectionThemeData(cursorColor: cursorSwatch[500]),
 //        textSelectionColor: cursorSwatch[200],
 //        textSelectionHandleColor: cursorSwatch[400],
@@ -662,8 +670,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    print('initState $this');
-
     _tabController = new TabController(vsync: this, length: 3);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) setState(() {});
@@ -674,8 +680,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    print('build $this');
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,

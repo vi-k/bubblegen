@@ -171,7 +171,6 @@ class _NumericFieldState extends State<NumericField> {
       },
       onVerticalDragUpdate: !_focusNode.hasFocus ? null : (details) {
 //        print('onVerticalDragUpdate: $this focused=$_focused');
-        print('primaryDelta: ${details.primaryDelta}');
         var offset = details.localPosition - _savedPos;
         var steps = -(offset.dy / _swipeStep).floor();
         if (button == _ValueButton.left && steps > 0 || button == _ValueButton.right && steps < 0) steps = 0;
@@ -187,11 +186,11 @@ class _NumericFieldState extends State<NumericField> {
       },
       child: Material(
         color: _errorText != null
-            ? Theme.of(context).errorColor.withAlpha(192)
+            ? Theme.of(context).colorScheme.error.withAlpha(192)
             : _swipeButton == button
-            ? Theme.of(context).accentColor
+            ? Theme.of(context).colorScheme.secondary
             : _focusNode.hasFocus
-            ? Theme.of(context).accentColor.withAlpha(192)
+            ? Theme.of(context).colorScheme.secondary.withAlpha(192)
             : Theme.of(context).primaryColor.withAlpha(192),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
@@ -201,7 +200,7 @@ class _NumericFieldState extends State<NumericField> {
         ),
         child: InkWell(
           onTap: () => step(button == _ValueButton.left ? -1 : 1),
-          highlightColor: Theme.of(context).accentColor,
+          highlightColor: Theme.of(context).colorScheme.secondary,
           child: Container(
               height: _fieldHeight,
               width: _buttonWidth,
@@ -249,7 +248,7 @@ class _NumericFieldState extends State<NumericField> {
               border: OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                      color: _errorText != null ? Theme.of(context).errorColor : Theme.of(context).accentColor,
+                      color: _errorText != null ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.secondary,
                       width: 2.0
                   )
               ),

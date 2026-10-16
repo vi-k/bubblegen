@@ -136,7 +136,6 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
 
-    print('build $this');
 //    final animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
     final animation = TweenSequence([
       TweenSequenceItem<double>(

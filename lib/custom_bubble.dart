@@ -740,7 +740,7 @@ class Position {
   }
 
   @override
-  int get hashCode => hashValues(ratio.hashCode, offset.hashCode);
+  int get hashCode => Object.hash(ratio, offset);
 
   Position copyWith({
     double? ratio,
@@ -975,7 +975,6 @@ class InsetPos {
           }
         } else {
           final radians = pos.ratio * halfPi;
-          print(radians / math.pi * 180.0);
           final x = (1.0 - math.cos(radians)) * radius + pos.offset;
           if (x < 0.0) {
             type = prevType(type);
@@ -1086,7 +1085,7 @@ class AbsInsetPos {
   }
 
   @override
-  int get hashCode => hashValues(type.hashCode, pos.hashCode);
+  int get hashCode => Object.hash(type, pos);
 
   @override
   bool operator ==(Object other) {

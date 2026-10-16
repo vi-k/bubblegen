@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'snapshot.dart';
 
 String _color(Color color) =>
+    // toARGB32() replaces value from Flutter 3.29; the floor is 3.27.
+    // ignore: deprecated_member_use
     '0x${color.value.toRadixString(16).padLeft(8, '0')}';
 
 /// Records every call as text; a path is named by its first appearance.

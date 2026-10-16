@@ -134,8 +134,6 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 
   @override
   void initState() {
-    print('initState: $this');
-
     Generator.settings.width = 50.0;
     Generator.settings.height = 50.0;
     Generator.settings.additionalPadding = 0.0;
@@ -1106,8 +1104,6 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    print('build $this');
 
     final animation = Tween(begin: _settingsWidth, end: 0.0).animate(_settingsController);
 
