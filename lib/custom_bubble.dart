@@ -297,7 +297,7 @@ class RenderBubble extends RenderProxyBox {
       bubble.style.elevation * bubble.scale,
       true,
     );
-    if (pi.draft != null) context.canvas.drawPath(path, paint);
+    context.canvas.drawPath(path, paint);
 
     // Обводка
     if (bubble.style.strokeWidth != 0.0) {
