@@ -78,9 +78,13 @@ class _NumericFieldState extends State<NumericField> {
   static double round(double value, int fractionDigits) =>
       double.parse(value.toStringAsFixed(fractionDigits));
 
+  // Flooring value * 10^fractionDigits misses the grid: 0.57 * 100 is
+  // 56.99999999999999. The nearest grid value parses back to the very same
+  // double when value lies on the grid, so the comparison below is exact.
   static double floor(double value, int fractionDigits) {
-    final k = pow(10, fractionDigits);
-    return round((value * k).floorToDouble() / k, fractionDigits);
+    final nearest = round(value, fractionDigits);
+    if (nearest <= value) return nearest;
+    return round(nearest - pow(10, -fractionDigits), fractionDigits);
   }
 
   void step(int steps, {double? value}) {
