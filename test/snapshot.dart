@@ -35,7 +35,10 @@ List<String> rasterize(Path path, int width, int height) {
 /// A missing snapshot fails the test and prints the actual value as a map
 /// entry, every line prefixed with `@@`, ready to be pasted into [snapshots].
 void expectSnapshot(
-    Map<String, List<String>> snapshots, String name, List<String> actual,) {
+  Map<String, List<String>> snapshots,
+  String name,
+  List<String> actual,
+) {
   final expected = snapshots[name];
   if (expected == null) {
     final buffer = StringBuffer()..writeln("@@  '$name': [");

@@ -5,7 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'geometry.dart';
 
 class CustomBubble extends SingleChildRenderObjectWidget {
-  CustomBubble({super.key, 
+  CustomBubble({
+    super.key,
     this.scale = 1.0,
     this.drawDraft = false,
     this.style = const CustomBubbleStyle(),
@@ -53,17 +54,27 @@ class CustomBubble extends SingleChildRenderObjectWidget {
 //    ));
   }
 
-  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo? draftInfo) { }
+  void createInset(
+    int index,
+    Path path,
+    Box box,
+    Point start,
+    Point end,
+    Inset inset,
+    AbsInset absInset,
+    DraftInfo? draftInfo,
+  ) {}
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) => 'CustomBubble(${scale == 1.0 ? '' : 'scale: $scale, '}${drawDraft == false ? '' : 'drawDraft: $drawDraft, '}style: $style, insets: $insets)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      'CustomBubble(${scale == 1.0 ? '' : 'scale: $scale, '}${drawDraft == false ? '' : 'drawDraft: $drawDraft, '}style: $style, insets: $insets)';
 }
 
 class RenderBubble extends RenderProxyBox {
   RenderBubble(
-      CustomBubble bubble, {
-        RenderBox? child,
-      })  : _bubble = bubble,
+    CustomBubble bubble, {
+    RenderBox? child,
+  })  : _bubble = bubble,
         super(child);
 
   CustomBubble _bubble;
@@ -87,8 +98,10 @@ class RenderBubble extends RenderProxyBox {
 //      final nipPlaceholderSize = bubble.style.nipPlaceholderSize ?? bubble.style.nipSize;
 
 //        changes = Offset(nipPlaceholderSize, 0);
-      final maxWidth = constraints.maxWidth - (bubble.style.margin.left + bubble.style.margin.right) * bubble.scale;
-      final maxHeight = constraints.maxHeight - (bubble.style.margin.top + bubble.style.margin.bottom) * bubble.scale;
+      final maxWidth = constraints.maxWidth -
+          (bubble.style.margin.left + bubble.style.margin.right) * bubble.scale;
+      final maxHeight = constraints.maxHeight -
+          (bubble.style.margin.top + bubble.style.margin.bottom) * bubble.scale;
       final minWidth = math.min(constraints.minWidth, maxWidth);
       final minHeight = math.min(constraints.minHeight, maxHeight);
 
@@ -111,8 +124,15 @@ class RenderBubble extends RenderProxyBox {
 //      print('childConstraints: $childConstraints');
 
       child!.layout(childConstraints, parentUsesSize: true);
-      size = Size(child!.size.width + bubble.style.margin.left + bubble.style.margin.right,
-          child!.size.height + bubble.style.margin.top + bubble.style.margin.bottom,) * bubble.scale;
+      size = Size(
+            child!.size.width +
+                bubble.style.margin.left +
+                bubble.style.margin.right,
+            child!.size.height +
+                bubble.style.margin.top +
+                bubble.style.margin.bottom,
+          ) *
+          bubble.scale;
 //      print('child.size: ${child.size}');
 //      print('size: $size');
     } else {
@@ -135,10 +155,22 @@ class RenderBubble extends RenderProxyBox {
 //    print('size: $size');
 //    print('original size: ${size / pi.scale}');
 
-      pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
-      pi.box = Rect.fromLTRB(bubble.style.margin.left, bubble.style.margin.top,
-          pi.rect.right - bubble.style.margin.right, pi.rect.bottom - bubble.style.margin.bottom,);
-      childOffset = offset.translate(bubble.style.margin.left * bubble.scale, bubble.style.margin.top * bubble.scale);
+    pi.rect = Rect.fromLTWH(
+      0,
+      0,
+      size.width / bubble.scale,
+      size.height / bubble.scale,
+    );
+    pi.box = Rect.fromLTRB(
+      bubble.style.margin.left,
+      bubble.style.margin.top,
+      pi.rect.right - bubble.style.margin.right,
+      pi.rect.bottom - bubble.style.margin.bottom,
+    );
+    childOffset = offset.translate(
+      bubble.style.margin.left * bubble.scale,
+      bubble.style.margin.top * bubble.scale,
+    );
 
 //    if (bubble.style.nipSide.isHorizontal) {
 //      pi.rect = Rect.fromLTWH(0, 0, size.width / bubble.scale, size.height / bubble.scale);
@@ -157,23 +189,31 @@ class RenderBubble extends RenderProxyBox {
     // Если радиусы больше сторон бокса, рассчитываем коэффициент, чтобы равномерно уменьшить все радиусы
     var k = 1.0;
 
-    if (bubble.style.radius.topLeft + bubble.style.radius.topRight > pi.box.width) {
-      final tK = pi.box.width / (bubble.style.radius.topLeft + bubble.style.radius.topRight);
+    if (bubble.style.radius.topLeft + bubble.style.radius.topRight >
+        pi.box.width) {
+      final tK = pi.box.width /
+          (bubble.style.radius.topLeft + bubble.style.radius.topRight);
       if (tK < k) k = tK;
     }
 
-    if (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight > pi.box.width) {
-      final bK = pi.box.width / (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight);
+    if (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight >
+        pi.box.width) {
+      final bK = pi.box.width /
+          (bubble.style.radius.bottomLeft + bubble.style.radius.bottomRight);
       if (bK < k) k = bK;
     }
 
-    if (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft > pi.box.height) {
-      final lK = pi.box.height / (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft);
+    if (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft >
+        pi.box.height) {
+      final lK = pi.box.height /
+          (bubble.style.radius.topLeft + bubble.style.radius.bottomLeft);
       if (lK < k) k = lK;
     }
 
-    if (bubble.style.radius.topRight + bubble.style.radius.bottomRight > pi.box.height) {
-      final rK = pi.box.height / (bubble.style.radius.topRight + bubble.style.radius.bottomRight);
+    if (bubble.style.radius.topRight + bubble.style.radius.bottomRight >
+        pi.box.height) {
+      final rK = pi.box.height /
+          (bubble.style.radius.topRight + bubble.style.radius.bottomRight);
       if (rK < k) k = rK;
     }
 
@@ -183,30 +223,34 @@ class RenderBubble extends RenderProxyBox {
 //        bubble.style.nipRadius);
 
     var radius = bubble.style.radius.topLeft * k;
-    pi.ltCircle = Circle(Point(pi.box.left + radius, pi.box.top + radius), radius);
+    pi.ltCircle =
+        Circle(Point(pi.box.left + radius, pi.box.top + radius), radius);
 
     radius = bubble.style.radius.bottomLeft * k;
-    pi.lbCircle = Circle(Point(pi.box.left + radius, pi.box.bottom - radius), radius);
+    pi.lbCircle =
+        Circle(Point(pi.box.left + radius, pi.box.bottom - radius), radius);
 
     radius = bubble.style.radius.topRight * k;
-    pi.rtCircle = Circle(Point(pi.box.right - radius, pi.box.top + radius), radius);
+    pi.rtCircle =
+        Circle(Point(pi.box.right - radius, pi.box.top + radius), radius);
 
     radius = bubble.style.radius.bottomRight * k;
-    pi.rbCircle = Circle(Point(pi.box.right - radius, pi.box.bottom - radius), radius);
+    pi.rbCircle =
+        Circle(Point(pi.box.right - radius, pi.box.bottom - radius), radius);
 
     pi.draft = bubble.drawDraft ? DraftInfo() : null;
 
     final path = Path();
 
     final box = Box.fromLTRBAndCorners(
-        pi.box.left,
-        pi.box.top,
-        pi.box.right,
-        pi.box.bottom,
-        topLeft: pi.ltCircle.radius,
-        topRight: pi.rtCircle.radius,
-        bottomLeft: pi.lbCircle.radius,
-        bottomRight: pi.rbCircle.radius,
+      pi.box.left,
+      pi.box.top,
+      pi.box.right,
+      pi.box.bottom,
+      topLeft: pi.ltCircle.radius,
+      topRight: pi.rtCircle.radius,
+      bottomLeft: pi.lbCircle.radius,
+      bottomRight: pi.rbCircle.radius,
     );
 
     bubble.generateInsets();
@@ -249,7 +293,12 @@ class RenderBubble extends RenderProxyBox {
     paint.color = bubble.style.color;
     paint.style = PaintingStyle.fill;
     if (pi.draft != null) pi.draft!.paintBackground(context.canvas, pi);
-    context.canvas.drawShadow(path, bubble.style.shadowColor, bubble.style.elevation * bubble.scale, true);
+    context.canvas.drawShadow(
+      path,
+      bubble.style.shadowColor,
+      bubble.style.elevation * bubble.scale,
+      true,
+    );
     if (pi.draft != null) context.canvas.drawPath(path, paint);
 
     // Обводка
@@ -280,7 +329,9 @@ class RenderBubble extends RenderProxyBox {
 
 //    print('box: $box');
 
-    final start = absInsets.isNotEmpty ? absInsets[0].start : const AbsInsetPos(InsetPosType.topLeft, 0);
+    final start = absInsets.isNotEmpty
+        ? absInsets[0].start
+        : const AbsInsetPos(InsetPosType.topLeft, 0);
     var lastPoint = start.apply(box);
 //    print('moveTo: $start $lastPoint');
     path.moveTo(lastPoint.x, lastPoint.y);
@@ -298,14 +349,24 @@ class RenderBubble extends RenderProxyBox {
           draftInfo.addPoint(lastPoint);
           draftInfo.addPoint(nextPoint, DraftType.Main);
         }
-        bubble.createInset(index, path, box, lastPoint, nextPoint, inset, absInset, draftInfo);
+        bubble.createInset(
+          index,
+          path,
+          box,
+          lastPoint,
+          nextPoint,
+          inset,
+          absInset,
+          draftInfo,
+        );
         lastPoint = nextPoint;
 
         // Устанавливаем в точку возврата самостоятельно
         path.lineTo(nextPoint.x, nextPoint.y);
 
         // Путь до следующей врезки
-        final pos = index < absInsets.length - 1 ? absInsets[index + 1].start : start;
+        final pos =
+            index < absInsets.length - 1 ? absInsets[index + 1].start : start;
         final point = pathFromTo(path, box, absInset.end, pos);
         if (point != null) lastPoint = point;
       }
@@ -334,7 +395,10 @@ class RenderBubble extends RenderProxyBox {
       point = pos.apply(box);
       if (prevPos.isOnCorner) {
 //        print('arcTo: $pos $point');
-        path.arcToPoint(point, radius: Radius.circular(prevPos.getRadius(box)!));
+        path.arcToPoint(
+          point,
+          radius: Radius.circular(prevPos.getRadius(box)!),
+        );
       } else {
 //        print('lineTo: $pos $point');
         path.lineTo(point.x, point.y);
@@ -366,24 +430,26 @@ class BubbleRadius {
   final double bottomLeft;
   final double bottomRight;
 
-  bool get hasOneRadius => topLeft == topRight && bottomLeft == bottomRight && topLeft == bottomLeft;
+  bool get hasOneRadius =>
+      topLeft == topRight && bottomLeft == bottomRight && topLeft == bottomLeft;
 
   BubbleRadius copyWith({
     double? topLeft,
     double? topRight,
     double? bottomLeft,
     double? bottomRight,
-  }) => BubbleRadius(
-      topLeft: topLeft ?? this.topLeft,
-      topRight: topRight ?? this.topRight,
-      bottomRight: bottomRight ?? this.bottomRight,
-      bottomLeft: bottomLeft ?? this.bottomLeft,
-    );
+  }) =>
+      BubbleRadius(
+        topLeft: topLeft ?? this.topLeft,
+        topRight: topRight ?? this.topRight,
+        bottomRight: bottomRight ?? this.bottomRight,
+        bottomLeft: bottomLeft ?? this.bottomLeft,
+      );
 
   @override
   String toString() => hasOneRadius
-        ? 'BubbleRadius(all: $topLeft)'
-        : 'BubbleRadius(topLeft: $topLeft, topRight: $topRight, bottomLeft: $bottomLeft, bottomRight: $bottomRight)';
+      ? 'BubbleRadius(all: $topLeft)'
+      : 'BubbleRadius(topLeft: $topLeft, topRight: $topRight, bottomLeft: $bottomLeft, bottomRight: $bottomRight)';
 }
 
 enum DraftType { Draft, Main, Error }
@@ -429,17 +495,34 @@ class DraftInfo {
   List<DraftLineSegment> get lineSegments => _lineSegments;
   List<DraftPoint> get points => _points;
 
-  void addLine(Point start, double direct, [DraftType type = DraftType.Draft]) =>
+  void addLine(
+    Point start,
+    double direct, [
+    DraftType type = DraftType.Draft,
+  ]) =>
       lines.add(DraftLine(Line(start, direct), type));
   void addLineCopy(Line line, [DraftType type = DraftType.Draft]) =>
       lines.add(DraftLine(Line(line.start, line.direct), type));
 
-  void addLineSegment(Point start, Point end, [DraftType type = DraftType.Draft]) =>
+  void addLineSegment(
+    Point start,
+    Point end, [
+    DraftType type = DraftType.Draft,
+  ]) =>
       lineSegments.add(DraftLineSegment(LineSegment(start, end), type));
-  void addLineSegmentCopy(LineSegment lineSegment, [DraftType type = DraftType.Draft]) =>
-      lineSegments.add(DraftLineSegment(LineSegment(lineSegment.start, lineSegment.end), type));
+  void addLineSegmentCopy(
+    LineSegment lineSegment, [
+    DraftType type = DraftType.Draft,
+  ]) =>
+      lineSegments.add(
+        DraftLineSegment(
+          LineSegment(lineSegment.start, lineSegment.end),
+          type,
+        ),
+      );
 
-  void addPoint(Point point, [DraftType type = DraftType.Draft]) => points.add(DraftPoint(point, type));
+  void addPoint(Point point, [DraftType type = DraftType.Draft]) =>
+      points.add(DraftPoint(point, type));
 
   void paintBackground(Canvas canvas, BubblePaintInfo pi) {
     final dp = 1.0 / pi.scale;
@@ -531,16 +614,27 @@ class DraftInfo {
     if (showTopCorner) {
       paint.style = PaintingStyle.fill;
       canvas.drawArc(
-          Rect.fromCenter(center: pi.ltCircle.center, width: pi.ltCircle.diameter, height: pi.ltCircle.diameter),
-          -math.pi / 2,
-          -math.pi / 2,
-          true,
-          paint,);
+        Rect.fromCenter(
+          center: pi.ltCircle.center,
+          width: pi.ltCircle.diameter,
+          height: pi.ltCircle.diameter,
+        ),
+        -math.pi / 2,
+        -math.pi / 2,
+        true,
+        paint,
+      );
     } else {
       path.reset();
-      path.moveTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy - pi.ltCircle.radius);
+      path.moveTo(
+        pi.ltCircle.center.dx,
+        pi.ltCircle.center.dy - pi.ltCircle.radius,
+      );
       path.lineTo(pi.ltCircle.center.dx, pi.ltCircle.center.dy);
-      path.lineTo(pi.ltCircle.center.dx - pi.ltCircle.radius, pi.ltCircle.center.dy);
+      path.lineTo(
+        pi.ltCircle.center.dx - pi.ltCircle.radius,
+        pi.ltCircle.center.dy,
+      );
       paint.style = PaintingStyle.stroke;
       canvas.drawPath(path, paint);
     }
@@ -549,38 +643,65 @@ class DraftInfo {
     if (showBottomCorner) {
       paint.style = PaintingStyle.fill;
       canvas.drawArc(
-          Rect.fromCenter(center: pi.lbCircle.center, width: pi.lbCircle.diameter, height: pi.lbCircle.diameter),
-          math.pi / 2,
-          math.pi / 2,
-          true,
-          paint,);
+        Rect.fromCenter(
+          center: pi.lbCircle.center,
+          width: pi.lbCircle.diameter,
+          height: pi.lbCircle.diameter,
+        ),
+        math.pi / 2,
+        math.pi / 2,
+        true,
+        paint,
+      );
     } else {
       path.reset();
-      path.moveTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy + pi.lbCircle.radius);
+      path.moveTo(
+        pi.lbCircle.center.dx,
+        pi.lbCircle.center.dy + pi.lbCircle.radius,
+      );
       path.lineTo(pi.lbCircle.center.dx, pi.lbCircle.center.dy);
-      path.lineTo(pi.lbCircle.center.dx - pi.lbCircle.radius, pi.lbCircle.center.dy);
+      path.lineTo(
+        pi.lbCircle.center.dx - pi.lbCircle.radius,
+        pi.lbCircle.center.dy,
+      );
       paint.style = PaintingStyle.stroke;
       canvas.drawPath(path, paint);
     }
 
     // Правый верхний угол
     path.reset();
-    path.moveTo(pi.rtCircle.center.dx, pi.rtCircle.center.dy - pi.rtCircle.radius);
+    path.moveTo(
+      pi.rtCircle.center.dx,
+      pi.rtCircle.center.dy - pi.rtCircle.radius,
+    );
     path.lineTo(pi.rtCircle.center.dx, pi.rtCircle.center.dy);
-    path.lineTo(pi.rtCircle.center.dx + pi.rtCircle.radius, pi.rtCircle.center.dy);
+    path.lineTo(
+      pi.rtCircle.center.dx + pi.rtCircle.radius,
+      pi.rtCircle.center.dy,
+    );
     paint.style = PaintingStyle.stroke;
     canvas.drawPath(path, paint);
 
     // Правый нижний угол
     path.reset();
-    path.moveTo(pi.rbCircle.center.dx, pi.rbCircle.center.dy + pi.rbCircle.radius);
+    path.moveTo(
+      pi.rbCircle.center.dx,
+      pi.rbCircle.center.dy + pi.rbCircle.radius,
+    );
     path.lineTo(pi.rbCircle.center.dx, pi.rbCircle.center.dy);
-    path.lineTo(pi.rbCircle.center.dx + pi.rbCircle.radius, pi.rbCircle.center.dy);
+    path.lineTo(
+      pi.rbCircle.center.dx + pi.rbCircle.radius,
+      pi.rbCircle.center.dy,
+    );
     paint.style = PaintingStyle.stroke;
     canvas.drawPath(path, paint);
 
     for (final type in DraftType.values) {
-      paint.color = type == DraftType.Error ? errorColor : type == DraftType.Main ? mainColor : draftColor;
+      paint.color = type == DraftType.Error
+          ? errorColor
+          : type == DraftType.Main
+              ? mainColor
+              : draftColor;
 
       paint.style = PaintingStyle.stroke;
 
@@ -605,8 +726,10 @@ class DraftInfo {
           var size = 0.0;
           while (true) {
             final start = item.line.point(size);
-            if (start.x < pi.rect.left - padding || start.x > pi.rect.right + padding
-                || start.y < pi.rect.top - padding || start.y > pi.rect.bottom + padding) {
+            if (start.x < pi.rect.left - padding ||
+                start.x > pi.rect.right + padding ||
+                start.y < pi.rect.top - padding ||
+                start.y > pi.rect.bottom + padding) {
               break;
             }
             final end = item.line.point(size + interval);
@@ -679,29 +802,31 @@ class CustomBubbleStyle {
   final double strokeWidth;
 
   CustomBubbleStyle copyWith({
-      EdgeInsets? margin,
-      BubbleRadius? radius,
-      bool? hFlip,
-      bool? vFlip,
-      Color? color,
-      double? elevation,
-      Color? shadowColor,
-      Color? strokeColor,
-      double? strokeWidth,
-  }) => CustomBubbleStyle(
-      margin: margin ?? this.margin,
-      radius: radius ?? this.radius,
-      hFlip: hFlip ?? this.hFlip,
-      vFlip: vFlip ?? this.vFlip,
-      color: color ?? this.color,
-      elevation: elevation ?? this.elevation,
-      shadowColor: shadowColor ?? this.shadowColor,
-      strokeColor: strokeColor ?? this.strokeColor,
-      strokeWidth: strokeWidth ?? this.strokeWidth,
-    );
+    EdgeInsets? margin,
+    BubbleRadius? radius,
+    bool? hFlip,
+    bool? vFlip,
+    Color? color,
+    double? elevation,
+    Color? shadowColor,
+    Color? strokeColor,
+    double? strokeWidth,
+  }) =>
+      CustomBubbleStyle(
+        margin: margin ?? this.margin,
+        radius: radius ?? this.radius,
+        hFlip: hFlip ?? this.hFlip,
+        vFlip: vFlip ?? this.vFlip,
+        color: color ?? this.color,
+        elevation: elevation ?? this.elevation,
+        shadowColor: shadowColor ?? this.shadowColor,
+        strokeColor: strokeColor ?? this.strokeColor,
+        strokeWidth: strokeWidth ?? this.strokeWidth,
+      );
 
   @override
-  String toString() => 'CustomBubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
+  String toString() =>
+      'CustomBubbleStyle(margin: $margin, radius: $radius, hFlip: $hFlip, vFlip: $vFlip, color: $color, elevation: $elevation, shadowColor: $shadowColor, strokeColor: $strokeColor, strokeWidth: $strokeWidth)';
 }
 
 class Position {
@@ -716,7 +841,8 @@ class Position {
   double apply(double size) => size * ratio + offset;
 
   @override
-  bool operator ==(Object other) => other is Position && other.ratio == ratio && other.offset == offset;
+  bool operator ==(Object other) =>
+      other is Position && other.ratio == ratio && other.offset == offset;
 
   @override
   int get hashCode => Object.hash(ratio, offset);
@@ -724,10 +850,11 @@ class Position {
   Position copyWith({
     double? ratio,
     double? offset,
-  }) => Position(
-      ratio: ratio ?? this.ratio,
-      offset: offset ?? this.offset,
-    );
+  }) =>
+      Position(
+        ratio: ratio ?? this.ratio,
+        offset: offset ?? this.offset,
+      );
 
   @override
   String toString() => 'Position(ratio: $ratio, offset: $offset)';
@@ -747,41 +874,41 @@ class Box {
   });
 
   Box.fromLTRBR(
-      double left,
-      double top,
-      double right,
-      double bottom,
-      double radius,
-      ) : this._(
-    top: top,
-    left: left,
-    right: right,
-    bottom: bottom,
-    tlRadius: radius,
-    trRadius: radius,
-    blRadius: radius,
-    brRadius: radius,
-  );
+    double left,
+    double top,
+    double right,
+    double bottom,
+    double radius,
+  ) : this._(
+          top: top,
+          left: left,
+          right: right,
+          bottom: bottom,
+          tlRadius: radius,
+          trRadius: radius,
+          blRadius: radius,
+          brRadius: radius,
+        );
 
   Box.fromLTRBAndCorners(
-      double left,
-      double top,
-      double right,
-      double bottom, {
-        double topLeft = 0.0,
-        double topRight = 0.0,
-        double bottomRight = 0.0,
-        double bottomLeft = 0.0,
-      })  : this._(
-    top: top,
-    left: left,
-    right: right,
-    bottom: bottom,
-    tlRadius: topLeft,
-    trRadius: topRight,
-    blRadius: bottomLeft,
-    brRadius: bottomRight,
-  );
+    double left,
+    double top,
+    double right,
+    double bottom, {
+    double topLeft = 0.0,
+    double topRight = 0.0,
+    double bottomRight = 0.0,
+    double bottomLeft = 0.0,
+  }) : this._(
+          top: top,
+          left: left,
+          right: right,
+          bottom: bottom,
+          tlRadius: topLeft,
+          trRadius: topRight,
+          blRadius: bottomLeft,
+          brRadius: bottomRight,
+        );
 
   final double left;
   final double top;
@@ -801,7 +928,9 @@ class Box {
 
   @override
   String toString() {
-    final radius = tlRadius == trRadius && tlRadius == brRadius && tlRadius == blRadius
+    final radius = tlRadius == trRadius &&
+            tlRadius == brRadius &&
+            tlRadius == blRadius
         ? 'radius: $tlRadius'
         : 'tlRadius: $tlRadius, trRadius: $trRadius, brRadius: $brRadius, blRadius: $blRadius';
     return 'Box(left: $left, top: $top, right: $right, bottom: $bottom, width: $width, height: $height, $radius)';
@@ -820,7 +949,16 @@ class Inset {
 }
 
 /// Тип позиции врезки
-enum InsetPosType { left, topLeft, top, topRight, right, bottomRight, bottom, bottomLeft }
+enum InsetPosType {
+  left,
+  topLeft,
+  top,
+  topRight,
+  right,
+  bottomRight,
+  bottom,
+  bottomLeft
+}
 
 /// Тип рассчёта смещения, когда оно попадает на угол
 /// byLength - по длине дуги угла
@@ -830,7 +968,11 @@ enum CornerOffset { byLength, byHeight, byWidth }
 
 /// Позиция врезки
 class InsetPos {
-  const InsetPos(this.type, this.pos, [this.cornerOffset = CornerOffset.byLength]);
+  const InsetPos(
+    this.type,
+    this.pos, [
+    this.cornerOffset = CornerOffset.byLength,
+  ]);
 
   final InsetPosType type;
   final Position pos;
@@ -838,18 +980,30 @@ class InsetPos {
 
   static const halfPi = math.pi / 2.0;
 
-  static bool isSide(InsetPosType type) => type == InsetPosType.left || type == InsetPosType.top || type == InsetPosType.right || type == InsetPosType.bottom;
+  static bool isSide(InsetPosType type) =>
+      type == InsetPosType.left ||
+      type == InsetPosType.top ||
+      type == InsetPosType.right ||
+      type == InsetPosType.bottom;
 
-  static bool isCorner(InsetPosType type) => type == InsetPosType.topLeft || type == InsetPosType.topRight || type == InsetPosType.bottomRight || type == InsetPosType.bottomLeft;
+  static bool isCorner(InsetPosType type) =>
+      type == InsetPosType.topLeft ||
+      type == InsetPosType.topRight ||
+      type == InsetPosType.bottomRight ||
+      type == InsetPosType.bottomLeft;
 
   static InsetPosType nextType(InsetPosType type) {
     final newIndex = type.index + 1;
-    return newIndex < InsetPosType.values.length ? InsetPosType.values[newIndex] : InsetPosType.values.first;
+    return newIndex < InsetPosType.values.length
+        ? InsetPosType.values[newIndex]
+        : InsetPosType.values.first;
   }
 
   static InsetPosType prevType(InsetPosType type) {
     final newIndex = type.index - 1;
-    return newIndex >= 0 ? InsetPosType.values[newIndex] : InsetPosType.values.last;
+    return newIndex >= 0
+        ? InsetPosType.values[newIndex]
+        : InsetPosType.values.last;
   }
 
   AbsInsetPos apply(Box box) {
@@ -901,7 +1055,8 @@ class InsetPos {
           result = AbsInsetPos(type, pos.ratio * halfPi);
         } else if (cornerOffset == CornerOffset.byLength) {
           final cornerLen = halfPi * radius; // Для дуги угла
-          final offset = cornerLen * pos.ratio + pos.offset; // Расстояние до точки
+          final offset =
+              cornerLen * pos.ratio + pos.offset; // Расстояние до точки
           if (offset < 0.0) {
             type = prevType(type);
             pos = Position(ratio: 1, offset: offset);
@@ -911,8 +1066,12 @@ class InsetPos {
           } else {
             result = AbsInsetPos(type, offset / cornerLen * halfPi);
           }
-        } else if (cornerOffset == CornerOffset.byHeight && (type == InsetPosType.topLeft || type == InsetPosType.bottomRight)
-            || cornerOffset == CornerOffset.byWidth && (type == InsetPosType.topRight || type == InsetPosType.bottomLeft)) {
+        } else if (cornerOffset == CornerOffset.byHeight &&
+                (type == InsetPosType.topLeft ||
+                    type == InsetPosType.bottomRight) ||
+            cornerOffset == CornerOffset.byWidth &&
+                (type == InsetPosType.topRight ||
+                    type == InsetPosType.bottomLeft)) {
           final radians = pos.ratio * halfPi;
           final y = math.sin(radians) * radius + pos.offset;
           if (y < 0.0) {
@@ -947,11 +1106,12 @@ class InsetPos {
     InsetPosType? type,
     Position? pos,
     CornerOffset? cornerOffset,
-  }) => InsetPos(
-      type ?? this.type,
-      pos ?? this.pos,
-      cornerOffset ?? this.cornerOffset,
-    );
+  }) =>
+      InsetPos(
+        type ?? this.type,
+        pos ?? this.pos,
+        cornerOffset ?? this.cornerOffset,
+      );
 
   @override
   String toString() => 'InsetPos($type, $pos, $cornerOffset)';
@@ -1011,21 +1171,24 @@ class AbsInsetPos {
   final InsetPosType type;
   final double pos;
 
-  bool get isOnSide => type == InsetPosType.left
-        || type == InsetPosType.top
-        || type == InsetPosType.right
-        || type == InsetPosType.bottom;
+  bool get isOnSide =>
+      type == InsetPosType.left ||
+      type == InsetPosType.top ||
+      type == InsetPosType.right ||
+      type == InsetPosType.bottom;
 
-  bool get isOnCorner => type == InsetPosType.topLeft
-      || type == InsetPosType.topRight
-      || type == InsetPosType.bottomRight
-      || type == InsetPosType.bottomLeft;
+  bool get isOnCorner =>
+      type == InsetPosType.topLeft ||
+      type == InsetPosType.topRight ||
+      type == InsetPosType.bottomRight ||
+      type == InsetPosType.bottomLeft;
 
   @override
   int get hashCode => Object.hash(type, pos);
 
   @override
-  bool operator ==(Object other) => other is AbsInsetPos && type == other.type && pos == other.pos;
+  bool operator ==(Object other) =>
+      other is AbsInsetPos && type == other.type && pos == other.pos;
 
   int compareTo(AbsInsetPos other) {
     var result = type.index.compareTo(other.type.index);
@@ -1046,8 +1209,8 @@ class AbsInsetPos {
 
       case InsetPosType.topLeft:
         point = Point(
-            box.left + (1.0 - math.cos(pos)) * box.tlRadius,
-            box.top + (1.0 - math.sin(pos)) * box.tlRadius,
+          box.left + (1.0 - math.cos(pos)) * box.tlRadius,
+          box.top + (1.0 - math.sin(pos)) * box.tlRadius,
         );
 
       case InsetPosType.top:
@@ -1055,8 +1218,8 @@ class AbsInsetPos {
 
       case InsetPosType.topRight:
         point = Point(
-            box.right - (1.0 - math.sin(pos)) * box.trRadius,
-            box.top + (1.0 - math.cos(pos)) * box.trRadius,
+          box.right - (1.0 - math.sin(pos)) * box.trRadius,
+          box.top + (1.0 - math.cos(pos)) * box.trRadius,
         );
 
       case InsetPosType.right:
@@ -1064,8 +1227,8 @@ class AbsInsetPos {
 
       case InsetPosType.bottomRight:
         point = Point(
-            box.right - (1.0 - math.cos(pos)) * box.brRadius,
-            box.bottom - (1.0 - math.sin(pos)) * box.brRadius,
+          box.right - (1.0 - math.cos(pos)) * box.brRadius,
+          box.bottom - (1.0 - math.sin(pos)) * box.brRadius,
         );
 
       case InsetPosType.bottom:
@@ -1073,8 +1236,8 @@ class AbsInsetPos {
 
       case InsetPosType.bottomLeft:
         point = Point(
-            box.left + (1.0 - math.sin(pos)) * box.blRadius,
-            box.bottom - (1.0 - math.cos(pos)) * box.blRadius,
+          box.left + (1.0 - math.sin(pos)) * box.blRadius,
+          box.bottom - (1.0 - math.cos(pos)) * box.blRadius,
         );
     }
 

@@ -37,7 +37,10 @@ class Line {
   double tan() => inf(math.tan(direct));
 
   /// Точка на линии
-  Point point(double distance) => Point(start.x + distance * math.cos(direct), start.y + distance * math.sin(direct));
+  Point point(double distance) => Point(
+        start.x + distance * math.cos(direct),
+        start.y + distance * math.sin(direct),
+      );
 
   /// Точка на линии
   Point pointByX(double x) => Point(x, start.y + (x - start.x) * tan());
@@ -57,7 +60,8 @@ class Line {
     } else {
       // Вспомогательный треугольник, гипотенуза которого находится на одной горизонтали с точкой
       final x = start.x + (point.y - start.y) / tan;
-      distance = math.sin(direct) * (point.x - x); // Дальний катет треугольника - искомое расстояние
+      distance = math.sin(direct) *
+          (point.x - x); // Дальний катет треугольника - искомое расстояние
       angle = direct + math.pi / 2;
     }
 
@@ -76,7 +80,9 @@ class Line {
     // Линия не пересекается с окружностью
     if (normal.length > circle.radius) return null;
 
-    final halfChord = math.sqrt(circle.radius * circle.radius - normal.length * normal.length); // Половина хорды
+    final halfChord = math.sqrt(
+      circle.radius * circle.radius - normal.length * normal.length,
+    ); // Половина хорды
     final dx = math.cos(direct) * halfChord;
     final dy = math.sin(direct) * halfChord;
     final start = Point(normal.end.x - dx, normal.end.y - dy);
@@ -93,7 +99,8 @@ class Line {
 
     final mX = start.x + (other.start.y - start.y) / thisTan;
 //    if (mX == this.start.x) return Point(mX, other.start.y + (mX - other.start.x) * otherTn);
-    final x = other.start.x - (other.start.x - mX) * thisTan / (thisTan - other.tan());
+    final x = other.start.x -
+        (other.start.x - mX) * thisTan / (thisTan - other.tan());
     final r = (x - start.x) / math.cos(direct);
     final y = start.y + math.sin(direct) * r;
 
@@ -144,7 +151,10 @@ class LineSegment {
 
   Point get end {
     if (_end == null && _direct != null) {
-      _end = Point(start.x + _length! * math.cos(_direct!), start.y + _length! * math.sin(_direct!));
+      _end = Point(
+        start.x + _length! * math.cos(_direct!),
+        start.y + _length! * math.sin(_direct!),
+      );
     }
     return _end!;
   }
@@ -156,7 +166,8 @@ class LineSegment {
   }
 
   double get length {
-    _length ??= math.sqrt(math.pow(_end!.x - start.x, 2) + math.pow(_end!.y - start.y, 2));
+    _length ??= math
+        .sqrt(math.pow(_end!.x - start.x, 2) + math.pow(_end!.y - start.y, 2));
     return _length!;
   }
 
@@ -185,7 +196,10 @@ class Circle {
   /// Точка на расстоянии от центра окружности: point(alpha, distance)
   Point point(double alpha, [double? distance]) {
     distance ??= radius;
-    return Point(center.x + distance * math.cos(alpha), center.y + distance * math.sin(alpha));
+    return Point(
+      center.x + distance * math.cos(alpha),
+      center.y + distance * math.sin(alpha),
+    );
   }
 
   /// Касательная, общая для двух окружностей
@@ -193,12 +207,18 @@ class Circle {
   /// @param other Вторая окружность
   /// @param firstSide Какая часть окружности дожна быть использована: -1.0 - верх, 1.0 - низ.
   /// @param secondSide Какая часть окружности дожна быть использована: -1.0 - верх, 1.0 - низ.
-  LineSegment tangentToCircle(Circle other, double firstSide, double secondSide) {
+  LineSegment tangentToCircle(
+    Circle other,
+    double firstSide,
+    double secondSide,
+  ) {
     // Линия, соединяющая центры
     final c2c = LineSegment(center, other.center);
 
     // Вспомогательный треугольник, где касательная - гипотенуза
-    final alpha = math.asin((radius - firstSide * secondSide * other.radius) / c2c.length).abs();
+    final alpha = math
+        .asin((radius - firstSide * secondSide * other.radius) / c2c.length)
+        .abs();
 //    print('alpha: ${alpha / pi * 180}');
 
     // Угол наклона касательной

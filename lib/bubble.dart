@@ -112,20 +112,36 @@ class NipLine {
   final double? sz1; // curve's sz₁
   final double? sz2; // curve's sz₂
 
-  const NipLine.line(double lineAngle) : this(NipLineType.line, NipLinePosType.angle, lineAngle);
-  const NipLine.lineTo(double pos) : this(NipLineType.line, NipLinePosType.pos, pos);
-  const NipLine.relativeLineTo(double offset) : this(NipLineType.line, NipLinePosType.offset, offset);
-  const NipLine.lineToCorner(double cornerAngle) : this(NipLineType.line, NipLinePosType.corners, cornerAngle);
+  const NipLine.line(double lineAngle)
+      : this(NipLineType.line, NipLinePosType.angle, lineAngle);
+  const NipLine.lineTo(double pos)
+      : this(NipLineType.line, NipLinePosType.pos, pos);
+  const NipLine.relativeLineTo(double offset)
+      : this(NipLineType.line, NipLinePosType.offset, offset);
+  const NipLine.lineToCorner(double cornerAngle)
+      : this(NipLineType.line, NipLinePosType.corners, cornerAngle);
 
-  const NipLine.arc(double lineAngle, double arcAngle) : this(NipLineType.arc, NipLinePosType.angle, lineAngle, a1: arcAngle);
-  const NipLine.arcTo(double pos, double arcAngle) : this(NipLineType.arc, NipLinePosType.pos, pos, a1: arcAngle);
+  const NipLine.arc(double lineAngle, double arcAngle)
+      : this(NipLineType.arc, NipLinePosType.angle, lineAngle, a1: arcAngle);
+  const NipLine.arcTo(double pos, double arcAngle)
+      : this(NipLineType.arc, NipLinePosType.pos, pos, a1: arcAngle);
   const NipLine.relativeArcTo(double offset, double arcAngle)
       : this(NipLineType.arc, NipLinePosType.offset, offset, a1: arcAngle);
   const NipLine.arcToCorner(double cornerAngle, double arcAngle)
-      : this(NipLineType.arc, NipLinePosType.corners, cornerAngle, a1: arcAngle);
-
-  const NipLine.curve(double lineAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
       : this(
+          NipLineType.arc,
+          NipLinePosType.corners,
+          cornerAngle,
+          a1: arcAngle,
+        );
+
+  const NipLine.curve(
+    double lineAngle, {
+    angle1,
+    angle2,
+    size1 = 2 / 3,
+    size2 = 2 / 3,
+  }) : this(
           NipLineType.curve,
           NipLinePosType.angle,
           lineAngle,
@@ -135,8 +151,13 @@ class NipLine {
           sz2: size2,
         );
 
-  const NipLine.curveTo(double pos, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this(
+  const NipLine.curveTo(
+    double pos, {
+    angle1,
+    angle2,
+    size1 = 2 / 3,
+    size2 = 2 / 3,
+  }) : this(
           NipLineType.curve,
           NipLinePosType.pos,
           pos,
@@ -146,8 +167,13 @@ class NipLine {
           sz2: size2,
         );
 
-  const NipLine.relativeCurveTo(double pos, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this(
+  const NipLine.relativeCurveTo(
+    double pos, {
+    angle1,
+    angle2,
+    size1 = 2 / 3,
+    size2 = 2 / 3,
+  }) : this(
           NipLineType.curve,
           NipLinePosType.offset,
           pos,
@@ -157,8 +183,13 @@ class NipLine {
           sz2: size2,
         );
 
-  const NipLine.curveToCorner(double cornerAngle, {angle1, angle2, size1 = 2 / 3, size2 = 2 / 3})
-      : this(
+  const NipLine.curveToCorner(
+    double cornerAngle, {
+    angle1,
+    angle2,
+    size1 = 2 / 3,
+    size2 = 2 / 3,
+  }) : this(
           NipLineType.curve,
           NipLinePosType.corners,
           cornerAngle,
@@ -195,36 +226,37 @@ class BubbleStyle extends CustomBubbleStyle {
 
   @override
   BubbleStyle copyWith({
-      EdgeInsets? margin,
-      BubbleRadius? radius,
+    EdgeInsets? margin,
+    BubbleRadius? radius,
 //      NipSide nipSide,
-      bool? hFlip,
-      bool? vFlip,
+    bool? hFlip,
+    bool? vFlip,
 //      double nipRadius,
 //      double nipSize,
 //      double nipPlaceholderSize,
 //      NipOffset nipOffset,
-      Color? color,
-      double? elevation,
-      Color? shadowColor,
-      Color? strokeColor,
-      double? strokeWidth,
-  }) => BubbleStyle(
-      margin: margin ?? this.margin,
-      radius: radius ?? this.radius,
+    Color? color,
+    double? elevation,
+    Color? shadowColor,
+    Color? strokeColor,
+    double? strokeWidth,
+  }) =>
+      BubbleStyle(
+        margin: margin ?? this.margin,
+        radius: radius ?? this.radius,
 //      nipSide: nipSide ?? this.nipSide,
-      hFlip: hFlip ?? this.hFlip,
-      vFlip: vFlip ?? this.vFlip,
+        hFlip: hFlip ?? this.hFlip,
+        vFlip: vFlip ?? this.vFlip,
 //      nipRadius: nipRadius ?? this.nipRadius,
 //      nipSize: nipSize ?? this.nipSize,
 //      nipPlaceholderSize: nipPlaceholderSize ?? this.nipPlaceholderSize,
 //      nipOffset: nipOffset ?? this.nipOffset,
-      color: color ?? this.color,
-      elevation: elevation ?? this.elevation,
-      shadowColor: shadowColor ?? this.shadowColor,
-      strokeColor: strokeColor ?? this.strokeColor,
-      strokeWidth: strokeWidth ?? this.strokeWidth,
-    );
+        color: color ?? this.color,
+        elevation: elevation ?? this.elevation,
+        shadowColor: shadowColor ?? this.shadowColor,
+        strokeColor: strokeColor ?? this.strokeColor,
+        strokeWidth: strokeWidth ?? this.strokeWidth,
+      );
 
   @override
   String toString() {
@@ -234,7 +266,8 @@ class BubbleStyle extends CustomBubbleStyle {
 }
 
 class Bubble extends CustomBubble {
-  Bubble({super.key, 
+  Bubble({
+    super.key,
     super.scale,
     super.drawDraft,
     required BubbleStyle super.style,
@@ -242,7 +275,7 @@ class Bubble extends CustomBubble {
     required this.topLine,
     required this.bottomLine,
     super.child,
-  })  : super(
+  }) : super(
           inset: nip.inset,
         );
 
@@ -261,7 +294,16 @@ class Bubble extends CustomBubble {
   }
 
   @override
-  void createInset(int index, Path path, Box box, Point start, Point end, Inset inset, AbsInset absInset, DraftInfo? draftInfo) {
+  void createInset(
+    int index,
+    Path path,
+    Box box,
+    Point start,
+    Point end,
+    Inset inset,
+    AbsInset absInset,
+    DraftInfo? draftInfo,
+  ) {
 //    final Inset inset;
 //    final double size;
 //    final double radius;
@@ -281,17 +323,25 @@ class Bubble extends CustomBubble {
       anchorAbsInsetPos = absInset.end;
     }
 
-    if (anchorAbsInsetPos.type == InsetPosType.left || nip.cornerOffset == CornerOffset.byHeight
-        && (anchorAbsInsetPos.type == InsetPosType.bottomLeft || anchorAbsInsetPos.type == InsetPosType.topLeft)) {
+    if (anchorAbsInsetPos.type == InsetPosType.left ||
+        nip.cornerOffset == CornerOffset.byHeight &&
+            (anchorAbsInsetPos.type == InsetPosType.bottomLeft ||
+                anchorAbsInsetPos.type == InsetPosType.topLeft)) {
       nipPoint = Point(box.left - nip.size, anchorPoint.y - nip.offset);
-    } else if (anchorAbsInsetPos.type == InsetPosType.right || nip.cornerOffset == CornerOffset.byHeight
-        && (anchorAbsInsetPos.type == InsetPosType.topRight || anchorAbsInsetPos.type == InsetPosType.bottomRight)) {
+    } else if (anchorAbsInsetPos.type == InsetPosType.right ||
+        nip.cornerOffset == CornerOffset.byHeight &&
+            (anchorAbsInsetPos.type == InsetPosType.topRight ||
+                anchorAbsInsetPos.type == InsetPosType.bottomRight)) {
       nipPoint = Point(box.right + nip.size, anchorPoint.y + nip.offset);
-    } else if (anchorAbsInsetPos.type == InsetPosType.top || nip.cornerOffset == CornerOffset.byWidth
-        && (anchorAbsInsetPos.type == InsetPosType.topLeft || anchorAbsInsetPos.type == InsetPosType.topRight)) {
+    } else if (anchorAbsInsetPos.type == InsetPosType.top ||
+        nip.cornerOffset == CornerOffset.byWidth &&
+            (anchorAbsInsetPos.type == InsetPosType.topLeft ||
+                anchorAbsInsetPos.type == InsetPosType.topRight)) {
       nipPoint = Point(anchorPoint.x + nip.offset, box.top - nip.size);
-    } else if (anchorAbsInsetPos.type == InsetPosType.bottom || nip.cornerOffset == CornerOffset.byWidth
-        && (anchorAbsInsetPos.type == InsetPosType.bottomRight || anchorAbsInsetPos.type == InsetPosType.bottomLeft)) {
+    } else if (anchorAbsInsetPos.type == InsetPosType.bottom ||
+        nip.cornerOffset == CornerOffset.byWidth &&
+            (anchorAbsInsetPos.type == InsetPosType.bottomRight ||
+                anchorAbsInsetPos.type == InsetPosType.bottomLeft)) {
       nipPoint = Point(anchorPoint.x - nip.offset, box.bottom + nip.size);
     } else if (nip.cornerOffset == CornerOffset.byLength) {
       final alpha = anchorAbsInsetPos.pos;
@@ -300,7 +350,8 @@ class Bubble extends CustomBubble {
           final radius = nip.size + box.tlRadius;
           final x = math.cos(alpha) * radius;
           final y = math.sin(alpha) * radius;
-          nipPoint = Point(box.left + box.tlRadius - x, box.top + box.tlRadius - y);
+          nipPoint =
+              Point(box.left + box.tlRadius - x, box.top + box.tlRadius - y);
         case InsetPosType.topRight:
           nipPoint = anchorPoint;
         case InsetPosType.bottomRight:
@@ -757,12 +808,13 @@ class Nip {
     NipAnchor? anchor,
     double? offset,
     CornerOffset? cornerOffset,
-  }) => Nip(
-      inset: inset ?? this.inset,
-      size: size ?? this.size,
-      radius: radius ?? this.radius,
-      anchor: anchor ?? this.anchor,
-      offset: offset ?? this.offset,
-      cornerOffset: cornerOffset ?? this.cornerOffset,
-    );
+  }) =>
+      Nip(
+        inset: inset ?? this.inset,
+        size: size ?? this.size,
+        radius: radius ?? this.radius,
+        anchor: anchor ?? this.anchor,
+        offset: offset ?? this.offset,
+        cornerOffset: cornerOffset ?? this.cornerOffset,
+      );
 }

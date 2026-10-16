@@ -10,8 +10,28 @@ class BubbleDemo extends StatefulWidget {
   _BubbleDemoState createState() => _BubbleDemoState();
 }
 
-class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-  static const _words = ['Lorem', ' ipsum', ' dolor', ' sit', ' amet', ', consectetur', ' adipiscing', ' elit', ', sed', ' do eiusmod', ' tempor', ' incididunt', ' ut', ' labore', ' et', ' dolore', ' magna', ' aliqua.'];
+class _BubbleDemoState extends State<BubbleDemo>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+  static const _words = [
+    'Lorem',
+    ' ipsum',
+    ' dolor',
+    ' sit',
+    ' amet',
+    ', consectetur',
+    ' adipiscing',
+    ' elit',
+    ', sed',
+    ' do eiusmod',
+    ' tempor',
+    ' incididunt',
+    ' ut',
+    ' labore',
+    ' et',
+    ' dolore',
+    ' magna',
+    ' aliqua.',
+  ];
 
   late AnimationController _animationController;
 
@@ -25,8 +45,8 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
   @override
   void initState() {
     _animationController = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 2000),
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
     );
     _animationController.repeat();
     _animationController.addListener(() {
@@ -47,7 +67,11 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
     super.dispose();
   }
 
-  Widget _getBubble({required int index, double? animationValue, required String suffix}) {
+  Widget _getBubble({
+    required int index,
+    double? animationValue,
+    required String suffix,
+  }) {
     final text = StringBuffer();
     for (var i = 0; i < index % (_words.length - 1) + 1; i++) {
       text.write(_words[i]);
@@ -63,7 +87,10 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
         color: index % 2 == 0 ? Colors.white : Colors.lightGreen[100],
       ),
       nip: Generator.settings.nip.copyWith(
-          size: Generator.settings.nip.size - (animationValue != null ? animationValue * Generator.settings.nip.size : 0),
+        size: Generator.settings.nip.size -
+            (animationValue != null
+                ? animationValue * Generator.settings.nip.size
+                : 0),
       ),
       topLine: Generator.settings.topLine,
       bottomLine: Generator.settings.bottomLine,
@@ -116,12 +143,13 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: Text(
-                  TimeOfDay(hour: index ~/ 60, minute: index % 60).format(context),
-                  style: DefaultTextStyle.of(context).style.copyWith(
-                    color: Colors.black.withAlpha(64),
-                    fontSize: 10,
-                    fontStyle: FontStyle.italic,
-                  ),
+                TimeOfDay(hour: index ~/ 60, minute: index % 60)
+                    .format(context),
+                style: DefaultTextStyle.of(context).style.copyWith(
+                      color: Colors.black.withAlpha(64),
+                      fontSize: 10,
+                      fontStyle: FontStyle.italic,
+                    ),
               ),
             ),
           ),
@@ -137,16 +165,19 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
 //    final animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
     final animation = TweenSequence([
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeOutQuart)),
+        tween: Tween<double>(begin: 0, end: 1)
+            .chain(CurveTween(curve: Curves.easeOutQuart)),
         weight: 1,
       ),
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: Curves.elasticOut)),
+        tween: Tween<double>(begin: 1, end: 0)
+            .chain(CurveTween(curve: Curves.elasticOut)),
         weight: 1,
       ),
     ]).animate(_animationController);
 
-    final suffix = ' ' * (5 + const TimeOfDay(hour: 23, minute: 59).format(context).length);
+    final suffix = ' ' *
+        (5 + const TimeOfDay(hour: 23, minute: 59).format(context).length);
 
     return Container(
       color: Colors.grey[300],
@@ -158,17 +189,28 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
 //              print('itemBuilder: #$index');
               return Padding(
                 padding: EdgeInsets.only(
-                  top: 6.0 + (Generator.settings.hFlip ? 0.0 : Generator.settings.additionalPadding),
-                  bottom: 6.0 + (Generator.settings.hFlip ? Generator.settings.additionalPadding : 0.0),
+                  top: 6.0 +
+                      (Generator.settings.hFlip
+                          ? 0.0
+                          : Generator.settings.additionalPadding),
+                  bottom: 6.0 +
+                      (Generator.settings.hFlip
+                          ? Generator.settings.additionalPadding
+                          : 0.0),
                   left: index % 2 == 0 ? 8.0 : 64.0,
                   right: index % 2 == 0 ? 64.0 : 8.0,
                 ),
                 child: Align(
-                  alignment: index % 2 == 0 ? Alignment.topLeft : Alignment.topRight,
+                  alignment:
+                      index % 2 == 0 ? Alignment.topLeft : Alignment.topRight,
                   child: _animate
                       ? AnimatedBuilder(
                           animation: animation,
-                          builder: (context, child) => _getBubble(index: index, animationValue: animation.value, suffix: suffix),
+                          builder: (context, child) => _getBubble(
+                            index: index,
+                            animationValue: animation.value,
+                            suffix: suffix,
+                          ),
                         )
                       : _getBubble(index: index, suffix: suffix),
                 ),
@@ -183,18 +225,21 @@ class _BubbleDemoState extends State<BubbleDemo> with AutomaticKeepAliveClientMi
               child: AnimatedBuilder(
                 animation: animation,
                 builder: (context, child) => ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _animate = !_animate;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _animate ? Colors.orange : Colors.lightGreen,
-                      foregroundColor: Colors.black87,
-                    ),
-                    icon: _animate ? const Icon(Icons.stop) : const Icon(Icons.play_arrow),
-                    label: Text('$_fps fps'),
+                  onPressed: () {
+                    setState(() {
+                      _animate = !_animate;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _animate ? Colors.orange : Colors.lightGreen,
+                    foregroundColor: Colors.black87,
                   ),
+                  icon: _animate
+                      ? const Icon(Icons.stop)
+                      : const Icon(Icons.play_arrow),
+                  label: Text('$_fps fps'),
+                ),
               ),
             ),
           ),

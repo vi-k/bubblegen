@@ -21,9 +21,9 @@ class Profiler extends SingleChildRenderObjectWidget {
 
 class RenderProfiler extends RenderProxyBox {
   RenderProfiler(
-      Profiler profiler, {
-        RenderBox? child,
-      })  : _profiler = profiler,
+    Profiler profiler, {
+    RenderBox? child,
+  })  : _profiler = profiler,
         super(child);
 
   static const margin = 8.0;
@@ -60,38 +60,45 @@ class RenderProfiler extends RenderProxyBox {
     final fieldPaint = Paint()
       ..color = Colors.white.withAlpha(64)
       ..style = PaintingStyle.fill;
-    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), fieldPaint);
+    context.canvas.drawRect(
+      Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+      fieldPaint,
+    );
 
 //    if (fps >= 10) {
-      final textPainter = TextPainter(
-          text: TextSpan(
-              text: '$fps fps',
-              style: const TextStyle(color: Colors.black),
-          ),
-          textAlign: TextAlign.left,
-          textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '$fps fps',
+        style: const TextStyle(color: Colors.black),
+      ),
+      textAlign: TextAlign.left,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
 
-      final textSize = textPainter.size;
-      final textOffset = Offset(
-          offset.dx + size.width - textSize.width - padding - margin, offset.dy + margin + padding,);
+    final textSize = textPainter.size;
+    final textOffset = Offset(
+      offset.dx + size.width - textSize.width - padding - margin,
+      offset.dy + margin + padding,
+    );
 
-      final path = Path();
-      path.addRRect(RRect.fromLTRBR(
-          textOffset.dx - padding - _profiler.breath,
-          textOffset.dy - padding - _profiler.breath,
-          textOffset.dx + textSize.width + padding + _profiler.breath,
-          textOffset.dy + textSize.height + padding + _profiler.breath,
-          const Radius.circular(radius),
-      ),);
+    final path = Path();
+    path.addRRect(
+      RRect.fromLTRBR(
+        textOffset.dx - padding - _profiler.breath,
+        textOffset.dy - padding - _profiler.breath,
+        textOffset.dx + textSize.width + padding + _profiler.breath,
+        textOffset.dy + textSize.height + padding + _profiler.breath,
+        const Radius.circular(radius),
+      ),
+    );
 
-      context.canvas.drawShadow(path, Colors.black, 4, true);
+    context.canvas.drawShadow(path, Colors.black, 4, true);
 
-      final paint = Paint()
-        ..color = Colors.orange.withAlpha(192)
-        ..style = PaintingStyle.fill;
-      context.canvas.drawPath(path, paint);
+    final paint = Paint()
+      ..color = Colors.orange.withAlpha(192)
+      ..style = PaintingStyle.fill;
+    context.canvas.drawPath(path, paint);
 
 //    paint
 //      ..color = Colors.orange[700]
@@ -99,7 +106,7 @@ class RenderProfiler extends RenderProxyBox {
 //      ..style = PaintingStyle.stroke;
 //    context.canvas.drawPath(path, paint);
 
-      textPainter.paint(context.canvas, textOffset);
+    textPainter.paint(context.canvas, textOffset);
 //    }
   }
 }

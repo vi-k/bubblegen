@@ -62,7 +62,7 @@ class GeneratorBubbleStyle {
         shadowColor: shadowColor,
         strokeColor: strokeColor,
         strokeWidth: strokeWidth,
-    );
+      );
 }
 
 class Generator extends StatefulWidget {
@@ -74,7 +74,8 @@ class Generator extends StatefulWidget {
   _GeneratorState createState() => _GeneratorState();
 }
 
-class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+class _GeneratorState extends State<Generator>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   static const _staticPadding = 20.0;
 //  Widget _settings;
   var _showSettings = false;
@@ -178,7 +179,9 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 
   void toggleSettings() {
     _showSettings = !_showSettings;
-    (_showSettings ? _settingsController.forward : _settingsController.reverse)();
+    (_showSettings
+        ? _settingsController.forward
+        : _settingsController.reverse)();
   }
 
   EdgeInsets getAddingPadding(double scale) {
@@ -190,75 +193,75 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
   }
 
   Widget getSettings() => Material(
-      elevation: 2,
+        elevation: 2,
 //        color: Colors.lime.shade100.withAlpha(224),
-      color: Colors.white.withAlpha(160),
-      child: ListView(
-        children: <Widget>[
-          ExpansionTile(
-            title: const Text(
-              'View',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+        color: Colors.white.withAlpha(160),
+        child: ListView(
+          children: <Widget>[
+            ExpansionTile(
+              title: const Text(
+                'View',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: NumericField(
+                    caption: 'Draft:',
+                    value: _drawDraft ? 1.0 : 0.0,
+                    min: 0,
+                    max: 1,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        _drawDraft = value == 1.0;
+                      });
+                    },
+                    onConvertToText: (value) => value == 1.0 ? 'show' : 'hide',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: NumericField(
+                    caption: 'Scale:',
+                    value: _scale,
+                    units: 'x',
+                    min: 1,
+                    max: 32,
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        _scale = value;
+                      });
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: NumericField(
+                    caption: 'Additional padding:',
+                    value: Generator.settings.additionalPadding,
+                    units: 'px',
+                    min: 0,
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.additionalPadding = value;
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: NumericField(
-                  caption: 'Draft:',
-                  value: _drawDraft ? 1.0 : 0.0,
-                  min: 0,
-                  max: 1,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      _drawDraft = value == 1.0;
-                    });
-                  },
-                  onConvertToText: (value) => value == 1.0 ? 'show' : 'hide',
-                ),
+            ExpansionTile(
+              title: const Text(
+                'style',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: NumericField(
-                  caption: 'Scale:',
-                  value: _scale,
-                  units: 'x',
-                  min: 1,
-                  max: 32,
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      _scale = value;
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: NumericField(
-                  caption: 'Additional padding:',
-                  value: Generator.settings.additionalPadding,
-                  units: 'px',
-                  min: 0,
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.additionalPadding = value;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              'style',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            children: <Widget>[
+              children: <Widget>[
 //          Padding(
 //            padding: const EdgeInsets.all(4.0),
 //            child: Value(
@@ -290,456 +293,505 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //              },
 //            ),
 //          ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'hasOneRadius:',
-                  value: Generator.settings.hasOneRadius ? 1.0 : 0.0,
-                  units: '',
-                  min: 0,
-                  max: 1,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.hasOneRadius = value == 1.0;
-                    });
-                  },
-                  onConvertToText: (value) => value == 1.0 ? 'true' : 'false',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: Generator.settings.hasOneRadius ? 'radius:' : 'radius.topLeft:',
-                  value: Generator.settings.radius.topLeft,
-                  units: 'px',
-                  min: 0,
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.radius = Generator.settings.hasOneRadius
-                          ? BubbleRadius(all: value)
-                          : Generator.settings.radius.copyWith(topLeft: value);
-                    });
-                  },
-                ),
-              ),
-              Visibility(
-                visible: !Generator.settings.hasOneRadius,
-                child: Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: NumericField(
-                    caption: 'radius.topRight:',
-                    value: Generator.settings.radius.topRight,
+                    caption: 'hasOneRadius:',
+                    value: Generator.settings.hasOneRadius ? 1.0 : 0.0,
+                    units: '',
+                    min: 0,
+                    max: 1,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.hasOneRadius = value == 1.0;
+                      });
+                    },
+                    onConvertToText: (value) => value == 1.0 ? 'true' : 'false',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: Generator.settings.hasOneRadius
+                        ? 'radius:'
+                        : 'radius.topLeft:',
+                    value: Generator.settings.radius.topLeft,
                     units: 'px',
                     min: 0,
                     step: 1,
                     onChanged: (value) {
                       setState(() {
-                        Generator.settings.radius = Generator.settings.radius.copyWith(topRight: value);
+                        Generator.settings.radius =
+                            Generator.settings.hasOneRadius
+                                ? BubbleRadius(all: value)
+                                : Generator.settings.radius
+                                    .copyWith(topLeft: value);
                       });
                     },
                   ),
                 ),
-              ),
-              Visibility(
-                visible: !Generator.settings.hasOneRadius,
-                child: Padding(
+                Visibility(
+                  visible: !Generator.settings.hasOneRadius,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'radius.topRight:',
+                      value: Generator.settings.radius.topRight,
+                      units: 'px',
+                      min: 0,
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          Generator.settings.radius = Generator.settings.radius
+                              .copyWith(topRight: value);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: !Generator.settings.hasOneRadius,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'radius.bottomRight:',
+                      value: Generator.settings.radius.bottomRight,
+                      units: 'px',
+                      min: 0,
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          Generator.settings.radius = Generator.settings.radius
+                              .copyWith(bottomRight: value);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: !Generator.settings.hasOneRadius,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'radius.bottomLeft:',
+                      value: Generator.settings.radius.bottomLeft,
+                      units: 'px',
+                      min: 0,
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          Generator.settings.radius = Generator.settings.radius
+                              .copyWith(bottomLeft: value);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: NumericField(
-                    caption: 'radius.bottomRight:',
-                    value: Generator.settings.radius.bottomRight,
+                    caption: 'elevation:',
+                    value: Generator.settings.elevation,
                     units: 'px',
                     min: 0,
-                    step: 1,
+                    step: 0.1,
+                    fractionDigits: 1,
                     onChanged: (value) {
                       setState(() {
-                        Generator.settings.radius = Generator.settings.radius.copyWith(bottomRight: value);
+                        Generator.settings.elevation = value;
                       });
                     },
                   ),
                 ),
-              ),
-              Visibility(
-                visible: !Generator.settings.hasOneRadius,
-                child: Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: NumericField(
-                    caption: 'radius.bottomLeft:',
-                    value: Generator.settings.radius.bottomLeft,
+                    caption: 'strokeWidth:',
+                    value: Generator.settings.strokeWidth,
                     units: 'px',
                     min: 0,
-                    step: 1,
+                    step: 0.1,
+                    fractionDigits: 1,
                     onChanged: (value) {
                       setState(() {
-                        Generator.settings.radius = Generator.settings.radius.copyWith(bottomLeft: value);
+                        Generator.settings.strokeWidth = value;
                       });
                     },
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'elevation:',
-                  value: Generator.settings.elevation,
-                  units: 'px',
-                  min: 0,
-                  step: 0.1,
-                  fractionDigits: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.elevation = value;
-                    });
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: NumericField(
+                    caption: 'hFlip:',
+                    value: Generator.settings.hFlip ? 1.0 : 0.0,
+                    min: 0,
+                    max: 1,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.hFlip = value == 1.0;
+                      });
+                    },
+                    onConvertToText: (value) => value == 1.0 ? 'true' : 'false',
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'strokeWidth:',
-                  value: Generator.settings.strokeWidth,
-                  units: 'px',
-                  min: 0,
-                  step: 0.1,
-                  fractionDigits: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.strokeWidth = value;
-                    });
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: NumericField(
+                    caption: 'vFlip:',
+                    value: Generator.settings.vFlip ? 1.0 : 0.0,
+                    min: 0,
+                    max: 1,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.vFlip = value == 1.0;
+                      });
+                    },
+                    onConvertToText: (value) => value == 1.0 ? 'true' : 'false',
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: NumericField(
-                  caption: 'hFlip:',
-                  value: Generator.settings.hFlip ? 1.0 : 0.0,
-                  min: 0,
-                  max: 1,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.hFlip = value == 1.0;
-                    });
-                  },
-                  onConvertToText: (value) => value == 1.0 ? 'true' : 'false',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: NumericField(
-                  caption: 'vFlip:',
-                  value: Generator.settings.vFlip ? 1.0 : 0.0,
-                  min: 0,
-                  max: 1,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.vFlip = value == 1.0;
-                    });
-                  },
-                  onConvertToText: (value) => value == 1.0 ? 'true' : 'false',
-                ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              'inset',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              ],
             ),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'start.type:',
-                  value: Generator.settings.nip.inset.start.type.index.toDouble(),
-                  min: 0,
-                  max: InsetPosType.values.length - 1.0,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+            ExpansionTile(
+              title: const Text(
+                'inset',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'start.type:',
+                    value: Generator.settings.nip.inset.start.type.index
+                        .toDouble(),
+                    min: 0,
+                    max: InsetPosType.values.length - 1.0,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start.copyWith(
-                                type: InsetPosType.values[value.round()],),
+                              type: InsetPosType.values[value.round()],
+                            ),
                             Generator.settings.nip.inset.end,
                           ),
-                      );
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.round();
-                    return InsetPosType.values[index].toString().replaceFirst('InsetPosType.', '');
-                  },
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.round();
+                      return InsetPosType.values[index]
+                          .toString()
+                          .replaceFirst('InsetPosType.', '');
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'start.pos.ratio:',
-                  value: Generator.settings.nip.inset.start.pos.ratio,
-                  units: '',
-                  min: 0,
-                  max: 1,
-                  step: 0.1,
-                  fractionDigits: 2,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'start.pos.ratio:',
+                    value: Generator.settings.nip.inset.start.pos.ratio,
+                    units: '',
+                    min: 0,
+                    max: 1,
+                    step: 0.1,
+                    fractionDigits: 2,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start.copyWith(
-                                pos: Generator.settings.nip.inset.start.pos.copyWith(ratio: value),),
+                              pos: Generator.settings.nip.inset.start.pos
+                                  .copyWith(ratio: value),
+                            ),
                             Generator.settings.nip.inset.end,
                           ),
-                      );
-                    });
-                  },
+                        );
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'start.pos.offset:',
-                  value: Generator.settings.nip.inset.start.pos.offset,
-                  units: 'px',
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
-                          inset: Inset(
-                            Generator.settings.nip.inset.start.copyWith(pos: Generator.settings.nip.inset.start.pos.copyWith(offset: value)),
-                            Generator.settings.nip.inset.end,
-                          ),
-                      );
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'start.cornerOffset:',
-                  value: Generator.settings.nip.inset.start.cornerOffset.index.toDouble(),
-                  min: 0,
-                  max: CornerOffset.values.length - 1.0,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'start.pos.offset:',
+                    value: Generator.settings.nip.inset.start.pos.offset,
+                    units: 'px',
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start.copyWith(
-                                cornerOffset: CornerOffset.values[value.round()],),
+                              pos: Generator.settings.nip.inset.start.pos
+                                  .copyWith(offset: value),
+                            ),
                             Generator.settings.nip.inset.end,
                           ),
-                      );
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.round();
-                    return CornerOffset.values[index].toString().replaceFirst('CornerOffset.', '');
-                  },
+                        );
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'end.type:',
-                  value: Generator.settings.nip.inset.end.type.index.toDouble(),
-                  min: 0,
-                  max: InsetPosType.values.length - 1.0,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'start.cornerOffset:',
+                    value: Generator.settings.nip.inset.start.cornerOffset.index
+                        .toDouble(),
+                    min: 0,
+                    max: CornerOffset.values.length - 1.0,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
+                          inset: Inset(
+                            Generator.settings.nip.inset.start.copyWith(
+                              cornerOffset: CornerOffset.values[value.round()],
+                            ),
+                            Generator.settings.nip.inset.end,
+                          ),
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.round();
+                      return CornerOffset.values[index]
+                          .toString()
+                          .replaceFirst('CornerOffset.', '');
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'end.type:',
+                    value:
+                        Generator.settings.nip.inset.end.type.index.toDouble(),
+                    min: 0,
+                    max: InsetPosType.values.length - 1.0,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start,
                             Generator.settings.nip.inset.end.copyWith(
-                                type: InsetPosType.values[value.round()],),
+                              type: InsetPosType.values[value.round()],
+                            ),
                           ),
-                      );
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.round();
-                    return InsetPosType.values[index].toString().replaceFirst('InsetPosType.', '');
-                  },
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.round();
+                      return InsetPosType.values[index]
+                          .toString()
+                          .replaceFirst('InsetPosType.', '');
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'end.pos.ratio:',
-                  value: Generator.settings.nip.inset.end.pos.ratio,
-                  units: '',
-                  min: 0,
-                  max: 1,
-                  step: 0.1,
-                  fractionDigits: 2,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'end.pos.ratio:',
+                    value: Generator.settings.nip.inset.end.pos.ratio,
+                    units: '',
+                    min: 0,
+                    max: 1,
+                    step: 0.1,
+                    fractionDigits: 2,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start,
                             Generator.settings.nip.inset.end.copyWith(
-                                pos: Generator.settings.nip.inset.start.pos.copyWith(ratio: value),),
+                              pos: Generator.settings.nip.inset.start.pos
+                                  .copyWith(ratio: value),
+                            ),
                           ),
-                      );
-                    });
-                  },
+                        );
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'end.pos.offset:',
-                  value: Generator.settings.nip.inset.end.pos.offset,
-                  units: 'px',
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'end.pos.offset:',
+                    value: Generator.settings.nip.inset.end.pos.offset,
+                    units: 'px',
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start,
                             Generator.settings.nip.inset.end.copyWith(
-                                pos: Generator.settings.nip.inset.end.pos.copyWith(offset: value),),
+                              pos: Generator.settings.nip.inset.end.pos
+                                  .copyWith(offset: value),
+                            ),
                           ),
-                      );
-                    });
-                  },
+                        );
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'end.cornerOffset:',
-                  value: Generator.settings.nip.inset.end.cornerOffset.index.toDouble(),
-                  min: 0,
-                  max: CornerOffset.values.length - 1.0,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'end.cornerOffset:',
+                    value: Generator.settings.nip.inset.end.cornerOffset.index
+                        .toDouble(),
+                    min: 0,
+                    max: CornerOffset.values.length - 1.0,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           inset: Inset(
                             Generator.settings.nip.inset.start,
                             Generator.settings.nip.inset.end.copyWith(
-                                cornerOffset: CornerOffset.values[value.round()],),
+                              cornerOffset: CornerOffset.values[value.round()],
+                            ),
                           ),
-                      );
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.round();
-                    return CornerOffset.values[index].toString().replaceFirst('CornerOffset.', '');
-                  },
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.round();
+                      return CornerOffset.values[index]
+                          .toString()
+                          .replaceFirst('CornerOffset.', '');
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              'nip',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              ],
             ),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'size:',
-                  value: Generator.settings.nip.size,
-                  units: 'px',
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(size: value);
-                    });
-                  },
-                ),
+            ExpansionTile(
+              title: const Text(
+                'nip',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'radius:',
-                  value: Generator.settings.nip.radius,
-                  units: 'px',
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(radius: value);
-                    });
-                  },
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'size:',
+                    value: Generator.settings.nip.size,
+                    units: 'px',
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(size: value);
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'anchor:',
-                  value: Generator.settings.nip.anchor.index.toDouble(),
-                  min: 0,
-                  max: NipAnchor.values.length - 1.0,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
-                        anchor: NipAnchor.values[value.round()],
-                      );
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.round();
-                    return NipAnchor.values[index].toString().replaceFirst('NipAnchor.', '');
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'radius:',
+                    value: Generator.settings.nip.radius,
+                    units: 'px',
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(radius: value);
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'offset:',
-                  value: Generator.settings.nip.offset,
-                  units: 'px',
-                  step: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(offset: value);
-                    });
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'anchor:',
+                    value: Generator.settings.nip.anchor.index.toDouble(),
+                    min: 0,
+                    max: NipAnchor.values.length - 1.0,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
+                          anchor: NipAnchor.values[value.round()],
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.round();
+                      return NipAnchor.values[index]
+                          .toString()
+                          .replaceFirst('NipAnchor.', '');
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'cornerOffset:',
-                  value: Generator.settings.nip.cornerOffset.index.toDouble(),
-                  min: 0,
-                  max: CornerOffset.values.length - 1.0,
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      Generator.settings.nip = Generator.settings.nip.copyWith(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'offset:',
+                    value: Generator.settings.nip.offset,
+                    units: 'px',
+                    step: 1,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(offset: value);
+                      });
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'cornerOffset:',
+                    value: Generator.settings.nip.cornerOffset.index.toDouble(),
+                    min: 0,
+                    max: CornerOffset.values.length - 1.0,
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        Generator.settings.nip =
+                            Generator.settings.nip.copyWith(
                           cornerOffset: CornerOffset.values[value.round()],
-                      );
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.round();
-                    return CornerOffset.values[index].toString().replaceFirst('CornerOffset.', '');
-                  },
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.round();
+                      return CornerOffset.values[index]
+                          .toString()
+                          .replaceFirst('CornerOffset.', '');
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 //          ExpansionTile(
 //            title: const Text(
 //              'Nip',
@@ -833,239 +885,289 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //              ),
 //            ],
 //          ),
-          ExpansionTile(
-            title: const Text(
-              'Top line',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+            ExpansionTile(
+              title: const Text(
+                'Top line',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: NumericField(
+                    caption: 'Type of position:',
+                    value: Generator.settings.topLine.posType.index.toDouble(),
+                    min: 0,
+                    max: (NipLinePosType.values.length - 1).toDouble(),
+                    step: 1,
+                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        final index = value.round();
+                        Generator.settings.topLine = NipLine(
+                          Generator.settings.topLine.lineType,
+                          NipLinePosType.values[index],
+                          _topLineValues[index],
+                        );
+                      });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.floor();
+                      return NipLinePosType.values[index]
+                          .toString()
+                          .replaceFirst(RegExp(r'.*\.'), '');
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: Generator.settings.topLine.posType ==
+                      NipLinePosType.angle,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Angle of line:',
+                      value: _topLineValues[NipLinePosType.angle.index],
+                      units: '°',
+                      min: -90,
+                      max: 90,
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          _topLineValues[NipLinePosType.angle.index] = value;
+                          Generator.settings.topLine = NipLine(
+                            Generator.settings.topLine.lineType,
+                            NipLinePosType.angle,
+                            value,
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible:
+                      Generator.settings.topLine.posType == NipLinePosType.pos,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Position on the side:',
+                      value: _topLineValues[NipLinePosType.pos.index],
+                      units: 'px',
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          _topLineValues[NipLinePosType.pos.index] = value;
+                          Generator.settings.topLine = NipLine(
+                            Generator.settings.topLine.lineType,
+                            NipLinePosType.pos,
+                            value,
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: Generator.settings.topLine.posType ==
+                      NipLinePosType.offset,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Offset from the nip:',
+                      value: _topLineValues[NipLinePosType.offset.index],
+                      units: 'px',
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          _topLineValues[NipLinePosType.offset.index] = value;
+                          Generator.settings.topLine = NipLine(
+                            Generator.settings.topLine.lineType,
+                            NipLinePosType.offset,
+                            value,
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: Generator.settings.topLine.posType ==
+                      NipLinePosType.corners,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Position on the corners:',
+                      value: _topLineValues[NipLinePosType.corners.index],
+                      units: '°',
+                      step: 1,
+                      onBeforeChanging: (value) {
+                        if (value < -180.0) {
+                          value = 180.0;
+                        } else if (value > 180.0)
+                          value = -180.0;
+                        else if (value > -90.0 && value <= 0.0)
+                          value = -90.0;
+                        else if (value > 0.0 && value < 90.0) value = 90.0;
+                        return value;
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          _topLineValues[NipLinePosType.corners.index] = value;
+                          Generator.settings.topLine = NipLine(
+                            Generator.settings.topLine.lineType,
+                            NipLinePosType.corners,
+                            value,
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'Type of position:',
-                  value: Generator.settings.topLine.posType.index.toDouble(),
-                  min: 0,
-                  max: (NipLinePosType.values.length - 1).toDouble(),
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      final index = value.round();
-                      Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType,
-                          NipLinePosType.values[index], _topLineValues[index],);
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.floor();
-                    return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
-                  },
-                ),
+            ExpansionTile(
+              title: const Text(
+                'Bottom line',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Visibility(
-                visible: Generator.settings.topLine.posType == NipLinePosType.angle,
-                child: Padding(
+              children: <Widget>[
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: NumericField(
-                    caption: 'Angle of line:',
-                    value: _topLineValues[NipLinePosType.angle.index],
-                    units: '°',
-                    min: -90,
-                    max: 90,
+                    caption: 'Type of position:',
+                    value:
+                        Generator.settings.bottomLine.posType.index.toDouble(),
+                    min: 0,
+                    max: (NipLinePosType.values.length - 1).toDouble(),
                     step: 1,
+                    textAlign: TextAlign.center,
                     onChanged: (value) {
                       setState(() {
-                        _topLineValues[NipLinePosType.angle.index] = value;
-                        Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType,
-                            NipLinePosType.angle, value,);
+                        final index = value.round();
+                        Generator.settings.bottomLine = NipLine(
+                          Generator.settings.bottomLine.lineType,
+                          NipLinePosType.values[index],
+                          _bottomLineValues[index],
+                        );
                       });
+                    },
+                    onConvertToText: (value) {
+                      final index = value.floor();
+                      return NipLinePosType.values[index]
+                          .toString()
+                          .replaceFirst(RegExp(r'.*\.'), '');
                     },
                   ),
                 ),
-              ),
-              Visibility(
-                visible: Generator.settings.topLine.posType == NipLinePosType.pos,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Position on the side:',
-                    value: _topLineValues[NipLinePosType.pos.index],
-                    units: 'px',
-                    step: 1,
-                    onChanged: (value) {
-                      setState(() {
-                        _topLineValues[NipLinePosType.pos.index] = value;
-                        Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType,
-                            NipLinePosType.pos, value,);
-                      });
-                    },
+                Visibility(
+                  visible: Generator.settings.bottomLine.posType ==
+                      NipLinePosType.angle,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Angle of line:',
+                      value: _bottomLineValues[NipLinePosType.angle.index],
+                      units: '°',
+                      min: -90,
+                      max: 90,
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          _bottomLineValues[NipLinePosType.angle.index] = value;
+                          Generator.settings.bottomLine = NipLine(
+                            Generator.settings.bottomLine.lineType,
+                            NipLinePosType.angle,
+                            value,
+                          );
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
-              Visibility(
-                visible: Generator.settings.topLine.posType == NipLinePosType.offset,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Offset from the nip:',
-                    value: _topLineValues[NipLinePosType.offset.index],
-                    units: 'px',
-                    step: 1,
-                    onChanged: (value) {
-                      setState(() {
-                        _topLineValues[NipLinePosType.offset.index] = value;
-                        Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType,
-                            NipLinePosType.offset, value,);
-                      });
-                    },
+                Visibility(
+                  visible: Generator.settings.bottomLine.posType ==
+                      NipLinePosType.pos,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Position on the side:',
+                      value: _bottomLineValues[NipLinePosType.pos.index],
+                      units: 'px',
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          _bottomLineValues[NipLinePosType.pos.index] = value;
+                          Generator.settings.bottomLine = NipLine(
+                            Generator.settings.bottomLine.lineType,
+                            NipLinePosType.pos,
+                            value,
+                          );
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
-              Visibility(
-                visible: Generator.settings.topLine.posType == NipLinePosType.corners,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Position on the corners:',
-                    value: _topLineValues[NipLinePosType.corners.index],
-                    units: '°',
-                    step: 1,
-                    onBeforeChanging: (value) {
-                      if (value < -180.0) {
-                        value = 180.0;
-                      } else if (value > 180.0) value = -180.0;
-                      else if (value > -90.0 && value <= 0.0) value = -90.0;
-                      else if (value > 0.0 && value < 90.0) value = 90.0;
-                      return value;
-                    },
-                    onChanged: (value) {
-                      setState(() {
-                        _topLineValues[NipLinePosType.corners.index] = value;
-                        Generator.settings.topLine = NipLine(Generator.settings.topLine.lineType,
-                            NipLinePosType.corners, value,);
-                      });
-                    },
+                Visibility(
+                  visible: Generator.settings.bottomLine.posType ==
+                      NipLinePosType.offset,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Offset from the nip:',
+                      value: _bottomLineValues[NipLinePosType.offset.index],
+                      units: 'px',
+                      step: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          _bottomLineValues[NipLinePosType.offset.index] =
+                              value;
+                          Generator.settings.bottomLine = NipLine(
+                            Generator.settings.bottomLine.lineType,
+                            NipLinePosType.offset,
+                            value,
+                          );
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              'Bottom line',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+                Visibility(
+                  visible: Generator.settings.bottomLine.posType ==
+                      NipLinePosType.corners,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: NumericField(
+                      caption: 'Position on the corners:',
+                      value: _bottomLineValues[NipLinePosType.corners.index],
+                      units: '°',
+                      step: 1,
+                      onBeforeChanging: (value) {
+                        if (value < -180.0) {
+                          value = 180.0;
+                        } else if (value > 180.0)
+                          value = -180.0;
+                        else if (value > -90.0 && value <= 0.0)
+                          value = -90.0;
+                        else if (value > 0.0 && value < 90.0) value = 90.0;
+                        return value;
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          _bottomLineValues[NipLinePosType.corners.index] =
+                              value;
+                          Generator.settings.bottomLine = NipLine(
+                            Generator.settings.bottomLine.lineType,
+                            NipLinePosType.corners,
+                            value,
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: NumericField(
-                  caption: 'Type of position:',
-                  value: Generator.settings.bottomLine.posType.index.toDouble(),
-                  min: 0,
-                  max: (NipLinePosType.values.length - 1).toDouble(),
-                  step: 1,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    setState(() {
-                      final index = value.round();
-                      Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType,
-                          NipLinePosType.values[index], _bottomLineValues[index],);
-                    });
-                  },
-                  onConvertToText: (value) {
-                    final index = value.floor();
-                    return NipLinePosType.values[index].toString().replaceFirst(RegExp(r'.*\.'), '');
-                  },
-                ),
-              ),
-              Visibility(
-                visible: Generator.settings.bottomLine.posType == NipLinePosType.angle,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Angle of line:',
-                    value: _bottomLineValues[NipLinePosType.angle.index],
-                    units: '°',
-                    min: -90,
-                    max: 90,
-                    step: 1,
-                    onChanged: (value) {
-                      setState(() {
-                        _bottomLineValues[NipLinePosType.angle.index] = value;
-                        Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType,
-                            NipLinePosType.angle, value,);
-                      });
-                    },
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: Generator.settings.bottomLine.posType == NipLinePosType.pos,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Position on the side:',
-                    value: _bottomLineValues[NipLinePosType.pos.index],
-                    units: 'px',
-                    step: 1,
-                    onChanged: (value) {
-                      setState(() {
-                        _bottomLineValues[NipLinePosType.pos.index] = value;
-                        Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType,
-                            NipLinePosType.pos, value,);
-                      });
-                    },
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: Generator.settings.bottomLine.posType == NipLinePosType.offset,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Offset from the nip:',
-                    value: _bottomLineValues[NipLinePosType.offset.index],
-                    units: 'px',
-                    step: 1,
-                    onChanged: (value) {
-                      setState(() {
-                        _bottomLineValues[NipLinePosType.offset.index] = value;
-                        Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType,
-                            NipLinePosType.offset, value,);
-                      });
-                    },
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: Generator.settings.bottomLine.posType == NipLinePosType.corners,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: NumericField(
-                    caption: 'Position on the corners:',
-                    value: _bottomLineValues[NipLinePosType.corners.index],
-                    units: '°',
-                    step: 1,
-                    onBeforeChanging: (value) {
-                      if (value < -180.0) {
-                        value = 180.0;
-                      } else if (value > 180.0) value = -180.0;
-                      else if (value > -90.0 && value <= 0.0) value = -90.0;
-                      else if (value > 0.0 && value < 90.0) value = 90.0;
-                      return value;
-                    },
-                    onChanged: (value) {
-                      setState(() {
-                        _bottomLineValues[NipLinePosType.corners.index] = value;
-                        Generator.settings.bottomLine = NipLine(Generator.settings.bottomLine.lineType,
-                            NipLinePosType.corners, value,);
-                      });
-                    },
-                  ),
-                ),
-              ),            ],
-          ),
 //          const Divider(),
 //          NipLinePos(
 //            caption: 'Top line',
@@ -1082,9 +1184,9 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
 //              _bottomLine = nipLine;
 //            }),
 //          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
 
   @override
   bool get wantKeepAlive => true;
@@ -1093,7 +1195,8 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context);
 
-    final animation = Tween<double>(begin: _settingsWidth, end: 0).animate(_settingsController);
+    final animation = Tween<double>(begin: _settingsWidth, end: 0)
+        .animate(_settingsController);
 
     return Column(
       children: <Widget>[
@@ -1108,7 +1211,9 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                   padding: getAddingPadding(1),
                   child: Align(
 //                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.hFlip ? Alignment.topLeft : Alignment.topRight,
-                    alignment: Generator.settings.hFlip ? Alignment.topRight : Alignment.topLeft,
+                    alignment: Generator.settings.hFlip
+                        ? Alignment.topRight
+                        : Alignment.topLeft,
 //                    child: const Text('test'),
                     child: Bubble(
                       style: Generator.settings.style,
@@ -1123,10 +1228,13 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: _staticPadding / 2.0) + getAddingPadding(1),
+                  padding: const EdgeInsets.only(top: _staticPadding / 2.0) +
+                      getAddingPadding(1),
                   child: Align(
 //                    alignment: Generator.settings.nipSide.isLeft || Generator.settings.nipSide.isVertical && !Generator.settings.hFlip ? Alignment.topLeft : Alignment.topRight,
-                    alignment: Generator.settings.hFlip ? Alignment.topRight : Alignment.topLeft,
+                    alignment: Generator.settings.hFlip
+                        ? Alignment.topRight
+                        : Alignment.topLeft,
 //                    child: const Text('test'),
                     child: Bubble(
                       style: Generator.settings.style,
@@ -1136,7 +1244,8 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         child: const Text(
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',),
+                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        ),
                       ),
                     ),
                   ),
@@ -1158,11 +1267,13 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                       behavior: HitTestBehavior.opaque,
                       onTap: toggleSettings,
                       child: Padding(
-                        padding: const EdgeInsets.all(_staticPadding) + getAddingPadding(_scale),
+                        padding: const EdgeInsets.all(_staticPadding) +
+                            getAddingPadding(_scale),
                         // child: const Text('TEST'),
                         child: Bubble(
                           scale: _scale,
-                          style: Generator.settings.style.copyWith(color: Colors.lightBlue),
+                          style: Generator.settings.style
+                              .copyWith(color: Colors.lightBlue),
                           nip: Generator.settings.nip,
                           topLine: Generator.settings.topLine,
                           bottomLine: Generator.settings.bottomLine,
@@ -1189,17 +1300,17 @@ class _GeneratorState extends State<Generator> with AutomaticKeepAliveClientMixi
                           animation: animation,
                           child: getSettings(),
                           builder: (context, child) => Visibility(
-                              maintainInteractivity: true,
-                              maintainSemantics: true,
-                              maintainState: true,
-                              maintainAnimation: true,
-                              maintainSize: true,
-                              visible: animation.value != _settingsWidth,
-                              child: Transform.translate(
-                                offset: Offset(animation.value, 0),
-                                child: child,
-                              ),
+                            maintainInteractivity: true,
+                            maintainSemantics: true,
+                            maintainState: true,
+                            maintainAnimation: true,
+                            maintainSize: true,
+                            visible: animation.value != _settingsWidth,
+                            child: Transform.translate(
+                              offset: Offset(animation.value, 0),
+                              child: child,
                             ),
+                          ),
                         ),
                       ),
                     ),

@@ -5,21 +5,36 @@ import 'snapshot.dart';
 
 // Every corner has its own radius, so every side and every corner has its own
 // length: left 50, top 86, right 42, bottom 86.
-final _box = Box.fromLTRBAndCorners(10, 20, 110, 80,
-    topLeft: 6, topRight: 8, bottomRight: 10, bottomLeft: 4,);
+final _box = Box.fromLTRBAndCorners(
+  10,
+  20,
+  110,
+  80,
+  topLeft: 6,
+  topRight: 8,
+  bottomRight: 10,
+  bottomLeft: 4,
+);
 
 final _sharpBox = Box.fromLTRBR(10, 20, 110, 80, 0);
 
 String _name(Object value) => value.toString().split('.').last;
 
-List<String> _apply(Box box, InsetPosType type, List<double> ratios,
-    List<double> offsets,) {
+List<String> _apply(
+  Box box,
+  InsetPosType type,
+  List<double> ratios,
+  List<double> offsets,
+) {
   final lines = <String>[];
   for (final cornerOffset in CornerOffset.values) {
     for (final ratio in ratios) {
       for (final offset in offsets) {
         final pos = InsetPos(
-            type, Position(ratio: ratio, offset: offset), cornerOffset,);
+          type,
+          Position(ratio: ratio, offset: offset),
+          cornerOffset,
+        );
         final abs = pos.apply(box);
         lines.add('${_name(cornerOffset)} ${fmt(ratio)} ${fmt(offset)}'
             ' -> ${_name(abs.type)} ${fmt(abs.pos)}'
@@ -34,16 +49,22 @@ void main() {
   group('InsetPos.apply', () {
     for (final type in InsetPosType.values) {
       test('${_name(type)} on rounded box', () {
-        expectSnapshot(_snapshots, '${_name(type)} on rounded box',
-            _apply(_box, type, [0.0, 0.5, 1.0], [-20.0, -3.0, 0.0, 3.0, 20.0]),);
+        expectSnapshot(
+          _snapshots,
+          '${_name(type)} on rounded box',
+          _apply(_box, type, [0.0, 0.5, 1.0], [-20.0, -3.0, 0.0, 3.0, 20.0]),
+        );
       });
     }
 
     for (final type in InsetPosType.values) {
       if (!InsetPos.isCorner(type)) continue;
       test('${_name(type)} on sharp box', () {
-        expectSnapshot(_snapshots, '${_name(type)} on sharp box',
-            _apply(_sharpBox, type, [0.5], [-3.0, 0.0, 3.0]),);
+        expectSnapshot(
+          _snapshots,
+          '${_name(type)} on sharp box',
+          _apply(_sharpBox, type, [0.5], [-3.0, 0.0, 3.0]),
+        );
       });
     }
   });

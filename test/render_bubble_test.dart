@@ -1,4 +1,3 @@
-
 import 'package:bubblegen/custom_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,9 +40,8 @@ class _RecordingCanvas implements Canvas {
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    final name = RegExp('"(.*)"')
-        .firstMatch(invocation.memberName.toString())!
-        .group(1);
+    final name =
+        RegExp('"(.*)"').firstMatch(invocation.memberName.toString())!.group(1);
     calls.add('$name(${invocation.positionalArguments.map(_arg).join(', ')})');
     return null;
   }
@@ -61,20 +59,24 @@ class _RecordingContext implements PaintingContext {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-Future<RenderBubble> _pump(WidgetTester tester, Widget bubble,
-    {Size? tight,}) async {
-  await tester.pumpWidget(Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(
-      child: tight == null
-          ? bubble
-          : SizedBox(width: tight.width, height: tight.height, child: bubble),
+Future<RenderBubble> _pump(
+  WidgetTester tester,
+  Widget bubble, {
+  Size? tight,
+}) async {
+  await tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: tight == null
+            ? bubble
+            : SizedBox(width: tight.width, height: tight.height, child: bubble),
+      ),
     ),
-  ),);
+  );
   return tester.renderObject<RenderBubble>(find.byType(CustomBubble));
 }
 
@@ -95,8 +97,13 @@ List<String> _paint(RenderBubble render) {
   final scale = render.bubble.scale;
   for (var i = 0; i < canvas.paths.length; i++) {
     lines.add('path$i:');
-    lines.addAll(rasterize(canvas.paths[i], (render.size.width / scale).ceil(),
-        (render.size.height / scale).ceil(),),);
+    lines.addAll(
+      rasterize(
+        canvas.paths[i],
+        (render.size.width / scale).ceil(),
+        (render.size.height / scale).ceil(),
+      ),
+    );
   }
   return lines;
 }
@@ -132,7 +139,11 @@ const _fancyStyle = CustomBubbleStyle(
   margin: EdgeInsets.all(2),
   // topLeft + bottomLeft exceed the box height 12: all radii are halved.
   radius: BubbleRadius(
-      topLeft: 20, topRight: 4, bottomRight: 4, bottomLeft: 4,),
+    topLeft: 20,
+    topRight: 4,
+    bottomRight: 4,
+    bottomLeft: 4,
+  ),
   hFlip: true,
   vFlip: true,
   color: Color(0xff112233),
@@ -146,26 +157,30 @@ void main() {
   group('layout', () {
     testWidgets('margin and scale', (tester) async {
       final render = await _pump(
-          tester,
-          CustomBubble(
-            scale: 2,
-            style: const CustomBubbleStyle(
-                margin: EdgeInsets.fromLTRB(1, 2, 3, 4),),
-            child: _child,
-          ),);
+        tester,
+        CustomBubble(
+          scale: 2,
+          style: const CustomBubbleStyle(
+            margin: EdgeInsets.fromLTRB(1, 2, 3, 4),
+          ),
+          child: _child,
+        ),
+      );
       expectSnapshot(_snapshots, 'margin and scale', _layout(render));
     });
 
     testWidgets('tight constraints', (tester) async {
       final render = await _pump(
-          tester,
-          CustomBubble(
-            scale: 2,
-            style: const CustomBubbleStyle(
-                margin: EdgeInsets.fromLTRB(1, 2, 3, 4),),
-            child: _child,
+        tester,
+        CustomBubble(
+          scale: 2,
+          style: const CustomBubbleStyle(
+            margin: EdgeInsets.fromLTRB(1, 2, 3, 4),
           ),
-          tight: const Size(100, 50),);
+          child: _child,
+        ),
+        tight: const Size(100, 50),
+      );
       expectSnapshot(_snapshots, 'tight constraints', _layout(render));
     });
 
@@ -183,14 +198,18 @@ void main() {
 
     testWidgets('flips, scale, stroke and oversized radii', (tester) async {
       final render = await _pump(
-          tester,
-          CustomBubble(
-            scale: 2,
-            style: _fancyStyle,
-            child: const SizedBox(width: 20, height: 12),
-          ),);
-      expectSnapshot(_snapshots, 'flips, scale, stroke and oversized radii',
-          _paint(render),);
+        tester,
+        CustomBubble(
+          scale: 2,
+          style: _fancyStyle,
+          child: const SizedBox(width: 20, height: 12),
+        ),
+      );
+      expectSnapshot(
+        _snapshots,
+        'flips, scale, stroke and oversized radii',
+        _paint(render),
+      );
     });
 
     testWidgets('no child', (tester) async {
@@ -200,13 +219,16 @@ void main() {
 
     testWidgets('draft', (tester) async {
       final render = await _pump(
-          tester,
-          CustomBubble(
-            drawDraft: true,
-            inset: const Inset(InsetPos(InsetPosType.topLeft, Position.zero),
-                InsetPos(InsetPosType.topLeft, Position(ratio: 1)),),
-            child: _child,
-          ),);
+        tester,
+        CustomBubble(
+          drawDraft: true,
+          inset: const Inset(
+            InsetPos(InsetPosType.topLeft, Position.zero),
+            InsetPos(InsetPosType.topLeft, Position(ratio: 1)),
+          ),
+          child: _child,
+        ),
+      );
       expectSnapshot(_snapshots, 'draft', _paintNames(render));
     });
   });
@@ -281,8 +303,7 @@ const _snapshots = <String, List<String>>{
     '........................',
     '........................',
   ],
-  'paint without child': [
-  ],
+  'paint without child': [],
   'draft': [
     'save',
     'translate',

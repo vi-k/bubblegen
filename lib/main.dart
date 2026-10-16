@@ -19,18 +19,45 @@ MaterialColor createSwatch(Color color) {
   // ignore: deprecated_member_use
   return MaterialColor(color.value, {
     // Почти совпадают с Colors.blue
-    50: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.12)), Colors.white),
-    100: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.30)), Colors.white),
-    200: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.50)), Colors.white),
-    300: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.70)), Colors.white),
-    400: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.85)), Colors.white),
+    50: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.12)),
+      Colors.white,
+    ),
+    100: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.30)),
+      Colors.white,
+    ),
+    200: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.50)),
+      Colors.white,
+    ),
+    300: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.70)),
+      Colors.white,
+    ),
+    400: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.85)),
+      Colors.white,
+    ),
     500: color,
     // Дальше синяя составляющая расходится с Colors.blue, равняюсь по зелёному
     // Тогда они расходятся по цвету, но совпадают по яркости
-    600: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.91)), Colors.black),
-    700: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.79)), Colors.black),
-    800: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.68)), Colors.black),
-    900: Color.alphaBlend(color.withAlpha(Color.getAlphaFromOpacity(0.48)), Colors.black),
+    600: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.91)),
+      Colors.black,
+    ),
+    700: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.79)),
+      Colors.black,
+    ),
+    800: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.68)),
+      Colors.black,
+    ),
+    900: Color.alphaBlend(
+      color.withAlpha(Color.getAlphaFromOpacity(0.48)),
+      Colors.black,
+    ),
   });
 }
 
@@ -55,7 +82,8 @@ class MyApp extends StatelessWidget {
           primarySwatch: primarySwatch,
           accentColor: Colors.blue,
         ),
-        textSelectionTheme: TextSelectionThemeData(cursorColor: cursorSwatch[500]),
+        textSelectionTheme:
+            TextSelectionThemeData(cursorColor: cursorSwatch[500]),
 //        textSelectionColor: cursorSwatch[200],
 //        textSelectionHandleColor: cursorSwatch[400],
       ),
@@ -681,12 +709,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        elevation: 4,
-        actions: [
-          PopupMenuButton(
-            itemBuilder: (context) => [
+        appBar: AppBar(
+          title: Text(widget.title),
+          elevation: 4,
+          actions: [
+            PopupMenuButton(
+              itemBuilder: (context) => [
                 const PopupMenuItem(
                   child: Text('1'),
                 ),
@@ -697,26 +725,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   child: Text('3'),
                 ),
               ],
+            ),
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Generator'),
+              Tab(text: 'Bubble\ndemo'),
+              Tab(text: 'CustomBubble\ndemo'),
+            ],
           ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Generator'),
-            Tab(text: 'Bubble\ndemo'),
-            Tab(text: 'CustomBubble\ndemo'),
-          ],
         ),
-      ),
-      body: SafeArea(
-        child: TabBarView(
-          controller: _tabController,
-          children: const <Widget>[
-            Generator(),
-            BubbleDemo(),
-            Text('Test #2'),
-          ],
+        body: SafeArea(
+          child: TabBarView(
+            controller: _tabController,
+            children: const <Widget>[
+              Generator(),
+              BubbleDemo(),
+              Text('Test #2'),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 }

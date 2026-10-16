@@ -4,7 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class NumericField extends StatefulWidget {
-  const NumericField({super.key, 
+  const NumericField({
+    super.key,
     this.caption,
     this.horizontal = false,
     this.inputWidth,
@@ -40,13 +41,14 @@ class NumericField extends StatefulWidget {
   _NumericFieldState createState() => _NumericFieldState();
 }
 
-enum _ValueButton { no, left, right}
+enum _ValueButton { no, left, right }
 
 class _NumericFieldState extends State<NumericField> {
   static const _fieldHeight = 48.0; // Высота поля
   static const _buttonWidth = 40.0; // Ширина кнопки
   static const _contentPadding = 4.0; // Отступы от края
-  static const _swipeStep = 8.0; // Шаг свайпа, за который происходит измение значения на один шаг
+  static const _swipeStep =
+      8.0; // Шаг свайпа, за который происходит измение значения на один шаг
 
   late double _value;
   double? _savedValue; // Значение, сохранённое для свайпа
@@ -73,7 +75,8 @@ class _NumericFieldState extends State<NumericField> {
     super.dispose();
   }
 
-  static double round(double value, int fractionDigits) => double.parse(value.toStringAsFixed(fractionDigits));
+  static double round(double value, int fractionDigits) =>
+      double.parse(value.toStringAsFixed(fractionDigits));
 
   static double floor(double value, int fractionDigits) {
     final k = pow(10, fractionDigits);
@@ -127,9 +130,12 @@ class _NumericFieldState extends State<NumericField> {
     if (correctTextField) {
       final str = convertToText(correctedValue);
       _controller.text = str;
-      _controller.selection = TextSelection.fromPosition(TextPosition(offset: str.length));
+      _controller.selection =
+          TextSelection.fromPosition(TextPosition(offset: str.length));
       // Во время преобразования могло произойти округление, учитываем это
-      _value = widget.onConvertToText == null ? convertToValue(str)! : correctedValue;
+      _value = widget.onConvertToText == null
+          ? convertToValue(str)!
+          : correctedValue;
       widget.onChanged(_value);
       errorText = null;
     } else if (correctedValue != _value && errorText == null) {
@@ -144,7 +150,9 @@ class _NumericFieldState extends State<NumericField> {
     }
   }
 
-  String convertToText(double value) => widget.onConvertToText?.call(value) ?? value.toStringAsFixed(widget.fractionDigits);
+  String convertToText(double value) =>
+      widget.onConvertToText?.call(value) ??
+      value.toStringAsFixed(widget.fractionDigits);
 
   double? convertToValue(String value) => double.tryParse(value);
 
@@ -157,55 +165,80 @@ class _NumericFieldState extends State<NumericField> {
       onLongPress: () {
         _focusNode.requestFocus();
       },
-      onVerticalDragStart: !_focusNode.hasFocus ? null : (details) {
+      onVerticalDragStart: !_focusNode.hasFocus
+          ? null
+          : (details) {
 //        print('onVerticalDragStart: $this focused=$_focused');
-        _savedPos = details.localPosition;
-        _savedValue = _value;
-        setState(() => _swipeButton = button);
-      },
-      onVerticalDragUpdate: !_focusNode.hasFocus ? null : (details) {
+              _savedPos = details.localPosition;
+              _savedValue = _value;
+              setState(() => _swipeButton = button);
+            },
+      onVerticalDragUpdate: !_focusNode.hasFocus
+          ? null
+          : (details) {
 //        print('onVerticalDragUpdate: $this focused=$_focused');
-        final offset = details.localPosition - _savedPos;
-        var steps = -(offset.dy / _swipeStep).floor();
-        if (button == _ValueButton.left && steps > 0 || button == _ValueButton.right && steps < 0) steps = 0;
-        step(steps, value: _savedValue);
-      },
-      onVerticalDragCancel: !_focusNode.hasFocus ? null : () {
+              final offset = details.localPosition - _savedPos;
+              var steps = -(offset.dy / _swipeStep).floor();
+              if (button == _ValueButton.left && steps > 0 ||
+                  button == _ValueButton.right && steps < 0) steps = 0;
+              step(steps, value: _savedValue);
+            },
+      onVerticalDragCancel: !_focusNode.hasFocus
+          ? null
+          : () {
 //        print('onVerticalDragCancel: $this focused=$_focused');
-        setState(() => _swipeButton = _ValueButton.no);
-      },
-      onVerticalDragEnd: !_focusNode.hasFocus ? null : (details) {
+              setState(() => _swipeButton = _ValueButton.no);
+            },
+      onVerticalDragEnd: !_focusNode.hasFocus
+          ? null
+          : (details) {
 //        print('onVerticalDragEnd: $this');
-        setState(() => _swipeButton = _ValueButton.no);
-      },
+              setState(() => _swipeButton = _ValueButton.no);
+            },
       child: Material(
         color: _errorText != null
             ? Theme.of(context).colorScheme.error.withAlpha(192)
             : _swipeButton == button
-            ? Theme.of(context).colorScheme.secondary
-            : _focusNode.hasFocus
-            ? Theme.of(context).colorScheme.secondary.withAlpha(192)
-            : Theme.of(context).primaryColor.withAlpha(192),
+                ? Theme.of(context).colorScheme.secondary
+                : _focusNode.hasFocus
+                    ? Theme.of(context).colorScheme.secondary.withAlpha(192)
+                    : Theme.of(context).primaryColor.withAlpha(192),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-            borderRadius: button == _ValueButton.left
-                ? const BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4))
-                : const BorderRadius.only(topRight: Radius.circular(4), bottomRight: Radius.circular(4)),
+          borderRadius: button == _ValueButton.left
+              ? const BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  bottomLeft: Radius.circular(4),
+                )
+              : const BorderRadius.only(
+                  topRight: Radius.circular(4),
+                  bottomRight: Radius.circular(4),
+                ),
         ),
         child: InkWell(
           onTap: () => step(button == _ValueButton.left ? -1 : 1),
           highlightColor: Theme.of(context).colorScheme.secondary,
           child: SizedBox(
-              height: _fieldHeight,
-              width: _buttonWidth,
-              child: Center(
-                  child: Text(
-                      widget.onConvertToText == null ? (button == _ValueButton.left ? '–' : '+') : (button == _ValueButton.left ? '<' : '>'),
-                      style: TextStyle(fontSize: 20,
-                          color: Colors.black.withAlpha(_value != (button == _ValueButton.left ? widget.min : widget.max) ? 255 : 48),
-                      ),
+            height: _fieldHeight,
+            width: _buttonWidth,
+            child: Center(
+              child: Text(
+                widget.onConvertToText == null
+                    ? (button == _ValueButton.left ? '–' : '+')
+                    : (button == _ValueButton.left ? '<' : '>'),
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black.withAlpha(
+                    _value !=
+                            (button == _ValueButton.left
+                                ? widget.min
+                                : widget.max)
+                        ? 255
+                        : 48,
                   ),
+                ),
               ),
+            ),
           ),
         ),
       ),
@@ -230,24 +263,33 @@ class _NumericFieldState extends State<NumericField> {
             controller: _controller,
             textAlign: widget.textAlign,
             decoration: InputDecoration(
-              fillColor: widget.onConvertToText != null ? Colors.grey[300] : Colors.white,
+              fillColor: widget.onConvertToText != null
+                  ? Colors.grey[300]
+                  : Colors.white,
               filled: true,
               errorText: _errorText,
               contentPadding: EdgeInsets.zero,
               prefix: const SizedBox(width: _buttonWidth),
               suffix: Padding(
-                padding: const EdgeInsets.only(right: _contentPadding + _buttonWidth),
+                padding: const EdgeInsets.only(
+                  right: _contentPadding + _buttonWidth,
+                ),
                 child: Text(widget.units ?? ''),
               ),
               border: const OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: _errorText != null ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.secondary,
-                      width: 2,
-                  ),
+                borderSide: BorderSide(
+                  color: _errorText != null
+                      ? Theme.of(context).colorScheme.error
+                      : Theme.of(context).colorScheme.secondary,
+                  width: 2,
+                ),
               ),
             ),
-            keyboardType: TextInputType.numberWithOptions(signed: widget.min < 0.0, decimal: true),
+            keyboardType: TextInputType.numberWithOptions(
+              signed: widget.min < 0.0,
+              decimal: true,
+            ),
             onChanged: (str) {
               setNewValue(convertToValue(str), false);
             },
@@ -269,34 +311,39 @@ class _NumericFieldState extends State<NumericField> {
 
     return widget.horizontal
         ? Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: <Widget>[
-        Visibility(
-          visible: widget.caption != null,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Text(widget.caption!),
-          ),
-        ),
-        SizedBox(
-            width: widget.inputWidth,
-            child: input,
-        ),
-      ],
-    )
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: <Widget>[
+              Visibility(
+                visible: widget.caption != null,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(widget.caption!),
+                ),
+              ),
+              SizedBox(
+                width: widget.inputWidth,
+                child: input,
+              ),
+            ],
+          )
         : Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Visibility(
-          visible: widget.caption != null,
-          child: Padding(
-            padding: const EdgeInsets.only(left: _contentPadding, right: _contentPadding, top: 6, bottom: 2),
-            child: Text(widget.caption!),
-          ),
-        ),
-        input,
-      ],
-    );
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Visibility(
+                visible: widget.caption != null,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: _contentPadding,
+                    right: _contentPadding,
+                    top: 6,
+                    bottom: 2,
+                  ),
+                  child: Text(widget.caption!),
+                ),
+              ),
+              input,
+            ],
+          );
   }
 }
